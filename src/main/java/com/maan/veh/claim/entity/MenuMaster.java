@@ -18,6 +18,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import lombok.*;
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -98,7 +99,14 @@ private String     companyId ;
     @Column(name="MENU_LOGO", length=200)
     private String     menuLogo ;
 
-
+    @Column(name="CREATED_BY")
+	private String createdBy;
+    
+    @Column(name="ENTRY_DATE")
+	private Date entryDate;
+    
+    @Column(name="MENU_NAME_LOCAL", length=100)
+    private String     menuNameLocal ;
     //--- ENTITY LINKS ( RELATIONSHIP )
 
 
