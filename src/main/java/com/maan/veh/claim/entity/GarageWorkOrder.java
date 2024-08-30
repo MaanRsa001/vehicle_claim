@@ -56,11 +56,11 @@ public class GarageWorkOrder {
     @Column(name = "delivery_date")
     private Date deliveryDate;
 
-    @Column(name = "joint_orderYn")
-    private Boolean jointOrderYn;
+    @Column(name = "joint_order_yn")
+    private String jointOrderYn;
 
-    @Column(name = "subrogationYn")
-    private Boolean subrogationYn;
+    @Column(name = "subrogation_yn")
+    private String subrogationYn;
 
     @Column(name = "total_loss")
     private BigDecimal totalLoss;
