@@ -12,6 +12,7 @@ import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.response.ErrorList;
+import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
 
 @Component
 public class InputValidationUtil {
@@ -46,6 +47,78 @@ public class InputValidationUtil {
 		return list;
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public List<ErrorList> validateWorkOrder(GarageWorkOrderSaveReq req){
+		List<ErrorList> list = new ArrayList<ErrorList>();
+		
+		// Validate and set claimNo
+        if (StringUtils.isBlank(req.getClaimNo())) {
+            list.add(new ErrorList("100","Claim number","Claim number cannot be blank"));
+        }
+
+        // Validate and set workOrderNo
+        if (StringUtils.isBlank(req.getWorkOrderNo())) {
+            list.add(new ErrorList("100","WorkOrderNo","Work order number cannot be blank"));
+
+        }
+
+        // Validate and set workOrderType
+        if (StringUtils.isBlank(req.getWorkOrderType())) {
+            list.add(new ErrorList("100","WorkOrderType","Work order type cannot be blank"));
+        }
+
+        // Validate and set settlementType
+        if (StringUtils.isBlank(req.getSettlementType())) {
+            list.add(new ErrorList("100","SettlementType","Settlement type cannot be blank"));
+
+        }
+
+        // Validate and set settlementTo
+        if (StringUtils.isBlank(req.getSettlementTo())) {
+            list.add(new ErrorList("100","SettlementTo","Settlement to cannot be blank"));
+
+        }
+
+        // Validate and set garageName
+        if (StringUtils.isBlank(req.getGarageName())) {
+            list.add(new ErrorList("100","GarageName","Garage name cannot be blank"));
+
+        }
+
+        // Validate and set location
+        if (StringUtils.isBlank(req.getLocation())) {
+            list.add(new ErrorList("100","Location","Location cannot be blank"));
+
+        }
+
+        // Validate and set repairType
+        if (StringUtils.isBlank(req.getRepairType())) {
+            list.add(new ErrorList("100","RepairType","Repair type cannot be blank"));
+
+        }
+
+        // Validate and set quotationNo
+        if (StringUtils.isBlank(req.getQuotationNo())) {
+            list.add(new ErrorList("100","QuotationNo","Quotation number cannot be blank"));
+
+        }
+
+        // Validate and set lossType
+        if (StringUtils.isBlank(req.getLossType())) {
+            list.add(new ErrorList("100","Loss type","Loss type cannot be blank"));
+
+        }
+
+        // Validate and set createdBy
+        if (StringUtils.isBlank(req.getCreatedBy())) {
+            list.add(new ErrorList("100","CreatedBy","Created by cannot be blank"));
+
+        }
+
+       
+		
+		return list;
 	}
 
 }
