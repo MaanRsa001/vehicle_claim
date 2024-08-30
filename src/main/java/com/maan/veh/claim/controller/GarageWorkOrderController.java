@@ -15,8 +15,6 @@ import com.maan.veh.claim.response.GarageWorkOrderResponse;
 import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
 import com.maan.veh.claim.service.GarageWorkOrderService;
 
-import jakarta.validation.Valid;
-
 @RestController
 @RequestMapping("/garage")
 public class GarageWorkOrderController {
@@ -30,12 +28,19 @@ public class GarageWorkOrderController {
     	CommonResponse savedClaim = service.saveWorkOrder(claim);
         return new ResponseEntity<>(savedClaim, HttpStatus.CREATED);
     }
-    
-    @PostMapping("/get")
-    public ResponseEntity<List<GarageWorkOrderResponse>> getGarageWorkOrders(
+
+    @PostMapping("/getbyclaimno")
+    public ResponseEntity<List<GarageWorkOrderResponse>> getGarageWorkOrdersByClaimNo(
             @RequestBody GarageWorkOrderRequest request) {
-        List<GarageWorkOrderResponse> response = service.getGarageWorkOrders(
+        List<GarageWorkOrderResponse> response = service.getGarageWorkOrdersByClaimNo(
                 request.getClaimNo(), request.getCreatedBy());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
+    @PostMapping("/getall")
+    public ResponseEntity<List<GarageWorkOrderResponse>> getAllGarageWorkOrders(
+            @RequestBody GarageWorkOrderRequest request) {
+        List<GarageWorkOrderResponse> response = service.getAllGarageWorkOrders(request.getCreatedBy());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

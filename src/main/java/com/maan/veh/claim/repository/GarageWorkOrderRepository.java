@@ -10,4 +10,6 @@ import com.maan.veh.claim.entity.GarageWorkOrderId;
 public interface GarageWorkOrderRepository extends JpaRepository<GarageWorkOrder, GarageWorkOrderId> , JpaSpecificationExecutor<GarageWorkOrder>  {
 
 	List<GarageWorkOrder> findByClaimNoAndCreatedBy(String claimNo, String createdBy);
+
+	List<GarageWorkOrder> findByCreatedBy(String createdBy);
 }
