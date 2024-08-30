@@ -135,36 +135,6 @@ private static final long serialVersionUID = 1L;
     @Column(name="BRANCH_CODE", length=100)
     private String     branchCode ;
 
-    @Column(name="MISSIPPI_ID")
-    private BigDecimal missippiId ;
-
-    @Column(name="APPROVED_PREPARED_BY", length=30)
-    private String     approvedPreparedBy ;
-
-    @Column(name="AC_EXECUTIVE_ID")
-    private BigDecimal acExecutiveId ;
-
-    @Column(name="CORE_APP_BROKER_CODE", length=25)
-    private String     coreAppBrokerCode ;
-
-    @Column(name="VAT_REG_NO", length=100)
-    private String     vatRegNo ;
-
-    @Column(name="CHECKER_YN", length=10)
-    private String     checkerYn ;
-
-    @Column(name="MAKER_YN", length=10)
-    private String     makerYn ;
-
-    @Column(name="COMMISSION_VAT_YN", length=10)
-    private String     commissionVatYn ;
-
-    @Column(name="CUST_CONFIRM_YN", length=10)
-    private String     custConfirmYn ;
-
-    @Column(name="CONTACT_PERSON_NAME", length=100)
-    private String     contactPersonName ;
-
     @Column(name="DESIGNATION", length=100)
     private String     designation ;
 
@@ -194,17 +164,10 @@ private static final long serialVersionUID = 1L;
     @Column(name="CREDIT_LIMIT")
     private BigDecimal creditLimit ;
 
-
-    @Column(name="CUSTOMER_CODE", length=100)
-    private String    customerCode;
-    
-    
     @Column(name="CUSTOMER_NAME", length=100)
     private String    customerName;
     
-    @Column(name="REGULATORY_CODE", length=100)
-    private String    regulatoryCode;
-    
+  
     //--- ENTITY LINKS ( RELATIONSHIP )
 
 

@@ -82,9 +82,6 @@ private static final long serialVersionUID = 1L;
     @Column(name="COMPANY_PHONE", length=20)
     private String     companyPhone ;
 
-    @Column(name="BROKER_YN", length=2)
-    private String     brokerYn ;
-
     @Column(name="COMPANY_WEBSITE", length=100)
     private String     companyWebsite ;
 
@@ -120,12 +117,7 @@ private static final long serialVersionUID = 1L;
     @Column(name="CREATED_BY", nullable=false, length=50)
     private String     createdBy ;
 
-    @Column(name="CURRENCY_ID", length=20)
-    private String     currencyId ;
-
-    @Column(name="REGULATORY_CODE", nullable=false, length=20)
-    private String     regulatoryCode ;
-
+  
     @Column(name="UPDATED_BY", length=50)
     private String     updatedBy ;
 
@@ -136,37 +128,11 @@ private static final long serialVersionUID = 1L;
     @Column(name="COUNTRY_ID", length=50)
     private String     countryId ;
     
-    @Column(name="TIN_NUMBER", length=100)
-    private String     tinNumber;
-    
-
-    @Column(name="VRN_NUMBER", length=100)
-    private String     vrnNumber;
-    
-    
     @Column(name="PO_BOX", length=100)
     private String  pOBox;
     
-    @Column(name="ALPHABET", length=20)
-    private String  alphabet;
-    
-    @Column(name="NUMERICDIGITS_START", length=20)
-    private String  numericDigitsStart;
-    
-    @Column(name="NUMERICDIGITS_END", length=20)
-    private String  numericDigitsEnd;
-    
-    @Column(name="SYMBOLS", length=20)
-    private String  symbols;
-    
-    @Column(name="TOTALPSMIN", length=20)
-    private String  Totalmin;
-    
-    @Column(name="TOTALPSMAX", length=20)
-    private String  Totalmax;
-    
-    @Column(name="PATTERN_STATUS", length=1)
-    private String     patternstatus ;
+
+
 
 }
 

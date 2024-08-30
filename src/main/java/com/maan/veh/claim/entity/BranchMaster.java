@@ -88,7 +88,6 @@ private static final long serialVersionUID = 1L;
     @Column(name="CORE_APP_CODE", length=20)
     private String     coreAppCode ;
 
-    
     @Column(name="REMARKS", length=100)
     private String     remarks ;
 
@@ -98,36 +97,18 @@ private static final long serialVersionUID = 1L;
     @Column(name="STATE_CODE")
     private Integer    stateCode ;
 
-    @Column(name="STATE_NAME", length=100)
-    private String     stateName ;
-
-    @Column(name="CITY_CODE")
-    private Integer    cityCode ;
-
-    @Column(name="CITY_NAME", length=100)
-    private String     cityName ;
-
     @Column(name="COUNTRY_ID", length=100)
     private String     countryId ;
 
     @Column(name="ADDRESS1", nullable=false, length=100)
     private String     address1 ;
 
-    @Column(name="ADDRESS2", nullable=false, length=100)
-    private String     address2 ;
-
     @Column(name="EMAIL", nullable=false, length=100)
     private String     email ;
 
     @Column(name="MOBILE_NUMBER", nullable=false, length=10)
     private String     mobileNumber ;
-
-    @Column(name="BRANCH_TYPE", nullable=false, length=10)
-    private String     branchType ;
-
-    @Column(name="REGULATORY_CODE", nullable=false, length=20)
-    private String     regulatoryCode ;
-
+   
     @Column(name="UPDATED_BY", length=100)
     private String    updatedBy ;
 
@@ -135,18 +116,9 @@ private static final long serialVersionUID = 1L;
     @Column(name="UPDATED_DATE")
     private Date       updatedDate ;
     
-    @Column(name="DIRECT_BROKER_ID", length=100)
-    private String    directBrokerId;
-    
-    @Column(name="BROKER_AGENCY_CODE", length=100)
-    private String    brokerAgencyCode;
-
-    @Column(name="SALE_POINT_CODE", length=100)
-    private String    salePointCode;
-
-    @Column(name="PO_BOX", length=100)
-    private String    poBox;
 }
+    
+
 
 
 

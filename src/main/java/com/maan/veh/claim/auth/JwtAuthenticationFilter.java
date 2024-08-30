@@ -26,9 +26,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
-
-
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	@Lazy
@@ -42,7 +39,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private JwtTokenUtil jwtTokenUtil;
 	
 	private String userType ;
-	private String subUserType ;
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)	throws IOException, ServletException {
@@ -60,7 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			loginId = table.getLoginId();
 			authToken = table.getTokenId();
 			userType = table.getUserType() ;
-			subUserType = table.getSubUserType() ;
 	        requestWrapper.addHeader(HEADER_STRING, authToken);
 			try {
 				username = jwtTokenUtil.getUsernameFromToken(authToken);
@@ -112,27 +107,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			
 			if (validtoken) {
 							
-				if(userType.equalsIgnoreCase("Issuer") && subUserType.equalsIgnoreCase("SuperAdmin") ) {
+				if(userType.equalsIgnoreCase("ADMIN")) {
 					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
 							userDetails, null, Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN")));
 					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(requestWrapper));
 					logger.info("authenticated user " + username + ", setting security context");
 					SecurityContextHolder.getContext().setAuthentication(authentication);
 					
-				} else if(userType.equalsIgnoreCase("Issuer") && ( subUserType.equalsIgnoreCase("high") ||subUserType.equalsIgnoreCase("both") ) ) {
+				} else if(userType.equalsIgnoreCase("SURVEYOR")) {
 					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-							userDetails, null, Arrays.asList(new SimpleGrantedAuthority("ROLE_APPROVER")));
+							userDetails, null, Arrays.asList(new SimpleGrantedAuthority("ROLE_SURVEYOR")));
 					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(requestWrapper));
 					logger.info("authenticated user " + username + ", setting security context");
 					SecurityContextHolder.getContext().setAuthentication(authentication);
 					
-				} else if (userType.equalsIgnoreCase("Broker") || userType.equalsIgnoreCase("User") || (userType.equalsIgnoreCase("Issuer") &&  subUserType.equalsIgnoreCase("low"))   ) {
+				} else if (userType.equalsIgnoreCase("DEALER")) {
 					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-							userDetails, null, Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")));
+							userDetails, null, Arrays.asList(new SimpleGrantedAuthority("ROLE_DEALER")));
+					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(requestWrapper));
+					logger.info("authenticated user " + username + ", setting security context");
+					SecurityContextHolder.getContext().setAuthentication(authentication);
+				} else if (userType.equalsIgnoreCase("GARAGE")) {
+					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+							userDetails, null, Arrays.asList(new SimpleGrantedAuthority("GARAGE")));
 					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(requestWrapper));
 					logger.info("authenticated user " + username + ", setting security context");
 					SecurityContextHolder.getContext().setAuthentication(authentication);
 				}
+				
 				
 				
 			}

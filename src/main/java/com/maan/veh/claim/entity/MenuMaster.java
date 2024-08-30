@@ -50,19 +50,18 @@ public class MenuMaster implements Serializable {
 private static final long serialVersionUID = 1L;
  
     //--- ENTITY PRIMARY KEY 
-@Id
-
-@Column(name="MENU_ID", nullable=false)
-private Integer    menuId ;
-
-@Id
-@Column(name="USERTYPE", length=100,nullable=false)
-private String     usertype ;
-
-@Id
-@Column(name="COMPANY_ID", length=50,nullable=false)
-private String     companyId ; 
-    
+	@Id
+	@Column(name="MENU_ID", nullable=false)
+	private Integer    menuId ;
+	
+	@Id
+	@Column(name="USERTYPE", length=100,nullable=false)
+	private String     usertype ;
+	
+	@Id
+	@Column(name="COMPANY_ID", length=50,nullable=false)
+	private String     companyId ; 
+	    
 
     //--- ENTITY DATA FIELDS 
     @Column(name="MENU_NAME", length=300)

@@ -64,9 +64,6 @@ private static final long serialVersionUID = 1L;
     @Column(name="USER_TYPE", length=50)
     private String     userType ;
 
-    @Column(name="SUB_USER_TYPE", length=50)
-    private String     subUserType ;
-
     @Column(name="AGENCY_CODE", length=50)
     private String     agencyCode ;
 

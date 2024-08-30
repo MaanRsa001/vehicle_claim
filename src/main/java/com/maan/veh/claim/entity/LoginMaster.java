@@ -69,9 +69,6 @@ private static final long serialVersionUID = 1L;
     @Column(name="USER_TYPE", nullable=false, length=20)
     private String     userType ;
 
-    @Id
-    @Column(name="SUB_USER_TYPE", nullable=false, length=20)
-    private String     subUserType ;
 
     //--- ENTITY DATA FIELDS 
     @Column(name="PASSWORD", length=100)
@@ -80,23 +77,11 @@ private static final long serialVersionUID = 1L;
     @Column(name="COMPANY_ID", length=20)
     private String     companyId ;
 
-    @Column(name="ATTACHED_BRANCHES", length=300)
-    private String     attachedBranches ;
-
-    @Column(name="ATTACHED_REGIONS", length=300)
-    private String     attachedRegions ;
-
-    @Column(name="ATTACHED_COMPANIES", length=300)
-    private String     attachedCompanies ;
-
     @Column(name="AGENCY_CODE", nullable=false, length=10)
     private String     agencyCode ;
 
-    @Column(name="BANK_CODE", length=20)
-    private String     bankCode ;
-
-    @Column(name="BROKER_COMPANY_YN", length=1)
-    private String     brokerCompanyYn ;
+    @Column(name="BRANCH_CODE", length=20)
+    private String     branchCode ;
 
     @Column(name="OA_CODE", length=10)
     private Integer     oaCode ;
@@ -116,10 +101,7 @@ private static final long serialVersionUID = 1L;
 
     @Column(name="CREATED_BY", length=20)
     private String     createdBy ;
-
-    @Column(name="MENU_IDS", length=500)
-    private String     menuIds ;
-
+    
     @Column(name="STATUS", nullable=false, length=1)
     private String     status ;
 
@@ -135,10 +117,6 @@ private static final long serialVersionUID = 1L;
 
     @Column(name="LPASS5", length=20)
     private String     lpass5 ;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="EFFECTIVE_DATE_START")
-    private Date       effectiveDateStart ;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="ENTRY_DATE")
