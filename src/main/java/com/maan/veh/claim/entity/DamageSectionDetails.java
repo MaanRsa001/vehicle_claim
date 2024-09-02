@@ -1,4 +1,5 @@
 package com.maan.veh.claim.entity;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -6,6 +7,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,75 +22,79 @@ import lombok.NoArgsConstructor;
 @IdClass(DamageSectionDetailsId.class)
 public class DamageSectionDetails {
 
-    @Id
-    @Column(name = "claim_no")
-    private String claimNo;
+		@Id
+	    @NotNull
+	    @Column(name = "claim_no", length = 50)
+	    private String claimNo;
 
-    @Id
-    @Column(name = "damage_sno")
-    private int damageSno;
+	    @Id
+	    @NotNull
+	    @Column(name = "damage_sno")
+	    private Integer damageSno;
 
-    @Column(name = "damage_direction")
-    private String damageDictDesc;
+	    @Column(name = "damage_direction", length = 100)
+	    private String damageDirection;
 
-    @Column(name = "damage_part")
-    private String damagePart;
+	    @Column(name = "damage_part", length = 100)
+	    private String damagePart;
 
-    @Column(name = "repair_replace")
-    private String repairReplace;
+	    @Column(name = "repair_replace", length = 50)
+	    private String repairReplace;
 
-    @Column(name = "no_of_parts")
-    private Integer noOfParts;
+	    @Column(name = "no_of_parts")
+	    private Integer noOfParts;
 
-    @Column(name = "garage_price")
-    private Double garagePrice;
+	    @Column(name = "garage_price", precision = 10, scale = 2)
+	    private BigDecimal garagePrice;
 
-    @Column(name = "dealer_price")
-    private Double dealerPrice;
+	    @Column(name = "dealer_price", precision = 10, scale = 2)
+	    private BigDecimal dealerPrice;
 
-    @Column(name = "garage_login_id")
-    private String garageLoginId;
+	    @Column(name = "garage_login_id", length = 50)
+	    private String garageLoginId;
 
-    @Column(name = "dealer_login_id")
-    private String dealerLoginId;
+	    @Column(name = "dealer_login_id", length = 50)
+	    private String dealerLoginId;
 
-    @Column(name = "surveyor_id")
-    private Integer surveyorId;
+	    @Column(name = "surveyor_id")
+	    private Integer surveyorId;
 
-    @Column(name = "replace_cost")
-    private Double replaceCost;
+	    @Column(name = "replace_cost", precision = 10, scale = 2)
+	    private BigDecimal replaceCost;
 
-    @Column(name = "replace_cost_deduct")
-    private Double replaceCostDeduct;
+	    @Column(name = "replace_cost_deduct", precision = 10, scale = 2)
+	    private BigDecimal replaceCostDeduct;
 
-    @Column(name = "sparepart_deprection")
-    private Double sparepartDeprection;
+	    @Column(name = "sparepart_deprection", precision = 10, scale = 2)
+	    private BigDecimal sparepartDeprection;
 
-    @Column(name = "discount_sparepart")
-    private Double discountSparepart;
+	    @Column(name = "discount_sparepart", precision = 10, scale = 2)
+	    private BigDecimal discountSparepart;
 
-    @Column(name = "totamt_replace")
-    private Double totamtReplace;
+	    @Column(name = "totamt_replace", precision = 10, scale = 2)
+	    private BigDecimal totamtReplace;
 
-    @Column(name = "labour_cost")
-    private Double labourCost;
+	    @Column(name = "labour_cost", precision = 10, scale = 2)
+	    private BigDecimal labourCost;
 
-    @Column(name = "labour_cost_deduct")
-    private Double labourCostDeduct;
+	    @Column(name = "labour_cost_deduct", precision = 10, scale = 2)
+	    private BigDecimal labourCostDeduct;
 
-    @Column(name = "labour_disc")
-    private Double labourDisc;
+	    @Column(name = "labour_disc", precision = 10, scale = 2)
+	    private BigDecimal labourDisc;
 
-    @Column(name = "totamt_of_labour")
-    private Double totamtOfLabour;
+	    @Column(name = "totamt_of_labour", precision = 10, scale = 2)
+	    private BigDecimal totamtOfLabour;
 
-    @Column(name = "tot_price")
-    private Double totPrice;
+	    @Column(name = "tot_price", precision = 10, scale = 2)
+	    private BigDecimal totPrice;
 
-    @Column(name = "entry_date")
-    private Date entryDate;
+	    @Column(name = "entry_date")
+	    @Temporal(TemporalType.DATE)
+	    private Date entryDate;
 
-    @Column(name = "status")
-    private String status;
+	    @Column(name = "status", length = 20)
+	    private String status;
+
 }
 

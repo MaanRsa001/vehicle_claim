@@ -26,4 +26,6 @@ public class DamageSectionDetailsController {
         List<DamageSectionDetailsResponse> response = service.getDamageDetailsByClaimNo(request);
         return ResponseEntity.ok(response);
     }
+    
+    
 }
