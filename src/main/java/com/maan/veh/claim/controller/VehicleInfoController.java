@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.maan.veh.claim.request.VehicleInfoRequest;
+import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.VehicleInfoResponse;
 import com.maan.veh.claim.service.VehicleInfoService;
 
@@ -20,9 +21,9 @@ public class VehicleInfoController {
     @Autowired
     private VehicleInfoService vehicleInfoService;
 
-    @PostMapping("/getByCompanyId")
-    public ResponseEntity<List<VehicleInfoResponse>> getVehicleInfoByCompanyId(@RequestBody VehicleInfoRequest request) {
-        List<VehicleInfoResponse> response = vehicleInfoService.getVehicleInfoByCompanyId(request);
+    @PostMapping("/getAll")
+    public ResponseEntity<CommonResponse> getVehicleInfoByCompanyId(@RequestBody VehicleInfoRequest request) {
+    	CommonResponse response = vehicleInfoService.getVehicleInfoByCompanyId(request);
         return ResponseEntity.ok(response);
     }
 }

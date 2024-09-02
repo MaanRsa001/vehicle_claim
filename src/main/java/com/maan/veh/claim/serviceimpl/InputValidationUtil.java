@@ -19,7 +19,7 @@ public class InputValidationUtil {
 	
 	@Autowired
 	private LoginMasterRepository loginRepo;
-
+	
 	
 	public List<ErrorList> isValidUser(LoginRequest req) {
 		List<ErrorList> list = new ArrayList<ErrorList>();
@@ -120,5 +120,6 @@ public class InputValidationUtil {
 		
 		return list;
 	}
+	
 
 }

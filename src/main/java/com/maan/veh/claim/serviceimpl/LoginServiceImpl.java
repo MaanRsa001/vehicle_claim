@@ -103,7 +103,9 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 			BranchMaster bm =list.stream().max((a,b) -> a.getAmendId().compareTo(b.getAmendId())).get();
 			
 			List<MenuMaster> menu_master =menuMasterRepo.findByCompanyIdAndUsertypeIgnoreCase(login.getCompanyId(),login.getUserType());
-			List<MenuMaster> parent_menu = menu_master.stream().filter(p ->"99999".equals(p.getParentMenu())).collect(Collectors.toList());
+			List<MenuMaster> parent_menu = menu_master.stream().filter(p ->"99999".equals(p.getParentMenu()))
+					.sorted((a,b) -> a.getDisplayOrder().compareTo(b.getDisplayOrder()))
+					.collect(Collectors.toList());
 		
 			List<LinkedHashMap<String,Object>> resMenuList = new ArrayList<>();
 			for(MenuMaster m : parent_menu) {
@@ -114,10 +116,12 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 					Map<String,Object> mm = new HashMap<>();
 					mm.put("ChildMenuName", StringUtils.isBlank(map.getMenuName())?"":map.getMenuName());
 					return mm;
-				}).collect(Collectors.toList());
+				})
+						
+				.collect(Collectors.toList());
 				
 				
-				menu.put("ParentMenuYn", filterMenu.size()>0?true:false);
+				menu.put("ChildMenuYn", filterMenu.size()>0?true:false);
 				menu.put("ChildMenuList", filterMenu);
 				resMenuList.add(menu);
 
@@ -125,7 +129,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 			
 			
 			
-			Map<String,Object> response = new LinkedHashMap<>();
+			LinkedHashMap<String,Object> response = new LinkedHashMap<>();
 			response.put("LoginId", login.getLoginId());
 			response.put("Token", session.getTempTokenid());
 			response.put("UserType", login.getUserType());

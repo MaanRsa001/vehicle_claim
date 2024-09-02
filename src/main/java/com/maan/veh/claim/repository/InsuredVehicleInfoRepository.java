@@ -10,5 +10,7 @@ import com.maan.veh.claim.entity.InsuredVehicleInfoId;
 public interface InsuredVehicleInfoRepository extends JpaRepository<InsuredVehicleInfo, InsuredVehicleInfoId> {
 
 	List<InsuredVehicleInfo> findByCompanyId(Integer companyId);
+
+	List<InsuredVehicleInfo> findByCompanyIdAndStatus(Integer companyId, String status);
    
 }

@@ -1,10 +1,8 @@
 package com.maan.veh.claim.service;
 
-import java.util.List;
-
 import com.maan.veh.claim.request.VehicleInfoRequest;
-import com.maan.veh.claim.response.VehicleInfoResponse;
+import com.maan.veh.claim.response.CommonResponse;
 
 public interface VehicleInfoService {
-    List<VehicleInfoResponse> getVehicleInfoByCompanyId(VehicleInfoRequest request);
+	CommonResponse getVehicleInfoByCompanyId(VehicleInfoRequest request);
 }
