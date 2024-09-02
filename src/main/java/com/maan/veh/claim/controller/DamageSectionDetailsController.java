@@ -3,6 +3,7 @@ package com.maan.veh.claim.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.maan.veh.claim.request.DamageSectionDetailsRequest;
+import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
+import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DamageSectionDetailsResponse;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
 
@@ -25,6 +28,12 @@ public class DamageSectionDetailsController {
             @RequestBody DamageSectionDetailsRequest request) {
         List<DamageSectionDetailsResponse> response = service.getDamageDetailsByClaimNo(request);
         return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/save")
+    public ResponseEntity<CommonResponse> saveDamageSectionDetails(@RequestBody List<DamageSectionDetailsSaveReq> req) {
+        CommonResponse response = service.saveDamageSectionDetails(req);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
     

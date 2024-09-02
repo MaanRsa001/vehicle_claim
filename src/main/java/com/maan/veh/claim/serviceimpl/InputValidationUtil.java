@@ -1,5 +1,6 @@
 package com.maan.veh.claim.serviceimpl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.maan.veh.claim.auth.passwordEnc;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.repository.LoginMasterRepository;
+import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
@@ -120,6 +122,84 @@ public class InputValidationUtil {
 		
 		return list;
 	}
+
+	public List<ErrorList> validateDamageDetails(List<DamageSectionDetailsSaveReq> reqList) {
+	    List<ErrorList> list = new ArrayList<>();
+	    int line = 1;
+	    for (DamageSectionDetailsSaveReq req : reqList) {
+	    	
+			if (StringUtils.isBlank(req.getClaimNo())) {
+				list.add(new ErrorList("100", "ClaimNo", "Claim number cannot be blank in line number : "+line));
+			}
+//			if (StringUtils.isBlank(req.getDamageSno())) {
+//				list.add(new ErrorList("101", "DamageSno", "Damage serial number cannot be blank in line number : "+line));
+//			}
+			if (StringUtils.isBlank(req.getDamageDirection())) {
+				list.add(new ErrorList("102", "DamageDirection", "Damage direction cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getDamagePart())) {
+				list.add(new ErrorList("103", "DamagePart", "Damage part cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getRepairReplace())) {
+				list.add(new ErrorList("104", "RepairReplace", "Repair/Replace field cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getNoOfParts())) {
+				list.add(new ErrorList("105", "NoOfParts", "Number of parts cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getGaragePrice())) {
+				list.add(new ErrorList("106", "GaragePrice", "Garage price cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getDealerPrice())) {
+				list.add(new ErrorList("107", "DealerPrice", "Dealer price cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getGarageLoginId())) {
+				list.add(new ErrorList("108", "GarageLoginId", "Garage login ID cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getDealerLoginId())) {
+				list.add(new ErrorList("109", "DealerLoginId", "Dealer login ID cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getSurveyorId())) {
+				list.add(new ErrorList("110", "SurveyorId", "Surveyor ID cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getReplaceCost())) {
+				list.add(new ErrorList("111", "ReplaceCost", "Replace cost cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getReplaceCostDeduct())) {
+				list.add(new ErrorList("112", "ReplaceCostDeduct", "Replace cost deduction cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getSparepartDeprection())) {
+				list.add(new ErrorList("113", "SparepartDeprection", "Spare part depreciation cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getDiscountSparepart())) {
+				list.add(new ErrorList("114", "DiscountSparepart", "Discount on spare parts cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getTotamtReplace())) {
+				list.add(new ErrorList("115", "TotamtReplace", "Total amount for replacement cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getLabourCost())) {
+				list.add(new ErrorList("116", "LabourCost", "Labour cost cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getLabourCostDeduct())) {
+				list.add(new ErrorList("117", "LabourCostDeduct", "Labour cost deduction cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getLabourDisc())) {
+				list.add(new ErrorList("118", "LabourDisc", "Labour discount cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getTotamtOfLabour())) {
+				list.add(new ErrorList("119", "TotamtOfLabour", "Total amount of labour cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getTotPrice())) {
+				list.add(new ErrorList("120", "TotPrice", "Total price cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getStatus())) {
+				list.add(new ErrorList("122", "Status", "Status cannot be blank in line number : "+line));
+			}
+			line++;
+		}
+		return list;
+	}
+
+
 	
 
 }
