@@ -44,10 +44,10 @@ public class DamageSectionDetails {
     @Column(name = "dealer_price")
     private Double dealerPrice;
 
-    @Column(name = "garage_loginId")
+    @Column(name = "garage_login_id")
     private String garageLoginId;
 
-    @Column(name = "dealer_loginId")
+    @Column(name = "dealer_login_id")
     private String dealerLoginId;
 
     @Column(name = "surveyor_id")
