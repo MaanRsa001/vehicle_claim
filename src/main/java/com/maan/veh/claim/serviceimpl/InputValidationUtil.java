@@ -17,6 +17,7 @@ import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
 import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.LoginRequest;
+import com.maan.veh.claim.request.TotalAmountDetailsRequest;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
 
@@ -358,6 +359,16 @@ public class InputValidationUtil {
 	        
 			line++;
 		}
+		return list;
+	}
+
+	public List<ErrorList> validateTotalAmountDetails(TotalAmountDetailsRequest req) {
+		List<ErrorList> list = new ArrayList<>();
+
+		if (StringUtils.isBlank(req.getClaimNo())) {
+			list.add(new ErrorList("100", "ClaimNo", "Claim number cannot be blank "));
+		}
+
 		return list;
 	}
 	

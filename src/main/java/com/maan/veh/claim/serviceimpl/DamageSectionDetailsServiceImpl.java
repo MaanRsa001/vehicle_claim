@@ -115,19 +115,19 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	                details.setGarageDealer(req.getGarageDealer());
 
 	                BigDecimal totalReplaceCost;
+	                BigDecimal amount;
 	                
 	                if ("Garage".equalsIgnoreCase(req.getGarageDealer())) {
-	                    totalReplaceCost = new BigDecimal(details.getNoOfParts()).multiply(details.getGaragePrice())
-	                        .add(details.getReplaceCost());
+	                	amount = details.getGaragePrice();
 	                } else {
-	                    totalReplaceCost = new BigDecimal(details.getNoOfParts()).multiply(details.getDealerPrice())
-	                        .add(details.getReplaceCost());
+	                	amount = details.getDealerPrice();
 	                }
 	                
-	                details.setTotamtReplace(totalReplaceCost);
-	                details.setTotPrice(totalReplaceCost);
 	                
 	                if ("Replace".equalsIgnoreCase(details.getRepairReplace())) {
+	                    totalReplaceCost = new BigDecimal(details.getNoOfParts()).multiply(details.getGaragePrice())
+		                        .add(details.getReplaceCost());
+	                    
 	                    BigDecimal replaceCostDeduct = totalReplaceCost
 	                        .multiply(new BigDecimal(req.getReplaceCostDeductPercentage())).divide(new BigDecimal(100));
 	                    BigDecimal sparePartDeprecation = totalReplaceCost
@@ -142,6 +142,9 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	                    details.setReplaceCostDeductPercentage(new BigDecimal(req.getReplaceCostDeductPercentage()));
 	                    details.setSparepartDeprectionPercentage(new BigDecimal(req.getSparepartDeprectionPercentage()));
 	                    details.setDiscountSparepartPercentage(new BigDecimal(req.getDiscountSparepartPercentage()));
+	                    
+	                    details.setTotamtReplace(totalReplaceCost);
+		                details.setTotPrice(totalReplaceCost);
 	                    
 	                } else {
 	                    BigDecimal labourCostDeduct = details.getLabourCost()
@@ -282,6 +285,8 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 					if ("Replace".equalsIgnoreCase(req.getRepairReplace())) {
 						details.setNoOfParts(Integer.valueOf(req.getNoOfUnits()));
 						details.setReplaceCost(new BigDecimal(req.getReplacementCharge()));
+					}else {
+						details.setLabourCost(new BigDecimal(req.getUnitPrice()));
 					}
 					
 					
