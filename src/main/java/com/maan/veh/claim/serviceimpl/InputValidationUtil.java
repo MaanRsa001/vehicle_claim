@@ -1,6 +1,5 @@
 package com.maan.veh.claim.serviceimpl;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +12,7 @@ import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.LoginRequest;
+import com.maan.veh.claim.request.TotalAmountDetailsSaveRequest;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
 
@@ -199,6 +199,66 @@ public class InputValidationUtil {
 		return list;
 	}
 
+	public List<ErrorList> validateTotalAmountDetails(TotalAmountDetailsSaveRequest req) {
+	    List<ErrorList> list = new ArrayList<>();
+
+	    // Validate and set claimNo
+	    if (StringUtils.isBlank(req.getClaimNo())) {
+	        list.add(new ErrorList("100", "ClaimNo", "Claim number cannot be blank"));
+	    }
+
+	    // Validate and set netAmount
+	    if (StringUtils.isBlank(req.getNetAmount())) {
+	        list.add(new ErrorList("100", "NetAmount", "Net amount cannot be blank"));
+	    }
+
+	    // Validate and set totamtAftDeduction
+	    if (StringUtils.isBlank(req.getTotamtAftDeduction())) {
+	        list.add(new ErrorList("100", "TotamtAftDeduction", "Total amount after deduction cannot be blank"));
+	    }
+
+	    // Validate and set vatRatePercent
+	    if (StringUtils.isBlank(req.getVatRatePercent())) {
+	        list.add(new ErrorList("100", "VatRatePercent", "VAT rate percent cannot be blank"));
+	    }
+
+	    // Validate and set vatRate
+	    if (StringUtils.isBlank(req.getVatRate())) {
+	        list.add(new ErrorList("100", "VatRate", "VAT rate cannot be blank"));
+	    }
+
+	    // Validate and set vatAmount
+	    if (StringUtils.isBlank(req.getVatAmount())) {
+	        list.add(new ErrorList("100", "VatAmount", "VAT amount cannot be blank"));
+	    }
+
+	    // Validate and set totamtWithVat
+	    if (StringUtils.isBlank(req.getTotamtWithVat())) {
+	        list.add(new ErrorList("100", "TotamtWithVat", "Total amount with VAT cannot be blank"));
+	    }
+
+	    // Validate and set createdBy
+	    if (StringUtils.isBlank(req.getCreatedBy())) {
+	        list.add(new ErrorList("100", "CreatedBy", "Created by cannot be blank"));
+	    }
+
+	    // Validate and set status
+	    if (StringUtils.isBlank(req.getStatus())) {
+	        list.add(new ErrorList("100", "Status", "Status cannot be blank"));
+	    }
+	    
+	    // Validate and set totReplaceCost
+	    if (StringUtils.isBlank(req.getTotReplaceCost())) {
+	        list.add(new ErrorList("100", "TotReplaceCost", "Total replace cost cannot be blank"));
+	    }
+
+	    // Validate and set totLabourCost
+	    if (StringUtils.isBlank(req.getTotLabourCost())) {
+	        list.add(new ErrorList("100", "TotLabourCost", "Total labour cost cannot be blank"));
+	    }
+	    
+	    return list;
+	}
 
 	
 
