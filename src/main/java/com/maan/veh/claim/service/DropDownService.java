@@ -21,4 +21,6 @@ public interface DropDownService {
 	List<DropDownRes> getLosstype();
 
 	List<DropDownRes> getbodyPart();
+
+	List<DropDownRes> getVatPercentage();
 }
