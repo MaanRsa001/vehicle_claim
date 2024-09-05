@@ -130,6 +130,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 			
 			
 			LinkedHashMap<String,Object> response = new LinkedHashMap<>();
+			response.put("CompanyId", login.getCompanyId());
 			response.put("LoginId", login.getLoginId());
 			response.put("Token", session.getTempTokenid());
 			response.put("UserType", login.getUserType());

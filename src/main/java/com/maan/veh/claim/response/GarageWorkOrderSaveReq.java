@@ -61,15 +61,9 @@ public class GarageWorkOrderSaveReq {
 	 	@JsonProperty("CreatedBy")
 	    private String createdBy;
 
-	 	@JsonProperty("CreatedDate")
-	    private String createdDate;
-
 	 	@JsonProperty("UpdatedBy")
 	    private String updatedBy;
 	 	
-	 	@JsonProperty("UpdatedDate")
-	    private String updatedDate;
-
 	 	@JsonProperty("SparepartsDealerId")
 	    private String sparepartsDealerId;
 

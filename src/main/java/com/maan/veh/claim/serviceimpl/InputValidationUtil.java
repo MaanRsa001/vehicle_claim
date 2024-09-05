@@ -139,14 +139,6 @@ public class InputValidationUtil {
         }
         
         try {
-            if (!StringUtils.isBlank(req.getUpdatedDate())) {
-                DD_MM_YYYY.parse(req.getUpdatedDate());
-            }
-        } catch (ParseException e) {
-            list.add(new ErrorList("100", "Updated Date", "Updated Date is invalid or not in the correct format (dd/MM/yyyy)"));
-        }
-        
-        try {
             if (!StringUtils.isBlank(req.getTotalLoss())) {
                 new BigDecimal(req.getTotalLoss());
             }
@@ -192,10 +184,10 @@ public class InputValidationUtil {
 				list.add(new ErrorList("108", "GarageLoginId", "Garage login ID cannot be blank in line number : "+line));
 			}
 			if (StringUtils.isBlank(req.getDealerLoginId())) {
-				list.add(new ErrorList("109", "DealerLoginId", "Dealer login ID cannot be blank in line number : "+line));
+				//list.add(new ErrorList("109", "DealerLoginId", "Dealer login ID cannot be blank in line number : "+line));
 			}
 			if (StringUtils.isBlank(req.getSurveyorId())) {
-				list.add(new ErrorList("110", "SurveyorId", "Surveyor ID cannot be blank in line number : "+line));
+				//list.add(new ErrorList("110", "SurveyorId", "Surveyor ID cannot be blank in line number : "+line));
 			}
 			if (StringUtils.isBlank(req.getReplaceCost())) {
 				list.add(new ErrorList("111", "ReplaceCost", "Replace cost cannot be blank in line number : "+line));
@@ -228,7 +220,7 @@ public class InputValidationUtil {
 				list.add(new ErrorList("120", "TotPrice", "Total price cannot be blank in line number : "+line));
 			}
 			if (StringUtils.isBlank(req.getStatus())) {
-				list.add(new ErrorList("122", "Status", "Status cannot be blank in line number : "+line));
+				//list.add(new ErrorList("122", "Status", "Status cannot be blank in line number : "+line));
 			}
 
 	        // Validate number formats and handle exceptions
@@ -340,5 +332,59 @@ public class InputValidationUtil {
 		}
 		return list;
 	}
+
+
+// 4351
+	private int[]  mergeSort(int[] array) {
+		
+		if(array.length == 1)
+			return array;
+			
+		int mid = array.length/2;
+		
+		int[] l = mergeSort(rangeOfArray(array,0,mid));// 43
+		int[] r =mergeSort(rangeOfArray(array,mid,array.length));//3
+		
+		
+		return merge(l,r);
+
+	}
+	
+	private int[] merge(int[] l, int[] r) {
+	int[] m = new int[l.length + r.length];
+	int i = 0,j=0,k=0;
+	
+	while(i<l.length && j<r.length) {
+		int val_1 =l[i];
+		int val_2 =r[j];
+		
+		if(val_1<val_2) {
+			m[k++] = l[i++] ;
+		}else {
+			m[k++] = r[j++] ;
+		}
+	}
+	
+	 while(i<l.length) {
+		 m[k++] = l[i++];
+	 }
+	 
+	 while(j<r.length) {
+		 m[k++] = l[j++];
+	 }
+	
+	return m;
+}
+
+	private int[] rangeOfArray(int[] arr ,int start,int end) {
+		int[] a = new int[end-1];
+		for(int i=start; i<end ;i++) {
+			a[i] = arr[i];
+		}
+		return a;
+		
+	}
+	
+
 
 }

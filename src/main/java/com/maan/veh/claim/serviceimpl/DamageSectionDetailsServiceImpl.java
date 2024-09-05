@@ -99,8 +99,12 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            	DamageSectionDetails details = new DamageSectionDetails();
 	            	
 					details.setClaimNo(req.getClaimNo());
+
 					details.setQuotationNo(req.getQuotationNo());
 					details.setDamageSno(damageSno);
+
+					details.setDamageSno(Optional.ofNullable(req.getDamageSno()).map(Integer ::valueOf).orElse(damageSno));
+
 					details.setDamageDirection(req.getDamageDirection());
 					details.setDamagePart(req.getDamagePart());
 					details.setRepairReplace(req.getRepairReplace());

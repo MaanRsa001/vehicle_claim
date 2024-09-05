@@ -6,12 +6,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.maan.veh.claim.entity.GarageWorkOrder;
+import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
+import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.request.GarageWorkOrderRequest;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.ErrorList;
@@ -28,17 +32,19 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
     private GarageWorkOrderRepository garageWorkOrderRepository;
     
     @Autowired
+    private InsuredVehicleInfoRepository insuredVehRepo;
+    
+    @Autowired
     private InputValidationUtil validation;
 
     @Override
     public CommonResponse getGarageWorkOrders(GarageWorkOrderRequest req) {
-    	List<GarageWorkOrderResponse> res = new ArrayList<>();
     	CommonResponse comResponse = new CommonResponse(); 
         try {
 			List<GarageWorkOrder> data = garageWorkOrderRepository.findByCreatedBy(req.getCreatedBy());
 			
 			if(data.size()>0) {
-				
+		    	List<GarageWorkOrderResponse> res = new ArrayList<>();
 				for(GarageWorkOrder workOrder : data ) {
 					 GarageWorkOrderResponse response = new GarageWorkOrderResponse();
 			         response.setClaimNo(workOrder.getClaimNo());
@@ -64,7 +70,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 			         response.setUpdatedDate(workOrder.getUpdatedDate());
 			         response.setEntryDate(workOrder.getEntryDate());
 			         response.setStatus(workOrder.getStatus());
-			         response.setSparepartsDealerId(workOrder.getSparepartsDealerId().toString());
+			         response.setSparepartsDealerId(Optional.ofNullable(workOrder.getSparepartsDealerId()).map(String ::valueOf).orElse(""));
 			         res.add(response);
 				}
 				
@@ -112,12 +118,21 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 		        work.setCreatedBy(req.getCreatedBy());
 		        work.setCreatedDate(new Date());
 		        work.setUpdatedBy(req.getUpdatedBy());
-		        work.setUpdatedDate(DD_MM_YYYY.parse(req.getUpdatedDate()));
+		        work.setUpdatedDate(new Date());
 		        work.setEntryDate(new Date());
 		        work.setStatus("Y");
+
 		        work.setSparepartsDealerId(req.getSparepartsDealerId());
 		        
 		        garageWorkOrderRepository.save(work);
+
+		        work.setSparepartsDealerId(StringUtils.isBlank(req.getSparepartsDealerId())?null:req.getSparepartsDealerId());
+		        
+		        garageWorkOrderRepository.save(work);
+		        
+		        InsuredVehicleInfo insuredVeh =  insuredVehRepo.findByClaimNo(req.getClaimNo()).get();
+		        insuredVeh.setStatus("I");
+		        insuredVehRepo.save(insuredVeh);
 		        
 		        response.setErrors(Collections.emptyList());
 		        response.setMessage("Success");
@@ -142,7 +157,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 	public CommonResponse getGarageWorkOrdersByClaimNo(GarageWorkOrderRequest request) {
     	CommonResponse response = new CommonResponse(); 
     	try {
-    		GarageWorkOrder data =garageWorkOrderRepository.findByClaimNoAndCreatedBy(request.getClaimNo(), request.getCreatedBy());
+    		GarageWorkOrder data =garageWorkOrderRepository.findByClaimNo(request.getClaimNo()).get();
     		if(data!=null) {
     			
     			 GarageWorkOrderResponse garage = new GarageWorkOrderResponse();
@@ -168,7 +183,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 		         garage.setUpdatedDate(data.getUpdatedDate());
 		         garage.setEntryDate(data.getEntryDate());
 		         garage.setStatus(data.getStatus());
-		         garage.setSparepartsDealerId(data.getSparepartsDealerId().toString());
+		         garage.setSparepartsDealerId(Optional.ofNullable(data.getSparepartsDealerId()).map(String :: valueOf).orElse(""));
 		         
 		         response.setErrors(Collections.emptyList());
 			     response.setMessage("Success");

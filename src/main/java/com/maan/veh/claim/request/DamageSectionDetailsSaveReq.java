@@ -9,8 +9,13 @@ public class DamageSectionDetailsSaveReq {
     @JsonProperty("ClaimNo")
     private String claimNo;
     
+
     @JsonProperty("QuotationNo")
     private String quotationNo;
+
+    @JsonProperty("DamageSno")
+    private String damageSno;
+
 
     @JsonProperty("DamageDirection")
     private String damageDirection;
