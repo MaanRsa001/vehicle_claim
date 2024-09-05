@@ -1,6 +1,8 @@
 package com.maan.veh.claim.serviceimpl;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +23,8 @@ public class InputValidationUtil {
 	
 	@Autowired
 	private LoginMasterRepository loginRepo;
+	
+	private static SimpleDateFormat DD_MM_YYYY = new SimpleDateFormat("dd/MM/yyyy");
 	
 	
 	public List<ErrorList> isValidUser(LoginRequest req) {
@@ -117,6 +121,38 @@ public class InputValidationUtil {
             list.add(new ErrorList("100","CreatedBy","Created by cannot be blank"));
 
         }
+        
+        try {
+            if (!StringUtils.isBlank(req.getWorkOrderDate())) {
+                DD_MM_YYYY.parse(req.getWorkOrderDate());
+            }
+        } catch (ParseException e) {
+            list.add(new ErrorList("100", "WorkOrderDate", "Work order date is invalid or not in the correct format (dd/MM/yyyy)"));
+        }
+        
+        try {
+            if (!StringUtils.isBlank(req.getDeliveryDate())) {
+                DD_MM_YYYY.parse(req.getDeliveryDate());
+            }
+        } catch (ParseException e) {
+            list.add(new ErrorList("100", "Delivery Date", "Delivery Date is invalid or not in the correct format (dd/MM/yyyy)"));
+        }
+        
+        try {
+            if (!StringUtils.isBlank(req.getUpdatedDate())) {
+                DD_MM_YYYY.parse(req.getUpdatedDate());
+            }
+        } catch (ParseException e) {
+            list.add(new ErrorList("100", "Updated Date", "Updated Date is invalid or not in the correct format (dd/MM/yyyy)"));
+        }
+        
+        try {
+            if (!StringUtils.isBlank(req.getTotalLoss())) {
+                new BigDecimal(req.getTotalLoss());
+            }
+        } catch (NumberFormatException e) {
+            list.add(new ErrorList("100", "TotalLoss", "Total loss must be a valid number"));
+        }
 
        
 		
@@ -131,9 +167,9 @@ public class InputValidationUtil {
 			if (StringUtils.isBlank(req.getClaimNo())) {
 				list.add(new ErrorList("100", "ClaimNo", "Claim number cannot be blank in line number : "+line));
 			}
-//			if (StringUtils.isBlank(req.getDamageSno())) {
-//				list.add(new ErrorList("101", "DamageSno", "Damage serial number cannot be blank in line number : "+line));
-//			}
+			if (StringUtils.isBlank(req.getQuotationNo())) {
+				list.add(new ErrorList("101", "QuotationNO", "Quotation number cannot be blank in line number : "+line));
+			}
 			if (StringUtils.isBlank(req.getDamageDirection())) {
 				list.add(new ErrorList("102", "DamageDirection", "Damage direction cannot be blank in line number : "+line));
 			}
@@ -194,12 +230,115 @@ public class InputValidationUtil {
 			if (StringUtils.isBlank(req.getStatus())) {
 				list.add(new ErrorList("122", "Status", "Status cannot be blank in line number : "+line));
 			}
+
+	        // Validate number formats and handle exceptions
+	        if (StringUtils.isNotBlank(req.getNoOfParts())) {
+	            try {
+	                Integer.valueOf(req.getNoOfParts());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("105", "NoOfParts", "Invalid number format for NoOfParts in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getGaragePrice())) {
+	            try {
+	                new BigDecimal(req.getGaragePrice());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("106", "GaragePrice", "Invalid format for GaragePrice in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getDealerPrice())) {
+	            try {
+	                new BigDecimal(req.getDealerPrice());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("107", "DealerPrice", "Invalid format for DealerPrice in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getReplaceCost())) {
+	            try {
+	                new BigDecimal(req.getReplaceCost());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("111", "ReplaceCost", "Invalid format for ReplaceCost in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getReplaceCostDeduct())) {
+	            try {
+	                new BigDecimal(req.getReplaceCostDeduct());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("112", "ReplaceCostDeduct", "Invalid format for ReplaceCostDeduct in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getSparepartDeprection())) {
+	            try {
+	                new BigDecimal(req.getSparepartDeprection());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("113", "SparepartDeprection", "Invalid format for SparepartDeprection in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getDiscountSparepart())) {
+	            try {
+	                new BigDecimal(req.getDiscountSparepart());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("114", "DiscountSparepart", "Invalid format for DiscountSparepart in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getTotamtReplace())) {
+	            try {
+	                new BigDecimal(req.getTotamtReplace());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("115", "TotamtReplace", "Invalid format for TotamtReplace in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getLabourCost())) {
+	            try {
+	                new BigDecimal(req.getLabourCost());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("116", "LabourCost", "Invalid format for LabourCost in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getLabourCostDeduct())) {
+	            try {
+	                new BigDecimal(req.getLabourCostDeduct());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("117", "LabourCostDeduct", "Invalid format for LabourCostDeduct in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getLabourDisc())) {
+	            try {
+	                new BigDecimal(req.getLabourDisc());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("118", "LabourDisc", "Invalid format for LabourDisc in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getTotamtOfLabour())) {
+	            try {
+	                new BigDecimal(req.getTotamtOfLabour());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("119", "TotamtOfLabour", "Invalid format for TotamtOfLabour in line number : " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getTotPrice())) {
+	            try {
+	                new BigDecimal(req.getTotPrice());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("120", "TotPrice", "Invalid format for TotPrice in line number : " + line));
+	            }
+	        }
+	        
 			line++;
 		}
 		return list;
 	}
-
-
-	
 
 }

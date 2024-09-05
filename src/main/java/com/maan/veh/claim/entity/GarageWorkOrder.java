@@ -42,7 +42,7 @@ public class GarageWorkOrder {
     private String garageName;
 
     @Column(name = "garage_id")
-    private Integer garageId;
+    private String garageId;
 
     @Column(name = "location")
     private String location;
@@ -90,7 +90,7 @@ public class GarageWorkOrder {
     private String status;
 
     @Column(name = "spareparts_dealer_id")
-    private Integer sparepartsDealerId;
+    private String sparepartsDealerId;
 
     // Getters and Setters
 }

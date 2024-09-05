@@ -1,6 +1,7 @@
 package com.maan.veh.claim.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,5 +13,7 @@ public interface InsuredVehicleInfoRepository extends JpaRepository<InsuredVehic
 	List<InsuredVehicleInfo> findByCompanyId(Integer companyId);
 
 	List<InsuredVehicleInfo> findByCompanyIdAndStatus(Integer companyId, String status);
+
+	Optional<InsuredVehicleInfo> findByClaimNo(String claimNo);
    
 }

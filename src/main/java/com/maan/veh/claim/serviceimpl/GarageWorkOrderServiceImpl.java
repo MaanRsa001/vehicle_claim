@@ -90,7 +90,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 		CommonResponse response = new CommonResponse();
 		try {
 			List<ErrorList> error =validation.validateWorkOrder(req);
-			if(error.size()>0) {
+			if(error.isEmpty()) {
 				GarageWorkOrder work = new GarageWorkOrder();
 				work.setClaimNo(req.getClaimNo());
 				work.setWorkOrderNo(req.getWorkOrderNo());
@@ -99,7 +99,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 				work.setSettlementType(req.getSettlementType());
 		        work.setSettlementTo(req.getSettlementTo());
 		        work.setGarageName(req.getGarageName());
-		        work.setGarageId(Integer.valueOf(req.getGarageId()));
+		        work.setGarageId(req.getGarageId());
 		        work.setLocation(req.getLocation());
 		        work.setRepairType(req.getRepairType());
 		        work.setQuotationNo(req.getQuotationNo());
@@ -115,7 +115,9 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 		        work.setUpdatedDate(DD_MM_YYYY.parse(req.getUpdatedDate()));
 		        work.setEntryDate(new Date());
 		        work.setStatus("Y");
-		        work.setSparepartsDealerId(Integer.valueOf(req.getSparepartsDealerId()));
+		        work.setSparepartsDealerId(req.getSparepartsDealerId());
+		        
+		        garageWorkOrderRepository.save(work);
 		        
 		        response.setErrors(Collections.emptyList());
 		        response.setMessage("Success");

@@ -31,6 +31,9 @@ public class DamageSectionDetails {
 	    @NotNull
 	    @Column(name = "damage_sno")
 	    private Integer damageSno;
+	    
+	    @Column(name = "quotation_no")
+	    private String quotationNo;
 
 	    @Column(name = "damage_direction", length = 100)
 	    private String damageDirection;
@@ -57,7 +60,7 @@ public class DamageSectionDetails {
 	    private String dealerLoginId;
 
 	    @Column(name = "surveyor_id")
-	    private Integer surveyorId;
+	    private String surveyorId;
 
 	    @Column(name = "replace_cost", precision = 10, scale = 2)
 	    private BigDecimal replaceCost;

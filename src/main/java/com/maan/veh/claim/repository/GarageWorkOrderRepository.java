@@ -1,5 +1,6 @@
 package com.maan.veh.claim.repository;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -12,4 +13,6 @@ public interface GarageWorkOrderRepository extends JpaRepository<GarageWorkOrder
 	GarageWorkOrder findByClaimNoAndCreatedBy(String claimNo, String createdBy);
 
 	List<GarageWorkOrder> findByCreatedBy(String createdBy);
+
+	Optional<GarageWorkOrder> findByClaimNo(String claimNo);
 }

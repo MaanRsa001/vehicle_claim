@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.maan.veh.claim.entity.DamageSectionDetails;
+import com.maan.veh.claim.entity.TotalAmountDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
+import com.maan.veh.claim.repository.TotalAmountDetailsRepository;
 import com.maan.veh.claim.request.DamageSectionDetailsRequest;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.response.CommonResponse;
@@ -29,6 +31,9 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	
 	@Autowired
 	private DamageSectionDetailsRepository repository;
+	
+	@Autowired
+    private TotalAmountDetailsRepository totalAmountDetailsRepository;
 	
 	@Autowired
     private InputValidationUtil validation;
@@ -49,6 +54,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 		
 		try {
 			response.setClaimNo(Optional.ofNullable(details.getClaimNo()).orElse(""));
+			response.setQuotationNo(Optional.ofNullable(details.getQuotationNo()).orElse(""));
 			response.setDamageSno(String.valueOf(details.getDamageSno()));
 			response.setDamageDictDesc(Optional.ofNullable(details.getDamageDirection()).orElse(""));
 			response.setDamagePart(Optional.ofNullable(details.getDamagePart()).orElse(""));
@@ -87,12 +93,13 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	        	
 	        	List<DamageSectionDetails> saveList = new ArrayList<DamageSectionDetails>();
 	        	int damageSno = 1;
-	        	
+	        	String claimNo = reqList.get(0).getClaimNo();
 	            for (DamageSectionDetailsSaveReq req:reqList) {
 	            	
 	            	DamageSectionDetails details = new DamageSectionDetails();
 	            	
 					details.setClaimNo(req.getClaimNo());
+					details.setQuotationNo(req.getQuotationNo());
 					details.setDamageSno(damageSno);
 					details.setDamageDirection(req.getDamageDirection());
 					details.setDamagePart(req.getDamagePart());
@@ -102,7 +109,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 					details.setDealerPrice(new BigDecimal(req.getDealerPrice()));
 					details.setGarageLoginId(req.getGarageLoginId());
 					details.setDealerLoginId(req.getDealerLoginId());
-					details.setSurveyorId(Integer.valueOf(req.getSurveyorId()));
+					details.setSurveyorId(req.getSurveyorId());
 					details.setReplaceCost(new BigDecimal(req.getReplaceCost()));
 					details.setReplaceCostDeduct(new BigDecimal(req.getReplaceCostDeduct()));
 					details.setSparepartDeprection(new BigDecimal(req.getSparepartDeprection()));
@@ -119,7 +126,10 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 					saveList.add(details);
 					damageSno++;
 				}
-				repository.saveAll(saveList);
+				repository.saveAllAndFlush(saveList);
+				
+				//Create or Update a Record in total_amount_details
+				updateTotalAmountDetails(claimNo);
 
 	            response.setErrors(Collections.emptyList());
 	            response.setMessage("Success");
@@ -139,5 +149,68 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    }
 	    return response;
 	}
+	
+	public void updateTotalAmountDetails(String claimNo) {
+	    // Aggregate data for the specific claim_no
+	    List<DamageSectionDetails> damageDetailsList = repository.findByClaimNo(claimNo);
+	    
+	    BigDecimal netAmount = BigDecimal.ZERO;
+	    BigDecimal totAmtAfterDeduct = BigDecimal.ZERO;
+	    BigDecimal vatPercent = new BigDecimal("18.00");
+	    BigDecimal vatRate = BigDecimal.ZERO;
+	    BigDecimal vatAmount = BigDecimal.ZERO;
+	    BigDecimal totAmtWithVat = BigDecimal.ZERO;
+	    BigDecimal totalReplaceCost = BigDecimal.ZERO;
+	    BigDecimal totalLabourCost = BigDecimal.ZERO;
+
+	    BigDecimal totDeduct = BigDecimal.ZERO;
+	    
+	    for (DamageSectionDetails damageDetails : damageDetailsList) {
+	    	
+	    	if(damageDetails.getRepairReplace().equalsIgnoreCase("REPAIR")) {
+	    		
+	    		totDeduct = totDeduct.add(damageDetails.getLabourCostDeduct());
+		    	netAmount = netAmount.add(damageDetails.getTotamtOfLabour());
+	    		
+	    	}else if(damageDetails.getRepairReplace().equalsIgnoreCase("REPLACE")) {
+	    		
+	    		totDeduct = totDeduct.add(damageDetails.getReplaceCostDeduct());
+		    	netAmount = netAmount.add(damageDetails.getTotamtReplace());
+	    	}
+	    	
+	        totalReplaceCost = totalReplaceCost.add(damageDetails.getTotamtReplace());
+	        totalLabourCost = totalLabourCost.add(damageDetails.getTotamtOfLabour());
+	        
+	    }
+
+	    // Calculate VAT and other related amounts
+        vatRate = vatPercent.divide(new BigDecimal("100"));
+	    vatAmount = netAmount.multiply(vatRate);
+	    totAmtWithVat = netAmount.add(vatAmount);
+	    totAmtAfterDeduct = totAmtWithVat.subtract(totDeduct);
+
+	    // Create or update a record in total_amount_details
+	    TotalAmountDetails totalAmountDetails = totalAmountDetailsRepository.findByClaimNo(claimNo)
+	            .orElse(new TotalAmountDetails());
+
+	    totalAmountDetails.setClaimNo(claimNo);
+
+	    // Update calculated values
+	    totalAmountDetails.setNetAmount(netAmount);                  // Total_amount of Repair or Replace
+	    totalAmountDetails.setTotamtAftDeduction(totAmtAfterDeduct); // Total amount after deduction from repair or replace
+	    totalAmountDetails.setVatRatePercent(vatPercent);            // VAT rate percent is fixed at 18.00%
+	    totalAmountDetails.setVatRate(vatRate);                      // Calculated VAT rate based on VAT rate percent
+	    totalAmountDetails.setVatAmount(vatAmount);                  // The amount of VAT based on net amount
+	    totalAmountDetails.setTotamtWithVat(totAmtWithVat);          // Total amount with VAT
+	    totalAmountDetails.setTotReplaceCost(totalReplaceCost);      // Total Replace Cost
+	    totalAmountDetails.setTotLabourCost(totalLabourCost);        // Total Labour Cost
+
+	    totalAmountDetails.setEntryDate(new Date());
+	    totalAmountDetails.setCreatedBy("System"); 
+	    totalAmountDetails.setStatus("Y");
+
+	    totalAmountDetailsRepository.saveAndFlush(totalAmountDetails);
+	}
+
 
 }

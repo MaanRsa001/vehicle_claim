@@ -11,6 +11,9 @@ public class DamageSectionDetailsResponse {
 
     @JsonProperty("ClaimNo")
     private String claimNo;
+    
+    @JsonProperty("QuotationNo")
+    private String quotationNo;
 
     @JsonProperty("DamageSno")
     private String damageSno;
