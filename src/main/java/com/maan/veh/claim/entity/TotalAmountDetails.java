@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "total_amount_details")
+@Table(name = "vc_total_amount_details")
 @IdClass(TotalAmountDetailsId.class)
 public class TotalAmountDetails {
 

@@ -43,7 +43,7 @@ import jakarta.persistence.*;
 @DynamicUpdate
 @Builder
 @IdClass(BranchMasterId.class)
-@Table(name="eway_branch_master")
+@Table(name="vc_branch_master")
 
 
 public class BranchMaster implements Serializable {

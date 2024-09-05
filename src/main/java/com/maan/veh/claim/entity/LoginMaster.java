@@ -53,7 +53,7 @@ import lombok.ToString;
 @DynamicUpdate
 @Builder
 @IdClass(LoginMasterId.class)
-@Table(name="eway_login_master")
+@Table(name="vc_login_master")
 
 
 public class LoginMaster implements Serializable {

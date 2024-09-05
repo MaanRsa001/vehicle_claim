@@ -21,7 +21,7 @@ import lombok.ToString;
 @ToString
 @Builder
 @Entity
-@Table(name = "claim_losstype_master")
+@Table(name = "vc_losstype_master")
 @IdClass(ClaimLossTypeMasterId.class)
 public class ClaimLossTypeMaster {
 

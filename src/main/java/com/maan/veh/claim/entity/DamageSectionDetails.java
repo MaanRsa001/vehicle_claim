@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "damage_section_details")
+@Table(name = "vc_damage_section_details")
 @IdClass(DamageSectionDetailsId.class)
 public class DamageSectionDetails {
 

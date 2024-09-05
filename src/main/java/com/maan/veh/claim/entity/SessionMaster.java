@@ -44,7 +44,7 @@ import jakarta.persistence.*;
 @DynamicUpdate
 @Builder
 @IdClass(SessionMasterId.class)
-@Table(name="eway_session_master")
+@Table(name="vc_session_master")
 
 
 public class SessionMaster implements Serializable {

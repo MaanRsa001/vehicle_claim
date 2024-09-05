@@ -42,7 +42,7 @@ import jakarta.persistence.*;
 @DynamicUpdate
 @Builder
 @IdClass(MenuMasterId.class)
-@Table(name="eway_menu_master")
+@Table(name="vc_menu_master")
 
 
 public class MenuMaster implements Serializable {

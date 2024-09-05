@@ -53,7 +53,7 @@ import lombok.ToString;
 @DynamicUpdate
 @Builder
 @IdClass(VehicleBodypartsMasterId.class)
-@Table(name="VEHICLE_BODYPARTS_MASTER")
+@Table(name="VC_VEHICLE_BODYPARTS_MASTER")
 
 
 public class VehicleBodypartsMaster implements Serializable {

@@ -43,7 +43,7 @@ import jakarta.persistence.*;
 @DynamicUpdate
 @Builder
 @IdClass(InsuranceCompanyMasterId.class)
-@Table(name="eway_insurance_company_master")
+@Table(name="vc_insurance_company_master")
 
 
 public class InsuranceCompanyMaster implements Serializable {

@@ -42,7 +42,7 @@ import jakarta.persistence.*;
 @DynamicUpdate
 @Builder
 @IdClass(ListItemValueId.class)
-@Table(name="list_item_value")
+@Table(name="vc_list_item_value")
 
 
 public class ListItemValue implements Serializable {

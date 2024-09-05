@@ -44,7 +44,7 @@ import jakarta.persistence.*;
 @DynamicUpdate
 @Builder
 @IdClass(LoginUserInfoId.class)
-@Table(name="login_user_info")
+@Table(name="vc_login_user_info")
 
 
 public class LoginUserInfo implements Serializable {

@@ -82,7 +82,7 @@ public class WebSecurityConfig  {
     private static final String HEALTHCHECK_URL = "/healthCheck/**";
     private static final String[] ALLOW_LIST = {
                 HEALTHCHECK_URL, "/v3/api-docs/**", "/swagger-resources/**",
-                "/swagger-ui.html/**", "/webjars/**", "/csrf/**", "/**", "/css/**"
+                "/swagger-ui.html/**", "/webjars/**", "/csrf/**", "/css/**"
         };
     
     @Bean
