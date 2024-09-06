@@ -60,19 +60,16 @@ public class IntegrationServiceImpl implements IntegrationService {
 			List<Map<String, Object>> lpoInfo = new ArrayList<>();
 			for (String claimNo : claimNoList) {
 				// Fetch data from all tables
-				Optional<InsuredVehicleInfo> insuredVehicleInfoOpt = insuredVehicleInfoRepository
-						.findByClaimNo(claimNo);
+				Optional<InsuredVehicleInfo> insuredVehicleInfoOpt = insuredVehicleInfoRepository.findByClaimNo(claimNo);
 				Optional<GarageWorkOrder> garageWorkOrderOpt = garageWorkOrderRepository.findByClaimNo(claimNo);
-				Optional<TotalAmountDetails> totalAmountDetailsOpt = totalAmountDetailsRepository
-						.findByClaimNo(claimNo);
-				List<DamageSectionDetails> damageSectionDetailsList = damageSectionDetailsRepository
-						.findByClaimNo(claimNo);
+				Optional<TotalAmountDetails> totalAmountDetailsOpt = totalAmountDetailsRepository.findByClaimNo(claimNo);
+				List<DamageSectionDetails> damageSectionDetailsList = damageSectionDetailsRepository.findByClaimNo(claimNo);
 				// Prepare vehicleInfo
 				Map<String, Object> vehicleDetails = new HashMap<>();
 				// Map InsuredVehicleInfo to vehicleInfo
 				insuredVehicleInfoOpt.ifPresent(info -> {
 					vehicleDetails.put("vehicleMakeModel", info.getVehicleMake() + " " + info.getVehicleModel());
-					vehicleDetails.put("makeYr", Optional.ofNullable(info.getMakeYear()).orElse(0));
+					vehicleDetails.put("makeYr", String.valueOf(Optional.ofNullable(info.getMakeYear()).orElse(0)));
 					vehicleDetails.put("chassisNo", Optional.ofNullable(info.getChassisNo()).orElse(""));
 					vehicleDetails.put("insuredClaimantName", Optional.ofNullable(info.getInsuredName()).orElse(""));
 					vehicleDetails.put("type", Optional.ofNullable(info.getType()).orElse(""));
@@ -83,85 +80,86 @@ public class IntegrationServiceImpl implements IntegrationService {
 				garageWorkOrderOpt.ifPresent(order -> {
 					garageWorkOrderInfo.put("workOrderType", Optional.ofNullable(order.getWorkOrderType()).orElse(""));
 					garageWorkOrderInfo.put("workOrderNo", Optional.ofNullable(order.getWorkOrderNo()).orElse(""));
-					garageWorkOrderInfo.put("workOrderDate",
-							Optional.ofNullable(order.getWorkOrderDate()).orElse(new Date()));
-					garageWorkOrderInfo.put("accForSettlementType",
-							Optional.ofNullable(order.getSettlementType()).orElse(""));
-					garageWorkOrderInfo.put("accForSettlement",
-							Optional.ofNullable(order.getSettlementTo()).orElse(""));
-					garageWorkOrderInfo.put("sparePartsDealer",
-							Optional.ofNullable(order.getSparepartsDealerId()).orElse(""));
+					garageWorkOrderInfo.put("workOrderDate",Optional.ofNullable(order.getWorkOrderDate()).orElse(new Date()));
+					garageWorkOrderInfo.put("accForSettlementType",Optional.ofNullable(order.getSettlementType()).orElse(""));
+					garageWorkOrderInfo.put("accForSettlement",Optional.ofNullable(order.getSettlementTo()).orElse(""));
+					garageWorkOrderInfo.put("sparePartsDealer",Optional.ofNullable(order.getSparepartsDealerId()).orElse(""));
 					garageWorkOrderInfo.put("garageCode", Optional.ofNullable(order.getGarageId()).orElse(""));
-					garageWorkOrderInfo.put("garageQuotationNo",
-							Optional.ofNullable(order.getQuotationNo()).orElse(""));
-					garageWorkOrderInfo.put("deliveryDate",
-							Optional.ofNullable(order.getDeliveryDate()).orElse(new Date()));
+					garageWorkOrderInfo.put("garageQuotationNo",Optional.ofNullable(order.getQuotationNo()).orElse(""));
+					garageWorkOrderInfo.put("deliveryDate",Optional.ofNullable(order.getDeliveryDate()).orElse(new Date()));
 					garageWorkOrderInfo.put("deliveryTo", Optional.ofNullable(order.getLocation()).orElse(""));
 					garageWorkOrderInfo.put("subrogationYN", Optional.ofNullable(order.getSubrogationYn()).orElse(""));
 					garageWorkOrderInfo.put("jointOrderYN", Optional.ofNullable(order.getJointOrderYn()).orElse(""));
-					garageWorkOrderInfo.put("totalLoss",
-							Optional.ofNullable(order.getTotalLoss()).orElse(BigDecimal.ZERO));
+					garageWorkOrderInfo.put("totalLoss",String.valueOf(Optional.ofNullable(order.getTotalLoss()).orElse(BigDecimal.ZERO)));
 					garageWorkOrderInfo.put("totalLossType", Optional.ofNullable(order.getLossType()).orElse(""));
 					garageWorkOrderInfo.put("remarks", Optional.ofNullable(order.getRemarks()).orElse(""));
 				});
 				// Map TotalAmountDetails to totalAmount
 				Map<String, Object> totalAmount = new HashMap<>();
 				totalAmountDetailsOpt.ifPresent(details -> {
-					totalAmount.put("netAmount", Optional.ofNullable(details.getNetAmount()).orElse(BigDecimal.ZERO));
-					totalAmount.put("unknownAccidentDeduction",
-							Optional.ofNullable(details.getTotamtAftDeduction()).orElse(BigDecimal.ZERO));
-					totalAmount.put("amountToBeRecovered",
-							Optional.ofNullable(details.getTotamtWithVat()).orElse(BigDecimal.ZERO)); // Assumed
-					totalAmount.put("totalAfterDeductions",
-							Optional.ofNullable(details.getTotamtAftDeduction()).orElse(BigDecimal.ZERO));
-					totalAmount.put("vatRatePer",
-							Optional.ofNullable(details.getVatRatePercent()).orElse(BigDecimal.ZERO));
-					totalAmount.put("vatRate", Optional.ofNullable(details.getVatRate()).orElse(BigDecimal.ZERO));
-					totalAmount.put("vatAmount", Optional.ofNullable(details.getVatAmount()).orElse(BigDecimal.ZERO));
-					totalAmount.put("totalWithVat",
-							Optional.ofNullable(details.getTotamtWithVat()).orElse(BigDecimal.ZERO));
+					totalAmount.put("netAmount", String.valueOf(Optional.ofNullable(details.getNetAmount()).orElse(BigDecimal.ZERO)));
+					totalAmount.put("unknownAccidentDeduction",String.valueOf(Optional.ofNullable(details.getTotamtAftDeduction()).orElse(BigDecimal.ZERO)));
+					totalAmount.put("amountToBeRecovered",String.valueOf(Optional.ofNullable(details.getTotamtWithVat()).orElse(BigDecimal.ZERO)));
+					totalAmount.put("totalAfterDeductions",String.valueOf(Optional.ofNullable(details.getTotamtAftDeduction()).orElse(BigDecimal.ZERO)));
+					totalAmount.put("vatRatePer",String.valueOf(Optional.ofNullable(details.getVatRatePercent()).orElse(BigDecimal.ZERO)));
+					totalAmount.put("vatRate", String.valueOf(Optional.ofNullable(details.getVatRate()).orElse(BigDecimal.ZERO)));
+					totalAmount.put("vatAmount", String.valueOf(Optional.ofNullable(details.getVatAmount()).orElse(BigDecimal.ZERO)));
+					totalAmount.put("totalWithVat",String.valueOf(Optional.ofNullable(details.getTotamtWithVat()).orElse(BigDecimal.ZERO)));
 				});
 				// Map TotalAmountDetails to replacementDetails and repairLabourDetails
 				Map<String, Object> replacementDetails = new HashMap<>();
 				Map<String, Object> repairLabourDetails = new HashMap<>();
-				totalAmountDetailsOpt.ifPresent(details -> {
-					replacementDetails.put("replacementCost",
-							Optional.ofNullable(details.getTotReplaceCost()).orElse(BigDecimal.ZERO));
-					replacementDetails.put("replacementCostDeductible",
-							Optional.ofNullable(details.getTotReplaceCost()).orElse(BigDecimal.ZERO));
-					replacementDetails.put("sparePartDepreciation",
-							Optional.ofNullable(details.getTotReplaceCost()).orElse(BigDecimal.ZERO));
-					replacementDetails.put("discountOnSpareParts",
-							Optional.ofNullable(details.getTotReplaceCost()).orElse(BigDecimal.ZERO));
-					replacementDetails.put("totalAmountReplacement",
-							Optional.ofNullable(details.getTotReplaceCost()).orElse(BigDecimal.ZERO));
+				// Initialize variables to accumulate values
+				BigDecimal totalReplacementCost = BigDecimal.ZERO;
+				BigDecimal totalReplacementCostDeductible = BigDecimal.ZERO;
+				BigDecimal totalSparePartDepreciation = BigDecimal.ZERO;
+				BigDecimal totalDiscountOnSpareParts = BigDecimal.ZERO;
+				BigDecimal totalAmountReplacement = BigDecimal.ZERO;
 
-					repairLabourDetails.put("repairLabour",
-							Optional.ofNullable(details.getTotLabourCost()).orElse(BigDecimal.ZERO));
-					repairLabourDetails.put("repairLabourDeductible",
-							Optional.ofNullable(details.getTotLabourCost()).orElse(BigDecimal.ZERO));
-					repairLabourDetails.put("repairLabourDiscountAmount",
-							Optional.ofNullable(details.getTotLabourCost()).orElse(BigDecimal.ZERO));
-					repairLabourDetails.put("totalAmountRepairLabour",
-							Optional.ofNullable(details.getTotLabourCost()).orElse(BigDecimal.ZERO));
-				});
+				BigDecimal totalRepairLabour = BigDecimal.ZERO;
+				BigDecimal totalRepairLabourDeductible = BigDecimal.ZERO;
+				BigDecimal totalRepairLabourDiscountAmount = BigDecimal.ZERO;
+				BigDecimal totalAmountRepairLabour = BigDecimal.ZERO;
+
+				// Iterate over the DamageSectionDetails list and categorize by 'repair_replace'
+				for (DamageSectionDetails details : damageSectionDetailsList) {
+				    if ("REPLACE".equalsIgnoreCase(details.getRepairReplace())) {
+				        totalReplacementCost = totalReplacementCost.add(Optional.ofNullable(details.getReplaceCost()).orElse(BigDecimal.ZERO));
+				        totalReplacementCostDeductible = totalReplacementCostDeductible.add(Optional.ofNullable(details.getReplaceCostDeduct()).orElse(BigDecimal.ZERO));
+				        totalSparePartDepreciation = totalSparePartDepreciation.add(Optional.ofNullable(details.getSparepartDeprection()).orElse(BigDecimal.ZERO));
+				        totalDiscountOnSpareParts = totalDiscountOnSpareParts.add(Optional.ofNullable(details.getDiscountSparepart()).orElse(BigDecimal.ZERO));
+				        totalAmountReplacement = totalAmountReplacement.add(Optional.ofNullable(details.getTotamtReplace()).orElse(BigDecimal.ZERO));
+				    } else if ("REPAIR".equalsIgnoreCase(details.getRepairReplace())) {
+				        totalRepairLabour = totalRepairLabour.add(Optional.ofNullable(details.getLabourCost()).orElse(BigDecimal.ZERO));
+				        totalRepairLabourDeductible = totalRepairLabourDeductible.add(Optional.ofNullable(details.getLabourCostDeduct()).orElse(BigDecimal.ZERO));
+				        totalRepairLabourDiscountAmount = totalRepairLabourDiscountAmount.add(Optional.ofNullable(details.getLabourDisc()).orElse(BigDecimal.ZERO));
+				        totalAmountRepairLabour = totalAmountRepairLabour.add(Optional.ofNullable(details.getTotamtOfLabour()).orElse(BigDecimal.ZERO));
+				    }
+				}
+
+				// Map the calculated values to replacementDetails and repairLabourDetails
+				replacementDetails.put("replacementCost", String.valueOf(totalReplacementCost));
+				replacementDetails.put("replacementCostDeductible", String.valueOf(totalReplacementCostDeductible));
+				replacementDetails.put("sparePartDepreciation", String.valueOf(totalSparePartDepreciation));
+				replacementDetails.put("discountOnSpareParts", String.valueOf(totalDiscountOnSpareParts));
+				replacementDetails.put("totalAmountReplacement", String.valueOf(totalAmountReplacement));
+
+				repairLabourDetails.put("repairLabour", String.valueOf(totalRepairLabour));
+				repairLabourDetails.put("repairLabourDeductible", String.valueOf(totalRepairLabourDeductible));
+				repairLabourDetails.put("repairLabourDiscountAmount", String.valueOf(totalRepairLabourDiscountAmount));
+				repairLabourDetails.put("totalAmountRepairLabour", String.valueOf(totalAmountRepairLabour));
+
 				// Map DamageSectionDetails to vehicleDamageDetails
 				List<Map<String, Object>> vehicleDamageDetailsList = new ArrayList<>();
 				for (DamageSectionDetails damageSection : damageSectionDetailsList) {
 					Map<String, Object> vehicleDamageDetails = new HashMap<>();
-					vehicleDamageDetails.put("damageDirection",
-							Optional.ofNullable(damageSection.getDamageDirection()).orElse(""));
-					vehicleDamageDetails.put("partyType",
-							Optional.ofNullable(damageSection.getDamagePart()).orElse(""));
-					vehicleDamageDetails.put("replaceRepair",
-							Optional.ofNullable(damageSection.getRepairReplace()).orElse(""));
-					vehicleDamageDetails.put("noUnits", Optional.ofNullable(damageSection.getNoOfParts()).orElse(0));
-					vehicleDamageDetails.put("unitPrice",
-							Optional.ofNullable(damageSection.getGaragePrice()).orElse(BigDecimal.ZERO));
-					vehicleDamageDetails.put("repalcementCharge",
-							Optional.ofNullable(damageSection.getReplaceCost()).orElse(BigDecimal.ZERO));
-					vehicleDamageDetails.put("total",
-							Optional.ofNullable(damageSection.getTotPrice()).orElse(BigDecimal.ZERO));
+					vehicleDamageDetails.put("damageDirection",Optional.ofNullable(damageSection.getDamageDirection()).orElse(""));
+					vehicleDamageDetails.put("partyType",Optional.ofNullable(damageSection.getDamagePart()).orElse(""));
+					vehicleDamageDetails.put("replaceRepair",Optional.ofNullable(damageSection.getRepairReplace()).orElse(""));
+					vehicleDamageDetails.put("noUnits", String.valueOf(Optional.ofNullable(damageSection.getNoOfParts()).orElse(0)));
+					vehicleDamageDetails.put("unitPrice",String.valueOf(Optional.ofNullable(damageSection.getGaragePrice()).orElse(BigDecimal.ZERO)));
+					vehicleDamageDetails.put("repalcementCharge",String.valueOf(Optional.ofNullable(damageSection.getReplaceCost()).orElse(BigDecimal.ZERO)));
+					vehicleDamageDetails.put("total",String.valueOf(Optional.ofNullable(damageSection.getTotPrice()).orElse(BigDecimal.ZERO)));
 
 					vehicleDamageDetailsList.add(vehicleDamageDetails);
 				}
