@@ -79,11 +79,14 @@ public class WebSecurityConfig  {
         return source;
     }
     
-    private static final String HEALTHCHECK_URL = "/healthCheck/**";
-    private static final String[] ALLOW_LIST = {
-                HEALTHCHECK_URL, "/v3/api-docs/**", "/swagger-resources/**",
-                "/swagger-ui.html/**", "/webjars/**", "/csrf/**", "/css/**"
-        };
+	private static final String HEALTHCHECK_URL = "/healthCheck/**";
+	private static final String[] ALLOW_LIST = { HEALTHCHECK_URL, "/", "/resources/**", "/styles/**", "/static/**",
+			"/jasper/**", "/public/**", "/webui/**", "/h2-console/**", "/*.jsp", "/**/*.jsp", "/configuration/**",
+			"/swagger-ui/**", "/ui/**", "/swagger-resources/**", "/api-docs", "/api-docs/**", "/fonts/**",
+			"/v3/api-docs/**", "/*.html", "/**/*.html", "/*.jpg", "/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg",
+			"/**/*.gif", "/**/*.svg", "/**/*.ico", "/**/*.ttf", "/**/*.woff", "/**/*.woff2", "/**/*.otf",
+			"/whatsappflow/**", "/whatsapp/webhook", "/whatsapp/webhook/meta/**",
+			"/whatsapptemplate/document/download/**", "/insurance/buypolicy/**","/swagger-ui/**" };
     
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http)throws Exception {
