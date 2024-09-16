@@ -77,9 +77,6 @@ private static final long serialVersionUID = 1L;
     @Column(name="PART_DESCRIPTION", length=500)
     private String     partDescription ;
 
-    @Column(name="PART_DESCRIPTION_AR", length=600)
-    private String     partDescriptionAr ;
-
     @Temporal(TemporalType.DATE)
     @Column(name="ENTRY_DATE")
     private Date       entryDate ;

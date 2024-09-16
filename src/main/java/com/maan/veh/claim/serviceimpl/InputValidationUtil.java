@@ -14,6 +14,8 @@ import com.maan.veh.claim.auth.passwordEnc;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
+import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
+import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
@@ -154,7 +156,100 @@ public class InputValidationUtil {
 	public List<ErrorList> validateDamageDetails(List<DamageSectionDetailsSaveReq> reqList) {
 	    List<ErrorList> list = new ArrayList<>();
 	    int line = 1;
+	    
 	    for (DamageSectionDetailsSaveReq req : reqList) {
+	        
+	        if (StringUtils.isBlank(req.getClaimNo())) {
+	            list.add(new ErrorList("100", "ClaimNo", "Claim number cannot be blank in line number: " + line));
+	        }
+	        if (StringUtils.isBlank(req.getQuotationNo())) {
+	            list.add(new ErrorList("101", "QuotationNo", "Quotation number cannot be blank in line number: " + line));
+	        }
+	        if (StringUtils.isBlank(req.getRepairReplace())) {
+	            list.add(new ErrorList("104", "RepairReplace", "Repair/Replace field cannot be blank in line number: " + line));
+	        }
+	        if (StringUtils.isBlank(req.getSurveyorId())) {
+	            list.add(new ErrorList("110", "SurveyorId", "Surveyor ID cannot be blank in line number: " + line));
+	        }
+	        if (StringUtils.isBlank(req.getGarageDealer())) {
+	            list.add(new ErrorList("111", "GarageDealer", "Garage or Dealer cannot be blank in line number: " + line));
+	        }
+
+	        // Conditional validation for "Replace"
+	        if ("Replace".equalsIgnoreCase(req.getRepairReplace())) {
+	            if (StringUtils.isBlank(req.getReplaceCostDeductPercentage())) {
+	                list.add(new ErrorList("112", "ReplaceCostDeductPercentage", "Replace cost deduction percentage cannot be blank in line number: " + line));
+	            }
+	            if (StringUtils.isBlank(req.getSparepartDeprectionPercentage())) {
+	                list.add(new ErrorList("113", "SparepartDeprectionPercentage", "Spare part depreciation percentage cannot be blank in line number: " + line));
+	            }
+	            if (StringUtils.isBlank(req.getDiscountSparepartPercentage())) {
+	                list.add(new ErrorList("114", "DiscountSparepartPercentage", "Discount on spare parts percentage cannot be blank in line number: " + line));
+	            }
+	        } else { // For non-Replace cases
+	            if (StringUtils.isBlank(req.getLabourCostDeductPercentage())) {
+	                list.add(new ErrorList("117", "LabourCostDeductPercentage", "Labour cost deduction percentage cannot be blank in line number: " + line));
+	            }
+	            if (StringUtils.isBlank(req.getLabourDiscPercentage())) {
+	                list.add(new ErrorList("118", "LabourDiscPercentage", "Labour discount percentage cannot be blank in line number: " + line));
+	            }
+	        }
+
+	        // Validation for numeric formats
+	        if (StringUtils.isNotBlank(req.getReplaceCostDeductPercentage())) {
+	            try {
+	                new BigDecimal(req.getReplaceCostDeductPercentage());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("112", "ReplaceCostDeductPercentage", "Invalid format for ReplaceCostDeductPercentage in line number: " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getSparepartDeprectionPercentage())) {
+	            try {
+	                new BigDecimal(req.getSparepartDeprectionPercentage());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("113", "SparepartDeprectionPercentage", "Invalid format for SparepartDeprectionPercentage in line number: " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getDiscountSparepartPercentage())) {
+	            try {
+	                new BigDecimal(req.getDiscountSparepartPercentage());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("114", "DiscountSparepartPercentage", "Invalid format for DiscountSparepartPercentage in line number: " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getLabourCostDeductPercentage())) {
+	            try {
+	                new BigDecimal(req.getLabourCostDeductPercentage());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("117", "LabourCostDeductPercentage", "Invalid format for LabourCostDeductPercentage in line number: " + line));
+	            }
+	        }
+
+	        if (StringUtils.isNotBlank(req.getLabourDiscPercentage())) {
+	            try {
+	                new BigDecimal(req.getLabourDiscPercentage());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("118", "LabourDiscPercentage", "Invalid format for LabourDiscPercentage in line number: " + line));
+	            }
+	        }
+	        
+	        line++;
+	    }
+	    return list;
+	}
+
+
+
+	public List<ErrorList> validateGarageDamageDetails(List<GarageSectionDetailsSaveReq> reqList) {
+		List<ErrorList> list = new ArrayList<>();
+	    int line = 1;
+	    for (GarageSectionDetailsSaveReq req : reqList) {
+	    	if(StringUtils.isNotBlank(req.getDamageSno())) {
+	    		line = Integer.valueOf(req.getDamageSno());
+			}
 	    	
 			if (StringUtils.isBlank(req.getClaimNo())) {
 				list.add(new ErrorList("100", "ClaimNo", "Claim number cannot be blank in line number : "+line));
@@ -171,160 +266,56 @@ public class InputValidationUtil {
 			if (StringUtils.isBlank(req.getRepairReplace())) {
 				list.add(new ErrorList("104", "RepairReplace", "Repair/Replace field cannot be blank in line number : "+line));
 			}
-			if (StringUtils.isBlank(req.getNoOfParts())) {
-				list.add(new ErrorList("105", "NoOfParts", "Number of parts cannot be blank in line number : "+line));
+			if ("Replace".equalsIgnoreCase(req.getRepairReplace())) {
+				if (StringUtils.isBlank(req.getNoOfUnits())) {
+					list.add(new ErrorList("105", "NoOfUnits", "Number of Units cannot be blank in line number : "+line));
+				}
+				if (StringUtils.isBlank(req.getReplacementCharge())) {
+					list.add(new ErrorList("111", "ReplacementCharge", "Replacement Charge cannot be blank in line number : "+line));
+				}
+				
 			}
-			if (StringUtils.isBlank(req.getGaragePrice())) {
-				list.add(new ErrorList("106", "GaragePrice", "Garage price cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getDealerPrice())) {
-				list.add(new ErrorList("107", "DealerPrice", "Dealer price cannot be blank in line number : "+line));
+			
+			if (StringUtils.isBlank(req.getUnitPrice())) {
+				list.add(new ErrorList("106", "UnitPrice", "Unit price cannot be blank in line number : "+line));
 			}
 			if (StringUtils.isBlank(req.getGarageLoginId())) {
 				list.add(new ErrorList("108", "GarageLoginId", "Garage login ID cannot be blank in line number : "+line));
 			}
-			if (StringUtils.isBlank(req.getDealerLoginId())) {
-				//list.add(new ErrorList("109", "DealerLoginId", "Dealer login ID cannot be blank in line number : "+line));
+			
+			if (StringUtils.isBlank(req.getDamageSno())) {
+				list.add(new ErrorList("102", "DamageSno", "Damage Sno cannot be blank in line number : "+line));
 			}
-			if (StringUtils.isBlank(req.getSurveyorId())) {
-				//list.add(new ErrorList("110", "SurveyorId", "Surveyor ID cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getReplaceCost())) {
-				list.add(new ErrorList("111", "ReplaceCost", "Replace cost cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getReplaceCostDeduct())) {
-				list.add(new ErrorList("112", "ReplaceCostDeduct", "Replace cost deduction cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getSparepartDeprection())) {
-				list.add(new ErrorList("113", "SparepartDeprection", "Spare part depreciation cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getDiscountSparepart())) {
-				list.add(new ErrorList("114", "DiscountSparepart", "Discount on spare parts cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getTotamtReplace())) {
-				list.add(new ErrorList("115", "TotamtReplace", "Total amount for replacement cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getLabourCost())) {
-				list.add(new ErrorList("116", "LabourCost", "Labour cost cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getLabourCostDeduct())) {
-				list.add(new ErrorList("117", "LabourCostDeduct", "Labour cost deduction cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getLabourDisc())) {
-				list.add(new ErrorList("118", "LabourDisc", "Labour discount cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getTotamtOfLabour())) {
-				list.add(new ErrorList("119", "TotamtOfLabour", "Total amount of labour cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getTotPrice())) {
-				list.add(new ErrorList("120", "TotPrice", "Total price cannot be blank in line number : "+line));
-			}
-			if (StringUtils.isBlank(req.getStatus())) {
-				//list.add(new ErrorList("122", "Status", "Status cannot be blank in line number : "+line));
-			}
-
-	        // Validate number formats and handle exceptions
-	        if (StringUtils.isNotBlank(req.getNoOfParts())) {
+		    // Validate number formats and handle exceptions
+	        if (StringUtils.isNotBlank(req.getNoOfUnits())) {
 	            try {
-	                Integer.valueOf(req.getNoOfParts());
+	                Integer.valueOf(req.getNoOfUnits());
 	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("105", "NoOfParts", "Invalid number format for NoOfParts in line number : " + line));
+	                list.add(new ErrorList("105", "NoOfUnits", "Invalid number format for NoOfUnits in line number : " + line));
 	            }
 	        }
 
-	        if (StringUtils.isNotBlank(req.getGaragePrice())) {
+	        if (StringUtils.isNotBlank(req.getUnitPrice())) {
 	            try {
-	                new BigDecimal(req.getGaragePrice());
+	                new BigDecimal(req.getUnitPrice());
 	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("106", "GaragePrice", "Invalid format for GaragePrice in line number : " + line));
+	                list.add(new ErrorList("106", "UnitPrice", "Invalid format for UnitPrice in line number : " + line));
 	            }
 	        }
 
-	        if (StringUtils.isNotBlank(req.getDealerPrice())) {
+	        if (StringUtils.isNotBlank(req.getReplacementCharge())) {
 	            try {
-	                new BigDecimal(req.getDealerPrice());
+	                new BigDecimal(req.getReplacementCharge());
 	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("107", "DealerPrice", "Invalid format for DealerPrice in line number : " + line));
+	                list.add(new ErrorList("111", "ReplacementCharge", "Invalid format for ReplacementCharge in line number : " + line));
 	            }
 	        }
 
-	        if (StringUtils.isNotBlank(req.getReplaceCost())) {
+	        if (StringUtils.isNotBlank(req.getTotalPrice())) {
 	            try {
-	                new BigDecimal(req.getReplaceCost());
+	                new BigDecimal(req.getTotalPrice());
 	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("111", "ReplaceCost", "Invalid format for ReplaceCost in line number : " + line));
-	            }
-	        }
-
-	        if (StringUtils.isNotBlank(req.getReplaceCostDeduct())) {
-	            try {
-	                new BigDecimal(req.getReplaceCostDeduct());
-	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("112", "ReplaceCostDeduct", "Invalid format for ReplaceCostDeduct in line number : " + line));
-	            }
-	        }
-
-	        if (StringUtils.isNotBlank(req.getSparepartDeprection())) {
-	            try {
-	                new BigDecimal(req.getSparepartDeprection());
-	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("113", "SparepartDeprection", "Invalid format for SparepartDeprection in line number : " + line));
-	            }
-	        }
-
-	        if (StringUtils.isNotBlank(req.getDiscountSparepart())) {
-	            try {
-	                new BigDecimal(req.getDiscountSparepart());
-	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("114", "DiscountSparepart", "Invalid format for DiscountSparepart in line number : " + line));
-	            }
-	        }
-
-	        if (StringUtils.isNotBlank(req.getTotamtReplace())) {
-	            try {
-	                new BigDecimal(req.getTotamtReplace());
-	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("115", "TotamtReplace", "Invalid format for TotamtReplace in line number : " + line));
-	            }
-	        }
-
-	        if (StringUtils.isNotBlank(req.getLabourCost())) {
-	            try {
-	                new BigDecimal(req.getLabourCost());
-	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("116", "LabourCost", "Invalid format for LabourCost in line number : " + line));
-	            }
-	        }
-
-	        if (StringUtils.isNotBlank(req.getLabourCostDeduct())) {
-	            try {
-	                new BigDecimal(req.getLabourCostDeduct());
-	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("117", "LabourCostDeduct", "Invalid format for LabourCostDeduct in line number : " + line));
-	            }
-	        }
-
-	        if (StringUtils.isNotBlank(req.getLabourDisc())) {
-	            try {
-	                new BigDecimal(req.getLabourDisc());
-	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("118", "LabourDisc", "Invalid format for LabourDisc in line number : " + line));
-	            }
-	        }
-
-	        if (StringUtils.isNotBlank(req.getTotamtOfLabour())) {
-	            try {
-	                new BigDecimal(req.getTotamtOfLabour());
-	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("119", "TotamtOfLabour", "Invalid format for TotamtOfLabour in line number : " + line));
-	            }
-	        }
-
-	        if (StringUtils.isNotBlank(req.getTotPrice())) {
-	            try {
-	                new BigDecimal(req.getTotPrice());
-	            } catch (NumberFormatException e) {
-	                list.add(new ErrorList("120", "TotPrice", "Invalid format for TotPrice in line number : " + line));
+	                list.add(new ErrorList("120", "TotalPrice", "Invalid format for TotalPrice in line number : " + line));
 	            }
 	        }
 	        
@@ -333,56 +324,41 @@ public class InputValidationUtil {
 		return list;
 	}
 
+	public List<ErrorList> validateDealerDamageDetails(List<DealerSectionDetailsSaveReq> reqList) {
+		List<ErrorList> list = new ArrayList<>();
+		
+	    int line = 1;
+	    for (DealerSectionDetailsSaveReq req : reqList) {
+	    	if(StringUtils.isNotBlank(req.getDamageSno())) {
+	    		line = Integer.valueOf(req.getDamageSno());
+			}
+			if (StringUtils.isBlank(req.getClaimNo())) {
+				list.add(new ErrorList("100", "ClaimNo", "Claim number cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getQuotationNo())) {
+				list.add(new ErrorList("101", "QuotationNO", "Quotation number cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getDamageSno())) {
+				list.add(new ErrorList("102", "DamageSno", "Damage Sno cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getUnitPrice())) {
+				list.add(new ErrorList("106", "UnitPrice", "Unit price cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getDealerLoginId())) {
+				list.add(new ErrorList("108", "DealerLoginId", "Dealer login ID cannot be blank in line number : "+line));
+			}
 
-// 4351
-	private int[]  mergeSort(int[] array) {
-		
-		if(array.length == 1)
-			return array;
-			
-		int mid = array.length/2;
-		
-		int[] l = mergeSort(rangeOfArray(array,0,mid));// 43
-		int[] r =mergeSort(rangeOfArray(array,mid,array.length));//3
-		
-		
-		return merge(l,r);
-
-	}
-	
-	private int[] merge(int[] l, int[] r) {
-	int[] m = new int[l.length + r.length];
-	int i = 0,j=0,k=0;
-	
-	while(i<l.length && j<r.length) {
-		int val_1 =l[i];
-		int val_2 =r[j];
-		
-		if(val_1<val_2) {
-			m[k++] = l[i++] ;
-		}else {
-			m[k++] = r[j++] ;
+	        if (StringUtils.isNotBlank(req.getUnitPrice())) {
+	            try {
+	                new BigDecimal(req.getUnitPrice());
+	            } catch (NumberFormatException e) {
+	                list.add(new ErrorList("106", "UnitPrice", "Invalid format for UnitPrice in line number : " + line));
+	            }
+	        }
+	        
+			line++;
 		}
-	}
-	
-	 while(i<l.length) {
-		 m[k++] = l[i++];
-	 }
-	 
-	 while(j<r.length) {
-		 m[k++] = l[j++];
-	 }
-	
-	return m;
-}
-
-	private int[] rangeOfArray(int[] arr ,int start,int end) {
-		int[] a = new int[end-1];
-		for(int i=start; i<end ;i++) {
-			a[i] = arr[i];
-		}
-		return a;
-		
+		return list;
 	}
 	
 

@@ -10,4 +10,6 @@ import com.maan.veh.claim.entity.DamageSectionDetailsId;
 
 public interface DamageSectionDetailsRepository extends JpaRepository<DamageSectionDetails, DamageSectionDetailsId> , JpaSpecificationExecutor<DamageSectionDetails>{
     List<DamageSectionDetails> findByClaimNo(String claimNo);
+
+	DamageSectionDetails findByClaimNoAndQuotationNoAndDamageSno(String claimNo, String quotationNo, Integer damageSno);
 }

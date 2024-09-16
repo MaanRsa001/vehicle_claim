@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.maan.veh.claim.request.DamageSectionDetailsRequest;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
+import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
+import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DamageSectionDetailsResponse;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
@@ -36,5 +38,16 @@ public class DamageSectionDetailsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
+    @PostMapping("/garagesave")
+    public ResponseEntity<CommonResponse> saveGarageDamageSectionDetails(@RequestBody List<GarageSectionDetailsSaveReq> req) {
+        CommonResponse response = service.saveGarageDamageSectionDetails(req);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
+    @PostMapping("/dealersave")
+    public ResponseEntity<CommonResponse> saveDealerDamageSectionDetails(@RequestBody List<DealerSectionDetailsSaveReq> req) {
+        CommonResponse response = service.saveDealerDamageSectionDetails(req);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
     
 }
