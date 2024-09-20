@@ -18,11 +18,20 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.maan.veh.claim.dto.ClaimIntimationDTOAttachmentDetails;
+import com.maan.veh.claim.dto.ClaimIntimationDTODocumentDetails;
+import com.maan.veh.claim.dto.ClaimIntimationDTODriver;
+import com.maan.veh.claim.dto.ClaimIntimationDTORequestMetaData;
+import com.maan.veh.claim.dto.ClaimIntimationDTOThirdPartyInfo;
 import com.maan.veh.claim.dto.ClaimTransactionRequestDTO;
+import com.maan.veh.claim.dto.ClaimTransactionRequestDTOMetaData;
 import com.maan.veh.claim.dto.FnolRequestDTO;
+import com.maan.veh.claim.dto.FnolRequestDTOMetaData;
 import com.maan.veh.claim.dto.SaveClaimRequestDTO;
 import com.maan.veh.claim.entity.ApiTransactionLog;
 import com.maan.veh.claim.repository.ApiTransactionLogRepository;
+import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
+import com.maan.veh.claim.request.ClaimIntimationThirdPartyInfo;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.LoginRequest;
@@ -55,6 +64,12 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     @Value("${external.api.url.authenticate}")
     private String externalApiUrlAuthenticate;
     
+    @Value("${auth.username}")
+    private String apiusername;
+
+    @Value("${auth.password}")
+    private String apipassword;
+    
     @Autowired
     private InputValidationUtil validation;
 
@@ -78,7 +93,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
         try {
             // Extract JWT token from request
-            String jwtToken = requestPayload.getJwtToken();
+            String jwtToken = authenticateUserCall();
             
             // Create headers with JWT token
             HttpHeaders headers = new HttpHeaders();
@@ -133,7 +148,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             }
             
             // Extract JWT token from request
-            String jwtToken = requestPayload.getJwtToken();
+            String jwtToken = authenticateUserCall();
             
             // Create headers with JWT token
             HttpHeaders headers = new HttpHeaders();
@@ -193,7 +208,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
                 return response;
             }
          // Extract JWT token from request
-            String jwtToken = request.getJwtToken();
+            String jwtToken = authenticateUserCall();
             
             // Create headers with JWT token
             HttpHeaders headers = new HttpHeaders();
@@ -318,7 +333,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	    // Map complex fields
 	    if (request.getRequestMetaData() != null) {
-	        SaveClaimRequestDTO.RequestMetaData metaData = new SaveClaimRequestDTO.RequestMetaData();
+	        ClaimIntimationDTORequestMetaData metaData = new ClaimIntimationDTORequestMetaData();
 	        metaData.setConsumerTrackingID(request.getRequestMetaData().getConsumerTrackingID());
 	        metaData.setCurrentBranch(request.getRequestMetaData().getCurrentBranch());
 	        metaData.setIpAddress(request.getRequestMetaData().getIpAddress());
@@ -336,7 +351,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    }
 
 	    if (request.getDriver() != null) {
-	        SaveClaimRequestDTO.Driver driverDTO = new SaveClaimRequestDTO.Driver();
+	    	ClaimIntimationDTODriver driverDTO = new ClaimIntimationDTODriver();
 	        driverDTO.setEmiratesId(request.getDriver().getEmiratesId());
 	        driverDTO.setLicenseNumber(request.getDriver().getLicenseNumber());
 	        driverDTO.setDob(request.getDriver().getDob());
@@ -344,11 +359,11 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    }
 
 	    if (request.getAttachmentDetails() != null) {
-	        SaveClaimRequestDTO.AttachmentDetails attachmentDetailsDTO = new SaveClaimRequestDTO.AttachmentDetails();
-	        List<SaveClaimRequestDTO.AttachmentDetails.DocumentDetails> documentDetailsDTOList = new ArrayList<>();
+	    	ClaimIntimationDTOAttachmentDetails attachmentDetailsDTO = new ClaimIntimationDTOAttachmentDetails();
+	        List<ClaimIntimationDTODocumentDetails> documentDetailsDTOList = new ArrayList<>();
 
-	        for (SaveClaimRequest.AttachmentDetails.DocumentDetails document : request.getAttachmentDetails().getDocumentDetails()) {
-	            SaveClaimRequestDTO.AttachmentDetails.DocumentDetails documentDetailsDTO = new SaveClaimRequestDTO.AttachmentDetails.DocumentDetails();
+	        for (ClaimIntimationDocumentDetails document : request.getAttachmentDetails().getDocumentDetails()) {
+	        	ClaimIntimationDTODocumentDetails documentDetailsDTO = new ClaimIntimationDTODocumentDetails();
 	            documentDetailsDTO.setDocumentData(document.getDocumentData());
 	            documentDetailsDTO.setDocumentFormat(document.getDocumentFormat());
 	            documentDetailsDTO.setDocumentId(document.getDocumentId());
@@ -366,9 +381,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 
 	    if (request.getThirdPartyInfo() != null) {
-	        List<SaveClaimRequestDTO.ThirdPartyInfo> thirdPartyInfoList = new ArrayList<>();
-	        for (SaveClaimRequest.ThirdPartyInfo thirdParty : request.getThirdPartyInfo()) {
-	            SaveClaimRequestDTO.ThirdPartyInfo thirdPartyInfoDTO = new SaveClaimRequestDTO.ThirdPartyInfo();
+	        List<ClaimIntimationDTOThirdPartyInfo> thirdPartyInfoList = new ArrayList<>();
+	        for (ClaimIntimationThirdPartyInfo thirdParty : request.getThirdPartyInfo()) {
+	        	ClaimIntimationDTOThirdPartyInfo thirdPartyInfoDTO = new ClaimIntimationDTOThirdPartyInfo();
 	            thirdPartyInfoDTO.setTpDriverLiability(thirdParty.getTpDriverLiability());
 	            thirdPartyInfoDTO.setTpDriverLicenceNo(thirdParty.getTpDriverLicenceNo());
 	            thirdPartyInfoDTO.setTpDriverName(thirdParty.getTpDriverName());
@@ -404,7 +419,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	    // Map RequestMetaData
 	    if (request.getRequestMetaData() != null) {
-	        FnolRequestDTO.RequestMetaData requestMetaDataDTO = new FnolRequestDTO.RequestMetaData();
+	        FnolRequestDTOMetaData requestMetaDataDTO = new FnolRequestDTOMetaData();
 	        requestMetaDataDTO.setConsumerTrackingID(request.getRequestMetaData().getConsumerTrackingID());
 	        requestMetaDataDTO.setCurrentBranch(request.getRequestMetaData().getCurrentBranch());
 	        requestMetaDataDTO.setIpAddress(request.getRequestMetaData().getIpAddress());
@@ -439,7 +454,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	    // Map RequestMetaData
 	    if (request.getRequestMetaData() != null) {
-	        ClaimTransactionRequestDTO.RequestMetaData metaDataDTO = new ClaimTransactionRequestDTO.RequestMetaData();
+	        ClaimTransactionRequestDTOMetaData metaDataDTO = new ClaimTransactionRequestDTOMetaData();
 	        metaDataDTO.setConsumerTrackingID(request.getRequestMetaData().getConsumerTrackingID());
 	        metaDataDTO.setCurrentBranch(request.getRequestMetaData().getCurrentBranch());
 	        metaDataDTO.setIpAddress(request.getRequestMetaData().getIpAddress());
@@ -459,5 +474,50 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    
 	    return dto;
 	}
+	
+
+	public String authenticateUserCall() {
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+	    log.setEndpoint(externalApiUrlAuthenticate);
+
+	    // Load username and password from properties
+	    String username = apiusername;
+	    String password = apipassword;
+
+	    // Create the request map
+	    Map<String, String> formattedRequest = Map.of(
+	        "username", username,
+	        "password", password
+	    );
+
+	    try {
+	        // Convert Map to JSON string
+	        String requestBody = objectMapper.writeValueAsString(formattedRequest);
+	        log.setRequest(requestBody);
+
+	        // Send request to external authentication API
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), requestBody, String.class);
+	        log.setResponse(apiResponse.getBody());
+	        log.setStatus("SUCCESS");
+
+	        // Extract JWT token from response
+	        Map<String, String> responseMap = objectMapper.readValue(apiResponse.getBody(), Map.class);
+	        String jwtToken = responseMap.get("jwt");
+
+	        return jwtToken; // Return the JWT token
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        apiTransactionLogRepo.save(log);
+	    }
+
+	    return null; // Return null if authentication fails
+	}
+
 
 }

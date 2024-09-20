@@ -14,17 +14,20 @@ import com.maan.veh.claim.auth.passwordEnc;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.request.ClaimDetailsSaveRequest;
+import com.maan.veh.claim.request.ClaimIntimationAttachmentDetails;
+import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
+import com.maan.veh.claim.request.ClaimIntimationDriver;
+import com.maan.veh.claim.request.ClaimIntimationRequestMetaData;
+import com.maan.veh.claim.request.ClaimIntimationThirdPartyInfo;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
+import com.maan.veh.claim.request.ClaimTransactionRequestMetaData;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
 import com.maan.veh.claim.request.FnolRequest;
+import com.maan.veh.claim.request.FnolRequestMetaData;
 import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.request.SaveClaimRequest;
-import com.maan.veh.claim.request.SaveClaimRequest.AttachmentDetails;
-import com.maan.veh.claim.request.SaveClaimRequest.Driver;
-import com.maan.veh.claim.request.SaveClaimRequest.RequestMetaData;
-import com.maan.veh.claim.request.SaveClaimRequest.ThirdPartyInfo;
 import com.maan.veh.claim.request.TotalAmountDetailsRequest;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
@@ -501,7 +504,7 @@ public class InputValidationUtil {
 		 List<ErrorList> errors = new ArrayList<>();
 
 	        // Validate RequestMetaData fields
-	        RequestMetaData metaData = request.getRequestMetaData();
+		    ClaimIntimationRequestMetaData metaData = request.getRequestMetaData();
 	        if (metaData != null) {
 	            // Validate ConsumerTrackingID
 	            if (StringUtils.isBlank(metaData.getConsumerTrackingID())) {
@@ -625,7 +628,7 @@ public class InputValidationUtil {
 	        }
 
 	        // Validate Driver details
-	        Driver driver = request.getDriver();
+	        ClaimIntimationDriver driver = request.getDriver();
 	        if (driver != null) {
 	            if (StringUtils.isBlank(driver.getEmiratesId())) {
 	                errors.add(new ErrorList("100", "Driver.EmiratesId", "EmiratesId cannot be blank"));
@@ -639,9 +642,9 @@ public class InputValidationUtil {
 	        }
 
 	     // Validate AttachmentDetails
-	        AttachmentDetails attachmentDetails = request.getAttachmentDetails();
+	        ClaimIntimationAttachmentDetails attachmentDetails = request.getAttachmentDetails();
 	        if (attachmentDetails != null && attachmentDetails.getDocumentDetails() != null) {
-	            for (AttachmentDetails.DocumentDetails doc : attachmentDetails.getDocumentDetails()) {
+	            for (ClaimIntimationDocumentDetails doc : attachmentDetails.getDocumentDetails()) {
 	                
 	                // Validate DocumentData
 	                if (StringUtils.isBlank(doc.getDocumentData())) {
@@ -685,9 +688,9 @@ public class InputValidationUtil {
 
 	     // Validate ThirdPartyInfo
 	        if (request.getIsThirdPartyInvolved() != null && request.getIsThirdPartyInvolved().equalsIgnoreCase("true")) {
-	            List<ThirdPartyInfo> thirdPartyInfoList = request.getThirdPartyInfo();
+	            List<ClaimIntimationThirdPartyInfo> thirdPartyInfoList = request.getThirdPartyInfo();
 	            if (thirdPartyInfoList != null) {
-	                for (ThirdPartyInfo info : thirdPartyInfoList) {
+	                for (ClaimIntimationThirdPartyInfo info : thirdPartyInfoList) {
 	                    
 	                    // Validate TPDriverLiability
 	                    if (StringUtils.isBlank(info.getTpDriverLiability())) {
@@ -782,7 +785,7 @@ public class InputValidationUtil {
             List<ErrorList> errors = new ArrayList<>();
         
         // Validate RequestMetaData
-        FnolRequest.RequestMetaData metaData = request.getRequestMetaData();
+        FnolRequestMetaData metaData = request.getRequestMetaData();
         if (metaData != null) {
             if (StringUtils.isBlank(metaData.getConsumerTrackingID())) {
                 errors.add(new ErrorList("100", "RequestMetaData.ConsumerTrackingID", "ConsumerTrackingID cannot be blank"));
@@ -851,7 +854,7 @@ public class InputValidationUtil {
 List<ErrorList> errors = new ArrayList<>();
         
         // Validate RequestMetaData
-        ClaimTransactionRequest.RequestMetaData metaData = request.getRequestMetaData();
+        ClaimTransactionRequestMetaData metaData = request.getRequestMetaData();
         if (metaData != null) {
             if (StringUtils.isEmpty(metaData.getConsumerTrackingID())) {
                 errors.add(new ErrorList("100", "RequestMetaData.ConsumerTrackingID", "ConsumerTrackingID cannot be blank"));
