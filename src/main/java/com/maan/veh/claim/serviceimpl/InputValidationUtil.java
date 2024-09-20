@@ -13,10 +13,18 @@ import org.springframework.stereotype.Component;
 import com.maan.veh.claim.auth.passwordEnc;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.repository.LoginMasterRepository;
+import com.maan.veh.claim.request.ClaimDetailsSaveRequest;
+import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
+import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.LoginRequest;
+import com.maan.veh.claim.request.SaveClaimRequest;
+import com.maan.veh.claim.request.SaveClaimRequest.AttachmentDetails;
+import com.maan.veh.claim.request.SaveClaimRequest.Driver;
+import com.maan.veh.claim.request.SaveClaimRequest.RequestMetaData;
+import com.maan.veh.claim.request.SaveClaimRequest.ThirdPartyInfo;
 import com.maan.veh.claim.request.TotalAmountDetailsRequest;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
@@ -372,6 +380,556 @@ public class InputValidationUtil {
 		return list;
 	}
 	
+	public List<ErrorList> validateClaimDetails(ClaimDetailsSaveRequest request) {
+	    List<ErrorList> errors = new ArrayList<>();
+
+	    // Validate and set ClaimReferenceNo
+	    if (StringUtils.isBlank(request.getClaimReferenceNo())) {
+	        errors.add(new ErrorList("100", "ClaimReferenceNo", "Claim reference number cannot be blank"));
+	    }
+
+	    // Validate and set ClaimNo
+	    if (StringUtils.isBlank(request.getClaimNo())) {
+	        errors.add(new ErrorList("100", "ClaimNo", "Claim number cannot be blank"));
+	    }
+
+	    // Validate and set PolicyNo
+	    if (StringUtils.isBlank(request.getPolicyNo())) {
+	        errors.add(new ErrorList("100", "PolicyNo", "Policy number cannot be blank"));
+	    }
+
+	    // Validate and set InsuredId
+	    if (StringUtils.isBlank(request.getInsuredId())) {
+	        errors.add(new ErrorList("100", "InsuredId", "Insured ID cannot be blank"));
+	    }
+
+	    // Validate and set LossLocation
+	    if (StringUtils.isBlank(request.getLossLocation())) {
+	        errors.add(new ErrorList("100", "LossLocation", "Loss location cannot be blank"));
+	    }
+
+	    // Validate and set PoliceStation
+	    if (StringUtils.isBlank(request.getPoliceStation())) {
+	        errors.add(new ErrorList("100", "PoliceStation", "Police station cannot be blank"));
+	    }
+
+	    // Validate and set PoliceReportNo
+	    if (StringUtils.isBlank(request.getPoliceReportNo())) {
+	        errors.add(new ErrorList("100", "PoliceReportNo", "Police report number cannot be blank"));
+	    }
+
+	    // Validate and set LossDescription
+	    if (StringUtils.isBlank(request.getLossDescription())) {
+	        errors.add(new ErrorList("100", "LossDescription", "Loss description cannot be blank"));
+	    }
+
+	    // Validate and set AtFault
+	    if (StringUtils.isBlank(request.getAtFault())) {
+	        errors.add(new ErrorList("100", "AtFault", "At fault cannot be blank"));
+	    }
+
+	    // Validate and set PolicyPeriod
+	    if (StringUtils.isBlank(request.getPolicyPeriod())) {
+	        errors.add(new ErrorList("100", "PolicyPeriod", "Policy period cannot be blank"));
+	    }
+
+	    // Validate and set ContactPersonPhoneNo
+	    if (StringUtils.isBlank(request.getContactPersonPhoneNo())) {
+	        errors.add(new ErrorList("100", "ContactPersonPhoneNo", "Contact person phone number cannot be blank"));
+	    }
+
+	    // Validate and set ContactPersonPhoneCode
+	    if (StringUtils.isBlank(request.getContactPersonPhoneCode())) {
+	        errors.add(new ErrorList("100", "ContactPersonPhoneCode", "Contact person phone code cannot be blank"));
+	    }
+
+	    // Validate and set PolicyReferenceNo
+	    if (StringUtils.isBlank(request.getPolicyReferenceNo())) {
+	        errors.add(new ErrorList("100", "PolicyReferenceNo", "Policy reference number cannot be blank"));
+	    }
+
+	    // Validate and set PolicyICReferenceNo
+	    if (StringUtils.isBlank(request.getPolicyICReferenceNo())) {
+	        errors.add(new ErrorList("100", "PolicyICReferenceNo", "Policy IC reference number cannot be blank"));
+	    }
+
+	    // Validate and set ClaimRequestReference
+	    if (StringUtils.isBlank(request.getClaimRequestReference())) {
+	        errors.add(new ErrorList("100", "ClaimRequestReference", "Claim request reference cannot be blank"));
+	    }
+
+	    // Validate and set ClaimCategory
+	    if (StringUtils.isBlank(request.getClaimCategory())) {
+	        errors.add(new ErrorList("100", "ClaimCategory", "Claim category cannot be blank"));
+	    }
+
+	    // Validate and set CreatedUser
+	    if (StringUtils.isBlank(request.getCreatedUser())) {
+	        errors.add(new ErrorList("100", "CreatedUser", "Created user cannot be blank"));
+	    }
+
+	    // Validate ClaimType (cannot be null)
+	    if (request.getClaimType() == null) {
+	        errors.add(new ErrorList("100", "ClaimType", "Claim type cannot be null"));
+	    }
+
+	    // Validate and set AccidentNumber
+	    if (StringUtils.isBlank(request.getAccidentNumber())) {
+	        errors.add(new ErrorList("100", "AccidentNumber", "Accident number cannot be blank"));
+	    }
+
+	    // Validate IsThirdPartyInvolved (cannot be null)
+	    if (request.getIsThirdPartyInvolved() == null) {
+	        errors.add(new ErrorList("100", "IsThirdPartyInvolved", "Third party involvement cannot be null"));
+	    }
+
+	    // Validate Driver details
+	    if (StringUtils.isBlank(request.getDriverEmiratesId())) {
+	        errors.add(new ErrorList("100", "DriverEmiratesId", "Driver Emirates ID cannot be blank"));
+	    }
+	    if (StringUtils.isBlank(request.getDriverLicenseNumber())) {
+	        errors.add(new ErrorList("100", "DriverLicenseNumber", "Driver license number cannot be blank"));
+	    }
+	    if (request.getDriverDob() == null) {
+	        errors.add(new ErrorList("100", "DriverDob", "Driver date of birth cannot be null"));
+	    }
+
+	    return errors;
+	}
+
+	public List<ErrorList> validateClaimIntemationDetails(SaveClaimRequest request) {
+		 List<ErrorList> errors = new ArrayList<>();
+
+	        // Validate RequestMetaData fields
+	        RequestMetaData metaData = request.getRequestMetaData();
+	        if (metaData != null) {
+	            // Validate ConsumerTrackingID
+	            if (StringUtils.isBlank(metaData.getConsumerTrackingID())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.ConsumerTrackingID", "ConsumerTrackingID cannot be blank"));
+	            }
+	            
+	            // Validate CurrentBranch
+	            if (StringUtils.isBlank(metaData.getCurrentBranch())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.CurrentBranch", "CurrentBranch cannot be blank"));
+	            }
+	            
+	            // Validate IpAddress
+	            if (StringUtils.isBlank(metaData.getIpAddress())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.IpAddress", "IpAddress cannot be blank"));
+	            }
+	            
+	            // Validate OriginBranch
+	            if (StringUtils.isBlank(metaData.getOriginBranch())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.OriginBranch", "OriginBranch cannot be blank"));
+	            }
+	            
+	            // Validate RequestData
+	            if (StringUtils.isBlank(metaData.getRequestData())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.RequestData", "RequestData cannot be blank"));
+	            }
+	            
+	            // Validate RequestGeneratedDateTime
+	            if (StringUtils.isBlank(metaData.getRequestGeneratedDateTime())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.RequestGeneratedDateTime", "RequestGeneratedDateTime cannot be blank"));
+	            }
+	            
+	            // Validate RequestId
+	            if (StringUtils.isBlank(metaData.getRequestId())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.RequestId", "RequestId cannot be blank"));
+	            }
+	            
+	            // Validate RequestOrigin
+	            if (StringUtils.isBlank(metaData.getRequestOrigin())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.RequestOrigin", "RequestOrigin cannot be blank"));
+	            }
+	            
+	            // Validate RequestReference
+	            if (StringUtils.isBlank(metaData.getRequestReference())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.RequestReference", "RequestReference cannot be blank"));
+	            }
+	            
+	            // Validate RequestedService
+	            if (StringUtils.isBlank(metaData.getRequestedService())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.RequestedService", "RequestedService cannot be blank"));
+	            }
+	            
+	            // Validate ResponseData (optional validation if needed)
+	            // Validate SourceCode
+	            if (StringUtils.isBlank(metaData.getSourceCode())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.SourceCode", "SourceCode cannot be blank"));
+	            }
+
+	            // Validate UserName
+	            if (StringUtils.isBlank(metaData.getUserName())) {
+	                errors.add(new ErrorList("100", "RequestMetaData.UserName", "UserName cannot be blank"));
+	            }
+	        } else {
+	            errors.add(new ErrorList("100", "RequestMetaData", "RequestMetaData cannot be null"));
+	        }
 
 
+	        // Validate SaveClaimRequest fields
+	        if (StringUtils.isEmpty(request.getJwtToken())) {
+	            errors.add(new ErrorList("100", "JwtToken", "JwtToken cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getLanguageCode())) {
+	            errors.add(new ErrorList("100", "LanguageCode", "LanguageCode cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getPolicyNo())) {
+	            errors.add(new ErrorList("100", "PolicyNo", "PolicyNo cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getInsuredId())) {
+	            errors.add(new ErrorList("100", "InsuredId", "InsuredId cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getLossDate())) {
+	            errors.add(new ErrorList("100", "LossDate", "LossDate cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getIntimatedDate())) {
+	            errors.add(new ErrorList("100", "IntimatedDate", "IntimatedDate cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getLossLocation())) {
+	            errors.add(new ErrorList("100", "LossLocation", "LossLocation cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getPoliceStation())) {
+	            errors.add(new ErrorList("100", "PoliceStation", "PoliceStation cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getPoliceReportNo())) {
+	            errors.add(new ErrorList("100", "PoliceReportNo", "PoliceReportNo cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getLossDescription())) {
+	            errors.add(new ErrorList("100", "LossDescription", "LossDescription cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getAtFault())) {
+	            errors.add(new ErrorList("100", "AtFault", "AtFault cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getPolicyPeriod())) {
+	            errors.add(new ErrorList("100", "PolicyPeriod", "PolicyPeriod cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getContactPersonPhoneNo())) {
+	            errors.add(new ErrorList("100", "ContactPersonPhoneNo", "ContactPersonPhoneNo cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getContactPersonPhoneCode())) {
+	            errors.add(new ErrorList("100", "ContactPersonPhoneCode", "ContactPersonPhoneCode cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getPolicyReferenceNo())) {
+	            errors.add(new ErrorList("100", "PolicyReferenceNo", "PolicyReferenceNo cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getPolicyICReferenceNo())) {
+	            errors.add(new ErrorList("100", "PolicyICReferenceNo", "PolicyICReferenceNo cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getClaimRequestReference())) {
+	            errors.add(new ErrorList("100", "ClaimRequestReference", "ClaimRequestReference cannot be blank"));
+	        }
+	        if (StringUtils.isBlank(request.getClaimCategory())) {
+	            errors.add(new ErrorList("100", "ClaimCategory", "ClaimCategory cannot be blank"));
+	        }
+
+	        // Validate Driver details
+	        Driver driver = request.getDriver();
+	        if (driver != null) {
+	            if (StringUtils.isBlank(driver.getEmiratesId())) {
+	                errors.add(new ErrorList("100", "Driver.EmiratesId", "EmiratesId cannot be blank"));
+	            }
+	            if (StringUtils.isBlank(driver.getLicenseNumber())) {
+	                errors.add(new ErrorList("100", "Driver.LicenseNumber", "LicenseNumber cannot be blank"));
+	            }
+	            if (StringUtils.isBlank(driver.getDob())) {
+	                errors.add(new ErrorList("100", "Driver.Dob", "Dob cannot be blank"));
+	            }
+	        }
+
+	     // Validate AttachmentDetails
+	        AttachmentDetails attachmentDetails = request.getAttachmentDetails();
+	        if (attachmentDetails != null && attachmentDetails.getDocumentDetails() != null) {
+	            for (AttachmentDetails.DocumentDetails doc : attachmentDetails.getDocumentDetails()) {
+	                
+	                // Validate DocumentData
+	                if (StringUtils.isBlank(doc.getDocumentData())) {
+	                    errors.add(new ErrorList("100", "AttachmentDetails.DocumentDetails.DocumentData", "DocumentData cannot be blank"));
+	                }
+	                
+	                // Validate DocumentFormat
+	                if (StringUtils.isBlank(doc.getDocumentFormat())) {
+	                    errors.add(new ErrorList("100", "AttachmentDetails.DocumentDetails.DocumentFormat", "DocumentFormat cannot be blank"));
+	                }
+	                
+	                // Validate DocumentId
+	                if (StringUtils.isBlank(doc.getDocumentId())) {
+	                    errors.add(new ErrorList("100", "AttachmentDetails.DocumentDetails.DocumentId", "DocumentId cannot be blank"));
+	                }
+	                
+	                // Validate DocumentName
+	                if (StringUtils.isBlank(doc.getDocumentName())) {
+	                    errors.add(new ErrorList("100", "AttachmentDetails.DocumentDetails.DocumentName", "DocumentName cannot be blank"));
+	                }
+	                
+	                // Validate DocumentRefNo
+	                if (StringUtils.isBlank(doc.getDocumentRefNo())) {
+	                    errors.add(new ErrorList("100", "AttachmentDetails.DocumentDetails.DocumentRefNo", "DocumentRefNo cannot be blank"));
+	                }
+	                
+	                // Validate DocumentType
+	                if (StringUtils.isBlank(doc.getDocumentType())) {
+	                    errors.add(new ErrorList("100", "AttachmentDetails.DocumentDetails.DocumentType", "DocumentType cannot be blank"));
+	                }
+	                
+	                // Validate DocumentURL
+	                if (StringUtils.isBlank(doc.getDocumentURL())) {
+	                    errors.add(new ErrorList("100", "AttachmentDetails.DocumentDetails.DocumentURL", "DocumentURL cannot be blank"));
+	                }
+	            }
+	        } else if (attachmentDetails != null && attachmentDetails.getDocumentDetails() == null) {
+	            errors.add(new ErrorList("100", "AttachmentDetails.DocumentDetails", "DocumentDetails cannot be null"));
+	        }
+
+
+	     // Validate ThirdPartyInfo
+	        if (request.getIsThirdPartyInvolved() != null && request.getIsThirdPartyInvolved().equalsIgnoreCase("true")) {
+	            List<ThirdPartyInfo> thirdPartyInfoList = request.getThirdPartyInfo();
+	            if (thirdPartyInfoList != null) {
+	                for (ThirdPartyInfo info : thirdPartyInfoList) {
+	                    
+	                    // Validate TPDriverLiability
+	                    if (StringUtils.isBlank(info.getTpDriverLiability())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPDriverLiability", "TPDriverLiability cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPDriverLicenceNo
+	                    if (StringUtils.isBlank(info.getTpDriverLicenceNo())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPDriverLicenceNo", "TPDriverLicenceNo cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPDriverName
+	                    if (StringUtils.isBlank(info.getTpDriverName())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPDriverName", "TPDriverName cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPDriverNationalityCode
+	                    if (StringUtils.isBlank(info.getTpDriverNationalityCode())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPDriverNationalityCode", "TPDriverNationalityCode cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPDriverTrafficNo
+	                    if (StringUtils.isBlank(info.getTpDriverTrafficNo())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPDriverTrafficNo", "TPDriverTrafficNo cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPMobileNumber
+	                    if (StringUtils.isBlank(info.getTpMobileNumber())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPMobileNumber", "TPMobileNumber cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPVehicleCurrentInsurer
+	                    if (StringUtils.isBlank(info.getTpVehicleCurrentInsurer())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPVehicleCurrentInsurer", "TPVehicleCurrentInsurer cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPVehicleMake
+	                    if (StringUtils.isBlank(info.getTpVehicleMake())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPVehicleMake", "TPVehicleMake cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPVehicleMakeCode
+	                    if (StringUtils.isBlank(info.getTpVehicleMakeCode())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPVehicleMakeCode", "TPVehicleMakeCode cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPVehicleModel
+	                    if (StringUtils.isBlank(info.getTpVehicleModel())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPVehicleModel", "TPVehicleModel cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPVehicleModelCode
+	                    if (StringUtils.isBlank(info.getTpVehicleModelCode())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPVehicleModelCode", "TPVehicleModelCode cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPVehiclePlateCode
+	                    if (StringUtils.isBlank(info.getTpVehiclePlateCode())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPVehiclePlateCode", "TPVehiclePlateCode cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPVehiclePlateNo
+	                    if (StringUtils.isBlank(info.getTpVehiclePlateNo())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPVehiclePlateNo", "TPVehiclePlateNo cannot be blank"));
+	                    }
+	                    
+	                    // Validate TPVehiclePlateTypeCode
+	                    if (StringUtils.isBlank(info.getTpVehiclePlateTypeCode())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.TPVehiclePlateTypeCode", "TPVehiclePlateTypeCode cannot be blank"));
+	                    }
+	                    
+	                    // Validate ThirdPartyReference
+	                    if (StringUtils.isBlank(info.getThirdPartyReference())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.ThirdPartyReference", "ThirdPartyReference cannot be blank"));
+	                    }
+	                    
+	                    // Validate ThirdPartyType
+	                    if (StringUtils.isBlank(info.getThirdPartyType())) {
+	                        errors.add(new ErrorList("100", "ThirdPartyInfo.ThirdPartyType", "ThirdPartyType cannot be blank"));
+	                    }
+	                }
+	            } else {
+	                errors.add(new ErrorList("100", "ThirdPartyInfo", "ThirdPartyInfo cannot be null when IsThirdPartyInvolved is true"));
+	            }
+	        }
+
+
+	        return errors;
+	}
+
+	public List<ErrorList> validateFnolRequest(FnolRequest request) {
+            List<ErrorList> errors = new ArrayList<>();
+        
+        // Validate RequestMetaData
+        FnolRequest.RequestMetaData metaData = request.getRequestMetaData();
+        if (metaData != null) {
+            if (StringUtils.isBlank(metaData.getConsumerTrackingID())) {
+                errors.add(new ErrorList("100", "RequestMetaData.ConsumerTrackingID", "ConsumerTrackingID cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getCurrentBranch())) {
+                errors.add(new ErrorList("100", "RequestMetaData.CurrentBranch", "CurrentBranch cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getIpAddress())) {
+                errors.add(new ErrorList("100", "RequestMetaData.IpAddress", "IpAddress cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getOriginBranch())) {
+                errors.add(new ErrorList("100", "RequestMetaData.OriginBranch", "OriginBranch cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getRequestData())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestData", "RequestData cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getRequestGeneratedDateTime())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestGeneratedDateTime", "RequestGeneratedDateTime cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getRequestId())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestId", "RequestId cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getRequestOrigin())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestOrigin", "RequestOrigin cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getRequestReference())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestReference", "RequestReference cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getRequestedService())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestedService", "RequestedService cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getResponseData())) {
+                errors.add(new ErrorList("100", "RequestMetaData.ResponseData", "ResponseData cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getSourceCode())) {
+                errors.add(new ErrorList("100", "RequestMetaData.SourceCode", "SourceCode cannot be blank"));
+            }
+            if (StringUtils.isBlank(metaData.getUserName())) {
+                errors.add(new ErrorList("100", "RequestMetaData.UserName", "UserName cannot be blank"));
+            }
+        } else {
+            errors.add(new ErrorList("100", "RequestMetaData", "RequestMetaData cannot be null"));
+        }
+        
+        // Validate other fields
+        if (StringUtils.isEmpty(request.getJwtToken())) {
+            errors.add(new ErrorList("100", "JwtToken", "JwtToken cannot be blank"));
+        }
+        if (StringUtils.isBlank(request.getCustomerId())) {
+            errors.add(new ErrorList("100", "CustomerId", "CustomerId cannot be blank"));
+        }
+        if (StringUtils.isBlank(request.getPolicyNo())) {
+            errors.add(new ErrorList("100", "PolicyNo", "PolicyNo cannot be blank"));
+        }
+        if (StringUtils.isBlank(request.getFnolNo())) {
+            errors.add(new ErrorList("100", "FnolNo", "FnolNo cannot be blank"));
+        }
+        if (StringUtils.isBlank(request.getLossDate())) {
+            errors.add(new ErrorList("100", "LossDate", "LossDate cannot be blank"));
+        }
+        
+        return errors;
+	}
+
+	public List<ErrorList> validateClaimTransactionRequest(ClaimTransactionRequest request) {
+List<ErrorList> errors = new ArrayList<>();
+        
+        // Validate RequestMetaData
+        ClaimTransactionRequest.RequestMetaData metaData = request.getRequestMetaData();
+        if (metaData != null) {
+            if (StringUtils.isEmpty(metaData.getConsumerTrackingID())) {
+                errors.add(new ErrorList("100", "RequestMetaData.ConsumerTrackingID", "ConsumerTrackingID cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getCurrentBranch())) {
+                errors.add(new ErrorList("100", "RequestMetaData.CurrentBranch", "CurrentBranch cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getIpAddress())) {
+                errors.add(new ErrorList("100", "RequestMetaData.IpAddress", "IpAddress cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getOriginBranch())) {
+                errors.add(new ErrorList("100", "RequestMetaData.OriginBranch", "OriginBranch cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getRequestData())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestData", "RequestData cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getRequestGeneratedDateTime())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestGeneratedDateTime", "RequestGeneratedDateTime cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getRequestId())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestId", "RequestId cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getRequestOrigin())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestOrigin", "RequestOrigin cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getRequestReference())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestReference", "RequestReference cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getRequestedService())) {
+                errors.add(new ErrorList("100", "RequestMetaData.RequestedService", "RequestedService cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getResponseData())) {
+                errors.add(new ErrorList("100", "RequestMetaData.ResponseData", "ResponseData cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getSourceCode())) {
+                errors.add(new ErrorList("100", "RequestMetaData.SourceCode", "SourceCode cannot be blank"));
+            }
+            if (StringUtils.isEmpty(metaData.getUserName())) {
+                errors.add(new ErrorList("100", "RequestMetaData.UserName", "UserName cannot be blank"));
+            }
+        }
+
+        // Validate other fields
+        if (StringUtils.isEmpty(request.getJwtToken())) {
+            errors.add(new ErrorList("100", "JwtToken", "JwtToken cannot be blank"));
+        }
+        if (StringUtils.isEmpty(request.getClaimsTpReferenceNo())) {
+            errors.add(new ErrorList("100", "ClaimsTpReferenceNo", "ClaimsTpReferenceNo cannot be blank"));
+        }
+        if (StringUtils.isEmpty(request.getFnolNo())) {
+            errors.add(new ErrorList("100", "FnolNo", "FnolNo cannot be blank"));
+        }
+        if (StringUtils.isEmpty(request.getTpPolicyReferenceNo())) {
+            errors.add(new ErrorList("100", "TpPolicyReferenceNo", "TpPolicyReferenceNo cannot be blank"));
+        }
+        if (StringUtils.isEmpty(request.getTransactionRefNo())) {
+            errors.add(new ErrorList("100", "TransactionRefNo", "TransactionRefNo cannot be blank"));
+        }
+
+        return errors;
+	}
+
+	public List<ErrorList> validateLoginRequest(LoginRequest request) {
+        List<ErrorList> errors = new ArrayList<>();
+
+        if (request == null) {
+            errors.add(new ErrorList("100", "LoginRequest", "LoginRequest cannot be null"));
+            return errors;
+        }
+
+        if (StringUtils.isBlank(request.getLoginId())) {
+            errors.add(new ErrorList("100", "LoginId", "LoginId cannot be blank"));
+        }
+
+        if (StringUtils.isBlank(request.getPassword())) {
+            errors.add(new ErrorList("100", "Password", "Password cannot be blank"));
+        }
+
+        return errors;
+    }
 }
