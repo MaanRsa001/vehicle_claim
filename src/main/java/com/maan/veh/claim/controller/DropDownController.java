@@ -175,4 +175,21 @@ public class DropDownController {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	@GetMapping(value = "/accountforsettlement")
+	public ResponseEntity<CommonRes> getAccountForSettlement() {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getAccountForSettlement();
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
 }

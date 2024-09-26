@@ -23,4 +23,6 @@ public interface DropDownService {
 	List<DropDownRes> getbodyPart();
 
 	List<DropDownRes> getVatPercentage();
+
+	List<DropDownRes> getAccountForSettlement();
 }

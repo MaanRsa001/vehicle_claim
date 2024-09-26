@@ -79,6 +79,11 @@ public class DropDownServiceImpl implements DropDownService {
 		 return getDropdownValues("VAT_PERCENTAGE");
 	}
 	
+	@Override
+	public List<DropDownRes> getAccountForSettlement() {
+		 return getDropdownValues("ACCOUNT_SETTLEMENT");
+	}
+	
     private List<DropDownRes> getDropdownValues(String itemType) {
         List<DropDownRes> resList = new ArrayList<>();
         try {
