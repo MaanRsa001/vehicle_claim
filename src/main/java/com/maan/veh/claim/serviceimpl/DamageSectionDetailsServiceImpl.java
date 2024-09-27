@@ -3,9 +3,12 @@ package com.maan.veh.claim.serviceimpl;
 import java.math.BigDecimal;
 //import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,7 @@ import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DamageSectionDetailsResponse;
 import com.maan.veh.claim.response.ErrorList;
+import com.maan.veh.claim.response.SaveClaimResponse.ErrorDetail;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
 
 @Service
@@ -286,6 +290,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 						details.setNoOfParts(Integer.valueOf(req.getNoOfUnits()));
 						details.setReplaceCost(new BigDecimal(req.getReplacementCharge()));
 					}else {
+						details.setNoOfParts(Integer.valueOf(req.getNoOfUnits()));
 						details.setLabourCost(new BigDecimal(req.getUnitPrice()));
 					}
 					
@@ -390,6 +395,55 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    }
 	    return response;
 	}
+
+	@Override
+	public CommonResponse viewGarageDamageSectionDetails(GarageSectionDetailsSaveReq req) {
+	    CommonResponse response = new CommonResponse();
+	    try {
+	        // Map to store damage details by DamageDirection
+	        Map<String, List<GarageSectionDetailsSaveReq>> groupedDamageDetails = new HashMap<>();
+	        
+	        // Fetch damage section details based on ClaimNo and QuotationNo
+	        List<DamageSectionDetails> details = repository.findByClaimNoAndQuotationNo(req.getClaimNo(), req.getQuotationNo());
+	        
+	        for (DamageSectionDetails data : details) {
+	            GarageSectionDetailsSaveReq res = new GarageSectionDetailsSaveReq();
+	            
+	            // Populate the fields from the retrieved data
+	            res.setClaimNo(data.getClaimNo());
+	            res.setQuotationNo(data.getQuotationNo());
+	            res.setDamageSno(data.getDamageSno() != null ? data.getDamageSno().toString() : "");
+	            res.setDamageDirection(data.getDamageDirection());
+	            res.setDamagePart(data.getDamagePart());
+	            res.setRepairReplace(data.getRepairReplace());    
+	            res.setNoOfUnits(data.getNoOfParts() != null ? data.getNoOfParts().toString() : "");
+	            res.setReplacementCharge(data.getReplaceCost() != null ? data.getReplaceCost().toString() : "");
+	            res.setUnitPrice(data.getGaragePrice() != null ? data.getGaragePrice().toString() : "");
+	            res.setGarageLoginId(req.getGarageLoginId());
+
+	            // Group by DamageDirection
+	            String damageDirection = data.getDamageDirection();
+	            if (!groupedDamageDetails.containsKey(damageDirection)) {
+	                groupedDamageDetails.put(damageDirection, new ArrayList<>());
+	            }
+	            groupedDamageDetails.get(damageDirection).add(res);  // Add to the appropriate direction
+	        }
+
+	        // Set the response
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Success");
+	        response.setResponse(groupedDamageDetails);  // Grouped response by damage direction
+	        
+	    } catch (Exception e) {
+	        // Handle exceptions
+	    	String exceptionDetails = e.getClass().getSimpleName() + ": " + e.getMessage();
+	        response.setResponse(exceptionDetails);
+	        response.setMessage("Failed");
+	        response.setResponse(null);
+	    }
+	    return response;
+	}
+
 
 
 }
