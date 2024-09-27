@@ -50,6 +50,12 @@ public class DamageSectionDetailsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
+    @PostMapping("/garagetotalview")
+    public ResponseEntity<CommonResponse> viewGarageTotalDamageSectionDetails(@RequestBody GarageSectionDetailsSaveReq req) {
+        CommonResponse response = service.viewGarageTotalDamageSectionDetails(req);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
     @PostMapping("/dealersave")
     public ResponseEntity<CommonResponse> saveDealerDamageSectionDetails(@RequestBody List<DealerSectionDetailsSaveReq> req) {
         CommonResponse response = service.saveDealerDamageSectionDetails(req);

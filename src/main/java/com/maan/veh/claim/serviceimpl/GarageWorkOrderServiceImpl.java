@@ -5,7 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -140,9 +142,13 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 		        insuredVeh.setStatus("I");
 		        insuredVehRepo.save(insuredVeh);
 		        
+		        Map<String,String> resMap = new HashMap<>();
+		        resMap.put("ClaimNo",req.getClaimNo());
+		        resMap.put("QuotationNo",req.getQuotationNo());
+		        
 		        response.setErrors(Collections.emptyList());
 		        response.setMessage("Success");
-		        response.setResponse(Collections.emptyList());
+		        response.setResponse(resMap);
 			}else {
 				 response.setErrors(error);
 			     response.setMessage("Failed");

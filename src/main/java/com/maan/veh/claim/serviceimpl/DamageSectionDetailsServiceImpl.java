@@ -444,6 +444,59 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    return response;
 	}
 
+	@Override
+	public CommonResponse viewGarageTotalDamageSectionDetails(GarageSectionDetailsSaveReq req) {
+	    CommonResponse response = new CommonResponse();
+	    try {
+	        // Initialize totals as BigDecimal
+	        BigDecimal totalGaragePrice = BigDecimal.ZERO;
+	        BigDecimal totalReplacementCharge = BigDecimal.ZERO;
+	        BigDecimal totalAmount = BigDecimal.ZERO;
+
+	        // Fetch damage section details based on ClaimNo and QuotationNo
+	        List<DamageSectionDetails> details = repository.findByClaimNoAndQuotationNo(req.getClaimNo(), req.getQuotationNo());
+	        
+	        for (DamageSectionDetails data : details) {
+	            // Retrieve garage price and number of units as BigDecimal
+	            BigDecimal garagePrice = data.getGaragePrice() != null ? data.getGaragePrice() : BigDecimal.ZERO;
+	            BigDecimal numberOfUnits = data.getNoOfParts() != null ? new BigDecimal(data.getNoOfParts()) : BigDecimal.ZERO; 
+	            BigDecimal replacementCharge = data.getReplaceCost() != null ? data.getReplaceCost() : BigDecimal.ZERO;
+
+	            // Calculate total garage price for the current row
+	            BigDecimal garagePriceForRow = garagePrice.multiply(numberOfUnits);
+	            totalGaragePrice = totalGaragePrice.add(garagePriceForRow);
+	            
+	            // Update total replacement charge
+	            totalReplacementCharge = totalReplacementCharge.add(replacementCharge);
+	        }
+
+	        // Calculate total amount
+	        totalAmount = totalGaragePrice.add(totalReplacementCharge);
+
+	        // Prepare the response map with totals
+	        Map<String, BigDecimal> responseMap = new HashMap<>();
+	        responseMap.put("totalGaragePrice", totalGaragePrice); // Total garage price
+	        responseMap.put("totalReplacementCharge", totalReplacementCharge); // Total replacement charge
+	        responseMap.put("totalAmount", totalAmount); // Total amount
+
+	        // Set the response
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Success");
+	        response.setResponse(responseMap);  // Response contains totals
+	        
+	    } catch (Exception e) {
+	        // Handle exceptions
+	        String exceptionDetails = e.getClass().getSimpleName() + ": " + e.getMessage();
+	        response.setErrors(Collections.singletonList(exceptionDetails)); // Set the error message
+	        response.setMessage("Failed");
+	        response.setResponse(null);
+	    }
+	    return response;
+	}
+
+
+
+
 
 
 }
