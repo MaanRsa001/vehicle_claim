@@ -400,8 +400,8 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	public CommonResponse viewGarageDamageSectionDetails(GarageSectionDetailsSaveReq req) {
 	    CommonResponse response = new CommonResponse();
 	    try {
-	        // Map to store damage details by DamageDirection
-	        Map<String, List<GarageSectionDetailsSaveReq>> groupedDamageDetails = new HashMap<>();
+	        
+	        List<GarageSectionDetailsSaveReq> groupedDamageDetails = new ArrayList<>();
 	        
 	        // Fetch damage section details based on ClaimNo and QuotationNo
 	        List<DamageSectionDetails> details = repository.findByClaimNoAndQuotationNo(req.getClaimNo(), req.getQuotationNo());
@@ -419,20 +419,16 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            res.setNoOfUnits(data.getNoOfParts() != null ? data.getNoOfParts().toString() : "");
 	            res.setReplacementCharge(data.getReplaceCost() != null ? data.getReplaceCost().toString() : "");
 	            res.setUnitPrice(data.getGaragePrice() != null ? data.getGaragePrice().toString() : "");
-	            res.setGarageLoginId(req.getGarageLoginId());
-
-	            // Group by DamageDirection
-	            String damageDirection = data.getDamageDirection();
-	            if (!groupedDamageDetails.containsKey(damageDirection)) {
-	                groupedDamageDetails.put(damageDirection, new ArrayList<>());
-	            }
-	            groupedDamageDetails.get(damageDirection).add(res);  // Add to the appropriate direction
+	            res.setGarageLoginId(data.getGarageLoginId());
+	            res.setStatus(data.getStatus());
+	            
+	            groupedDamageDetails.add(res); 
 	        }
 
 	        // Set the response
 	        response.setErrors(Collections.emptyList());
 	        response.setMessage("Success");
-	        response.setResponse(groupedDamageDetails);  // Grouped response by damage direction
+	        response.setResponse(groupedDamageDetails);  
 	        
 	    } catch (Exception e) {
 	        // Handle exceptions

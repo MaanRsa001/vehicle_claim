@@ -39,5 +39,8 @@ public class GarageSectionDetailsSaveReq {
 
     @JsonProperty("TotalPrice")
     private String totalPrice;
+    
+    @JsonProperty("Status")
+    private String Status;
 
 }
