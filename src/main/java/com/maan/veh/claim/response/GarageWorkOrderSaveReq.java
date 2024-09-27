@@ -15,15 +15,24 @@ public class GarageWorkOrderSaveReq {
 	 	
 	 	@JsonProperty("WorkOrderType")
 	    private String workOrderType;
+	 	
+	 	 @JsonProperty("WorkOrderTypeDesc")
+	     private String workOrderTypeDesc;
 
 	 	@JsonProperty("WorkOrderDate")
 	    private String workOrderDate;
 
 	 	@JsonProperty("SettlementType")
 	    private String settlementType;
+	 	
+	 	@JsonProperty("SettlementTypeDesc")
+	    private String settlementTypeDesc;
 
 	 	@JsonProperty("SettlementTo")
 	    private String settlementTo;
+	 	
+	 	@JsonProperty("SettlementToDesc")
+	    private String settlementToDesc;
 
 	 	@JsonProperty("GarageName")
 	    private String garageName;

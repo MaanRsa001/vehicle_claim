@@ -28,15 +28,24 @@ public class GarageWorkOrder {
 
     @Column(name = "work_order_type")
     private String workOrderType;
+    
+    @Column(name = "work_order_type_desc")
+    private String workOrderTypeDesc;
 
     @Column(name = "work_order_date")
     private Date workOrderDate;
 
     @Column(name = "settlement_type")
     private String settlementType;
+    
+    @Column(name = "settlement_type_desc")
+    private String settlementTypeDesc;
 
     @Column(name = "settlement_to")
     private String settlementTo;
+    
+    @Column(name = "settlement_to_desc")
+    private String settlementToDesc;
 
     @Column(name = "garage_name")
     private String garageName;

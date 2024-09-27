@@ -18,15 +18,24 @@ public class GarageWorkOrderResponse {
     @JsonProperty("WorkOrderType")
     private String workOrderType;
     
+    @JsonProperty("WorkOrderTypeDesc")
+    private String workOrderTypeDesc;
+    
     @JsonFormat(pattern="dd/MM/yyyy")
     @JsonProperty("WorkOrderDate")
     private Date workOrderDate;
 
     @JsonProperty("SettlementType")
     private String settlementType;
+    
+    @JsonProperty("SettlementTypeDesc")
+    private String settlementTypeDesc;
 
     @JsonProperty("SettlementTo")
     private String settlementTo;
+    
+    @JsonProperty("SettlementToDesc")
+    private String settlementToDesc;
 
     @JsonProperty("GarageName")
     private String garageName;
