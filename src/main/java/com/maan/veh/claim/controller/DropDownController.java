@@ -192,4 +192,21 @@ public class DropDownController {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	@GetMapping(value = "/repairreplace")
+	public ResponseEntity<CommonRes> getRepairReplace() {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getRepairReplace();
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
 }

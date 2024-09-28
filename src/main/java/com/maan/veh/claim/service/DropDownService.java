@@ -25,4 +25,6 @@ public interface DropDownService {
 	List<DropDownRes> getVatPercentage();
 
 	List<DropDownRes> getAccountForSettlement();
+
+	List<DropDownRes> getRepairReplace();
 }

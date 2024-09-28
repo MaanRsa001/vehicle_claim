@@ -84,6 +84,11 @@ public class DropDownServiceImpl implements DropDownService {
 		 return getDropdownValues("ACCOUNT_SETTLEMENT");
 	}
 	
+	@Override
+	public List<DropDownRes> getRepairReplace() {
+		 return getDropdownValues("REPAIR_REPLACE");
+	}
+	
     private List<DropDownRes> getDropdownValues(String itemType) {
         List<DropDownRes> resList = new ArrayList<>();
         try {
