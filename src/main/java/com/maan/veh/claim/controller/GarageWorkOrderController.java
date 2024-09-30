@@ -34,7 +34,7 @@ public class GarageWorkOrderController {
 
     }
     
-    @PostMapping("/getAllByGarge")
+    @PostMapping("/getAllByGarage")
     public ResponseEntity<CommonResponse> getGarageWorkOrders(
             @RequestBody GarageWorkOrderRequest request) {
     	CommonResponse response = service.getGarageWorkOrders(request);
