@@ -534,6 +534,45 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    return response;
 	}
 
+	@Override
+	public CommonResponse deleteGarageDamageSectionDetails(List<GarageSectionDetailsSaveReq> reqList) {
+		CommonResponse response = new CommonResponse();
+	    try {
+	        List<ErrorList> errors = validation.validateDeleteGarageDamageDetails(reqList);
+	        if (errors.isEmpty()) {
+	        	
+	        	List<DamageSectionDetails> deleteList = new ArrayList<DamageSectionDetails>();
+	        	
+	            for (GarageSectionDetailsSaveReq req:reqList) {
+	            	
+	            	DamageSectionDetails details = repository.findByClaimNoAndQuotationNoAndDamageSno(req.getClaimNo(),req.getQuotationNo(),Optional.ofNullable(req.getDamageSno()).map(Integer::valueOf).orElse(1));
+	            	if(details != null ) {
+	            		deleteList.add(details);
+	            	}else {
+	            		
+	            	}
+				}
+				repository.deleteAll(deleteList);
+
+	            response.setErrors(Collections.emptyList());
+	            response.setMessage("Success");
+	            response.setResponse(Collections.emptyList());
+	        } else {
+	            response.setErrors(errors);
+	            response.setMessage("Failed");
+	            response.setResponse(Collections.emptyList());
+	            response.setIsError(true);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Failed");
+	        String exceptionDetails = e.getClass().getSimpleName() + ": " + e.getMessage();
+	        response.setResponse(exceptionDetails);
+	    }
+	    return response;
+	}
+
 
 
 

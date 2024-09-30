@@ -935,4 +935,29 @@ List<ErrorList> errors = new ArrayList<>();
 
         return errors;
     }
+
+	public List<ErrorList> validateDeleteGarageDamageDetails(List<GarageSectionDetailsSaveReq> reqList) {
+		List<ErrorList> list = new ArrayList<>();
+	    int line = 1;
+	    for (GarageSectionDetailsSaveReq req : reqList) {
+	    	if(StringUtils.isNotBlank(req.getDamageSno())) {
+	    		line = Integer.valueOf(req.getDamageSno());
+			}
+	    	
+			if (StringUtils.isBlank(req.getClaimNo())) {
+				list.add(new ErrorList("100", "ClaimNo", "Claim number cannot be blank in line number : "+line));
+			}
+			if (StringUtils.isBlank(req.getQuotationNo())) {
+				list.add(new ErrorList("101", "QuotationNO", "Quotation number cannot be blank in line number : "+line));
+			}
+
+			if (StringUtils.isBlank(req.getDamageSno())) {
+				list.add(new ErrorList("102", "DamageSno", "Damage Sno cannot be blank in line number : "+line));
+			}
+
+        
+			line++;
+		}
+		return list;
+	}
 }
