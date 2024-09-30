@@ -217,4 +217,61 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 		}
 		return response;
 	}
+
+	@Override
+	public CommonResponse getAllGarageWorkOrders(GarageWorkOrderRequest request) {
+		CommonResponse comResponse = new CommonResponse(); 
+        try {
+			List<GarageWorkOrder> data = garageWorkOrderRepository.findAll();
+			
+			if(data.size()>0) {
+		    	List<GarageWorkOrderResponse> res = new ArrayList<>();
+				for(GarageWorkOrder workOrder : data ) {
+					 GarageWorkOrderResponse response = new GarageWorkOrderResponse();
+			         response.setClaimNo(workOrder.getClaimNo());
+			         response.setWorkOrderNo(workOrder.getWorkOrderNo());
+			         response.setWorkOrderType(workOrder.getWorkOrderType());
+			         response.setWorkOrderTypeDesc(workOrder.getWorkOrderTypeDesc());
+			         response.setWorkOrderDate(workOrder.getWorkOrderDate());
+			         response.setSettlementType(workOrder.getSettlementType());
+			         response.setSettlementTypeDesc(workOrder.getSettlementTypeDesc());
+			         response.setSettlementTo(workOrder.getSettlementTo());
+			         response.setSettlementToDesc(workOrder.getSettlementToDesc());
+			         response.setGarageName(workOrder.getGarageName());
+			         response.setGarageId(workOrder.getGarageId().toString());
+			         response.setLocation(workOrder.getLocation());
+			         response.setRepairType(workOrder.getRepairType());
+			         response.setQuotationNo(workOrder.getQuotationNo());
+			         response.setDeliveryDate(workOrder.getDeliveryDate());
+			         response.setJointOrderYn(workOrder.getJointOrderYn());
+			         response.setSubrogationYn(workOrder.getSubrogationYn());
+			         response.setTotalLoss(workOrder.getTotalLoss().toString());
+			         response.setLossType(workOrder.getLossType());
+			         response.setRemarks(workOrder.getRemarks());
+			         response.setCreatedBy(workOrder.getCreatedBy());
+			         response.setCreatedDate(workOrder.getCreatedDate());
+			         response.setUpdatedBy(workOrder.getUpdatedBy());
+			         response.setUpdatedDate(workOrder.getUpdatedDate());
+			         response.setEntryDate(workOrder.getEntryDate());
+			         response.setStatus(workOrder.getStatus());
+			         response.setSparepartsDealerId(Optional.ofNullable(workOrder.getSparepartsDealerId()).map(String ::valueOf).orElse(""));
+			         res.add(response);
+				}
+				
+				comResponse.setErrors(Collections.emptyList());
+				comResponse.setMessage("Success");
+				comResponse.setResponse(res);
+			
+			}else {
+				
+				comResponse.setErrors(Collections.emptyList());
+				comResponse.setMessage("Failed");
+				comResponse.setResponse(Collections.emptyList());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+                   
+         return comResponse;
+	}
 }

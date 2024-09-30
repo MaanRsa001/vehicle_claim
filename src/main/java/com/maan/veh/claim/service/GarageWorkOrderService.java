@@ -12,5 +12,7 @@ public interface GarageWorkOrderService {
 
 	CommonResponse getGarageWorkOrdersByClaimNo(GarageWorkOrderRequest request);
 
+	CommonResponse getAllGarageWorkOrders(GarageWorkOrderRequest request);
+
 
 }

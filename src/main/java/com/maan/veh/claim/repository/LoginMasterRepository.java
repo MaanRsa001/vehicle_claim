@@ -1,5 +1,7 @@
 package com.maan.veh.claim.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +16,7 @@ public interface LoginMasterRepository extends JpaRepository<LoginMaster, LoginM
 	LoginMaster findByLoginId(String loginId);
 
 	LoginMaster findByLoginIdIgnoreCaseAndPassword(String loginId, String password);
+
+	List<LoginMaster> findByUserType(String string);
 
 }

@@ -12,9 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.maan.veh.claim.entity.ClaimLossTypeMaster;
 import com.maan.veh.claim.entity.ListItemValue;
+import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.VehicleBodypartsMaster;
 import com.maan.veh.claim.repository.ClaimLosstypeMasterRepository;
 import com.maan.veh.claim.repository.ListItemValueRepository;
+import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.VehicleBodypartsMasterRepository;
 import com.maan.veh.claim.response.DropDownRes;
 import com.maan.veh.claim.service.DropDownService;
@@ -43,6 +45,9 @@ public class DropDownServiceImpl implements DropDownService {
     
     @Autowired
     private VehicleBodypartsMasterRepository bodyPartRepo;
+    
+    @Autowired
+    private LoginMasterRepository loginRepo;
 
     @Override
     public List<DropDownRes> getDamageDirection() {
@@ -182,5 +187,24 @@ public class DropDownServiceImpl implements DropDownService {
 			// Return an empty list in case of an exception
 			return Collections.emptyList();
 		}
+	}
+
+	@Override
+	public List<DropDownRes> getGarageLoginId() {
+		List<DropDownRes> resList = new ArrayList<>();
+        try {
+            List<LoginMaster> getList = loginRepo.findByUserType("Garage");
+            for (LoginMaster data : getList) {
+                DropDownRes res = new DropDownRes();
+                res.setCode(data.getOaCode().toString());
+                res.setCodeDesc(data.getLoginId());
+                resList.add(res);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("Exception is ---> " + e.getMessage());
+            return null;
+        }
+        return resList;
 	}
 }
