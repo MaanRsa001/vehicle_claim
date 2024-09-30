@@ -36,6 +36,9 @@ public class GarageSectionDetailsSaveReq {
 
     @JsonProperty("GarageLoginId")
     private String garageLoginId;
+    
+    @JsonProperty("DealerLoginId")
+    private String dealerLoginId;
 
     @JsonProperty("TotalPrice")
     private String totalPrice;

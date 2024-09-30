@@ -62,4 +62,9 @@ public class DamageSectionDetailsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
+    @PostMapping("/dealerview")
+    public ResponseEntity<CommonResponse> viewDealerDamageSectionDetails(@RequestBody GarageSectionDetailsSaveReq req) {
+        CommonResponse response = service.viewDealerDamageSectionDetails(req);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

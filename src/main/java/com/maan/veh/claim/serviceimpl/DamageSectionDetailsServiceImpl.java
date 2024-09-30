@@ -490,6 +490,50 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    return response;
 	}
 
+	@Override
+	public CommonResponse viewDealerDamageSectionDetails(GarageSectionDetailsSaveReq req) {
+		CommonResponse response = new CommonResponse();
+	    try {
+	        
+	        List<GarageSectionDetailsSaveReq> groupedDamageDetails = new ArrayList<>();
+	        
+	        // Fetch damage section details based on ClaimNo and QuotationNo
+	        List<DamageSectionDetails> details = repository.findByClaimNoAndQuotationNo(req.getClaimNo(), req.getQuotationNo());
+	        
+	        for (DamageSectionDetails data : details) {
+	            GarageSectionDetailsSaveReq res = new GarageSectionDetailsSaveReq();
+	            
+	            // Populate the fields from the retrieved data
+	            res.setClaimNo(data.getClaimNo());
+	            res.setQuotationNo(data.getQuotationNo());
+	            res.setDamageSno(data.getDamageSno() != null ? data.getDamageSno().toString() : "");
+	            res.setDamageDirection(data.getDamageDirection());
+	            res.setDamagePart(data.getDamagePart());
+	            res.setRepairReplace(data.getRepairReplace());    
+	            res.setNoOfUnits(data.getNoOfParts() != null ? data.getNoOfParts().toString() : "");
+	            //res.setReplacementCharge(data.getReplaceCost() != null ? data.getReplaceCost().toString() : "");
+	            res.setUnitPrice(data.getDealerPrice() != null ? data.getDealerPrice().toString() : "");
+	            res.setDealerLoginId(data.getDealerLoginId());
+	            res.setStatus(data.getStatus());
+	            
+	            groupedDamageDetails.add(res); 
+	        }
+
+	        // Set the response
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Success");
+	        response.setResponse(groupedDamageDetails);  
+	        
+	    } catch (Exception e) {
+	        // Handle exceptions
+	    	String exceptionDetails = e.getClass().getSimpleName() + ": " + e.getMessage();
+	        response.setResponse(exceptionDetails);
+	        response.setMessage("Failed");
+	        response.setResponse(null);
+	    }
+	    return response;
+	}
+
 
 
 
