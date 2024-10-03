@@ -7,4 +7,6 @@ public interface LoginService {
 
 	CommonResponse isValidUser(LoginRequest req);
 
+	CommonResponse logout(LoginRequest req);
+
 }

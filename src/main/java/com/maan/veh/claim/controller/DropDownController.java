@@ -226,4 +226,38 @@ public class DropDownController {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	@GetMapping(value = "/dealerLoginId")
+	public ResponseEntity<CommonRes> getDealerLoginId() {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getDealerLoginId();
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@GetMapping(value = "/status")
+	public ResponseEntity<CommonRes> getStatus() {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getStatus();
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
 }

@@ -94,6 +94,11 @@ public class DropDownServiceImpl implements DropDownService {
 		 return getDropdownValues("REPAIR_REPLACE");
 	}
 	
+	@Override
+	public List<DropDownRes> getStatus() {
+		 return getDropdownValues("STATUS");
+	}
+	
     private List<DropDownRes> getDropdownValues(String itemType) {
         List<DropDownRes> resList = new ArrayList<>();
         try {
@@ -194,6 +199,25 @@ public class DropDownServiceImpl implements DropDownService {
 		List<DropDownRes> resList = new ArrayList<>();
         try {
             List<LoginMaster> getList = loginRepo.findByUserType("Garage");
+            for (LoginMaster data : getList) {
+                DropDownRes res = new DropDownRes();
+                res.setCode(data.getOaCode().toString());
+                res.setCodeDesc(data.getLoginId());
+                resList.add(res);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("Exception is ---> " + e.getMessage());
+            return null;
+        }
+        return resList;
+	}
+
+	@Override
+	public List<DropDownRes> getDealerLoginId() {
+		List<DropDownRes> resList = new ArrayList<>();
+        try {
+            List<LoginMaster> getList = loginRepo.findByUserType("Dealer");
             for (LoginMaster data : getList) {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getOaCode().toString());

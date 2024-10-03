@@ -44,6 +44,10 @@ public class LoginController {
 		}
 				
 	}
-	
+	@PostMapping("/logout")
+	public CommonResponse logoutUser(@RequestBody LoginRequest req) {
+			return service.logout(req);		
+				
+	}
 	
 }

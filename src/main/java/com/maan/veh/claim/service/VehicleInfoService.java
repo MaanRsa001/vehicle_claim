@@ -5,4 +5,10 @@ import com.maan.veh.claim.response.CommonResponse;
 
 public interface VehicleInfoService {
 	CommonResponse getVehicleInfoByCompanyId(VehicleInfoRequest request);
+
+	CommonResponse rejectClaim(VehicleInfoRequest request);
+
+	CommonResponse surveyorView(VehicleInfoRequest request);
+
+	CommonResponse dealerView(VehicleInfoRequest request);
 }

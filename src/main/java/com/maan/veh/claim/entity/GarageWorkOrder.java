@@ -100,6 +100,12 @@ public class GarageWorkOrder {
 
     @Column(name = "spareparts_dealer_id")
     private String sparepartsDealerId;
+    
+    @Column(name = "quote_status")
+    private String quoteStatus; // P - pending
+                                // I - In Progress
+                                // C - Completed
+                                // R - Rejected
 
     // Getters and Setters
 }

@@ -19,5 +19,9 @@ public interface GarageWorkOrderRepository extends JpaRepository<GarageWorkOrder
 
 	GarageWorkOrder findByClaimNoAndQuotationNo(String claimNo, String quotationNo);
 
+	List<GarageWorkOrder> findByGarageId(String garageId);
+
+	List<GarageWorkOrder> findBySparepartsDealerId(String sparepartsDealerId);
+
 
 }

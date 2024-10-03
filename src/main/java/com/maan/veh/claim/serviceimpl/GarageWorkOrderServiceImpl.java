@@ -76,7 +76,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 			         response.setEntryDate(workOrder.getEntryDate());
 			         response.setStatus(workOrder.getStatus());
 			         response.setSparepartsDealerId(Optional.ofNullable(workOrder.getSparepartsDealerId()).map(String ::valueOf).orElse(""));
-			         res.add(response);
+			         response.setQuoteStatus(workOrder.getQuoteStatus());			         res.add(response);
 				}
 				
 				comResponse.setErrors(Collections.emptyList());
@@ -116,7 +116,17 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 		        work.setGarageId(req.getGarageId());
 		        work.setLocation(req.getLocation());
 		        work.setRepairType(req.getRepairType());
-		        work.setQuotationNo(req.getQuotationNo());
+		        
+		        if(StringUtils.isNotBlank(req.getQuotationNo())) {
+		        	work.setQuotationNo(req.getQuotationNo());
+		        }else {
+		        	long count = garageWorkOrderRepository.count();
+		        	String quoteSequence = "QUO-";
+		        	String claimNo = req.getClaimNo();
+		        	String quoteNo = quoteSequence + claimNo +"-"+ count;
+		        	work.setQuotationNo(quoteNo);
+		        }
+		        
 		        work.setDeliveryDate(DD_MM_YYYY.parse(req.getDeliveryDate()));
 		        work.setJointOrderYn(req.getJointOrderYn());
 		        work.setSubrogationYn(req.getSubrogationYn());
@@ -129,22 +139,19 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 		        work.setUpdatedDate(new Date());
 		        work.setEntryDate(new Date());
 		        work.setStatus("Y");
-
-		        work.setSparepartsDealerId(req.getSparepartsDealerId());
-		        
-		        garageWorkOrderRepository.save(work);
+		        work.setQuoteStatus(req.getQuoteStatus());
 
 		        work.setSparepartsDealerId(StringUtils.isBlank(req.getSparepartsDealerId())?null:req.getSparepartsDealerId());
 		        
 		        garageWorkOrderRepository.save(work);
 		        
 		        InsuredVehicleInfo insuredVeh =  insuredVehRepo.findByClaimNo(req.getClaimNo()).get();
-		        insuredVeh.setStatus("I");
+		        insuredVeh.setStatus(req.getQuoteStatus());
 		        insuredVehRepo.save(insuredVeh);
 		        
 		        Map<String,String> resMap = new HashMap<>();
-		        resMap.put("ClaimNo",req.getClaimNo());
-		        resMap.put("QuotationNo",req.getQuotationNo());
+		        resMap.put("ClaimNo",work.getClaimNo());
+		        resMap.put("QuotationNo",work.getQuotationNo());
 		        
 		        response.setErrors(Collections.emptyList());
 		        response.setMessage("Success");
@@ -200,6 +207,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 		         garage.setEntryDate(data.getEntryDate());
 		         garage.setStatus(data.getStatus());
 		         garage.setSparepartsDealerId(Optional.ofNullable(data.getSparepartsDealerId()).map(String :: valueOf).orElse(""));
+		         garage.setQuoteStatus(data.getQuoteStatus());
 		         
 		         response.setErrors(Collections.emptyList());
 			     response.setMessage("Success");
@@ -255,6 +263,8 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 			         response.setEntryDate(workOrder.getEntryDate());
 			         response.setStatus(workOrder.getStatus());
 			         response.setSparepartsDealerId(Optional.ofNullable(workOrder.getSparepartsDealerId()).map(String ::valueOf).orElse(""));
+			         response.setQuoteStatus(workOrder.getQuoteStatus());
+			         
 			         res.add(response);
 				}
 				

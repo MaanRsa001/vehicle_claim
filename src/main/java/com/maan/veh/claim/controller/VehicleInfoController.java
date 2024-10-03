@@ -22,5 +22,23 @@ public class VehicleInfoController {
     public ResponseEntity<CommonResponse> getVehicleInfoByCompanyId(@RequestBody VehicleInfoRequest request) {
     	CommonResponse response = vehicleInfoService.getVehicleInfoByCompanyId(request);
         return ResponseEntity.ok(response);
-    }	
-}
+    }
+    
+    @PostMapping("/rejectClaim")
+    public ResponseEntity<CommonResponse> rejectClaim(@RequestBody VehicleInfoRequest request) {
+    	CommonResponse response = vehicleInfoService.rejectClaim(request);
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/surveyorView")
+    public ResponseEntity<CommonResponse> surveyorView(@RequestBody VehicleInfoRequest request) {
+    	CommonResponse response = vehicleInfoService.surveyorView(request);
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/dealerView")
+    public ResponseEntity<CommonResponse> dealerView(@RequestBody VehicleInfoRequest request) {
+    	CommonResponse response = vehicleInfoService.dealerView(request);
+        return ResponseEntity.ok(response);
+    }
+}	

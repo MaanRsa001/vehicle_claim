@@ -13,4 +13,7 @@ public class LoginRequest {
 	@JsonProperty("Password")
 	private String password;
 	
+	@JsonProperty("Token")
+	private String token;
+	
 }

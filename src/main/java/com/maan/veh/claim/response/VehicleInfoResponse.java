@@ -49,4 +49,7 @@ public class VehicleInfoResponse {
 
     @JsonProperty("Status")
     private String status;
+    
+    @JsonProperty("QuotationNo")
+    private String quotationNo;
 }

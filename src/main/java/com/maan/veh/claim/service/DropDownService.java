@@ -29,4 +29,8 @@ public interface DropDownService {
 	List<DropDownRes> getRepairReplace();
 
 	List<DropDownRes> getGarageLoginId();
+
+	List<DropDownRes> getStatus();
+
+	List<DropDownRes> getDealerLoginId();
 }

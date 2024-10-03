@@ -75,6 +75,8 @@ public class GarageWorkOrderSaveReq {
 	 	
 	 	@JsonProperty("SparepartsDealerId")
 	    private String sparepartsDealerId;
-
+	 	
+	 	@JsonProperty("QuoteStatus")
+	    private String quoteStatus;
 
 }

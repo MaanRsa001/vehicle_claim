@@ -118,11 +118,11 @@ public class InputValidationUtil {
 
         }
 
-        // Validate and set quotationNo
-        if (StringUtils.isBlank(req.getQuotationNo())) {
-            list.add(new ErrorList("100","QuotationNo","Quotation number cannot be blank"));
-
-        }
+//        // Validate and set quotationNo
+//        if (StringUtils.isBlank(req.getQuotationNo())) {
+//            list.add(new ErrorList("100","QuotationNo","Quotation number cannot be blank"));
+//
+//        }
 
         // Validate and set lossType
         if (StringUtils.isBlank(req.getLossType())) {
