@@ -78,5 +78,8 @@ public class GarageWorkOrderSaveReq {
 	 	
 	 	@JsonProperty("QuoteStatus")
 	    private String quoteStatus;
+	 	
+	 	@JsonProperty("UserType")
+	    private String userType;
 
 }

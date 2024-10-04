@@ -6,12 +6,12 @@ import lombok.Data;
 
 @Data
 public class ClaimIntimationDTODriver {
-    @JsonProperty("EmiratesId")
+    @JsonProperty("emiratesId")
     private String emiratesId;
 
-    @JsonProperty("LicenseNumber")
+    @JsonProperty("licenseNumber")
     private String licenseNumber;
 
-    @JsonProperty("Dob")
+    @JsonProperty("dob")
     private String dob; // Use proper date format or type as required
 }

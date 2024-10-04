@@ -6,9 +6,6 @@ import java.util.List;
 @Data
 public class SaveClaimRequest {
 	
-	@JsonProperty("jwtToken")
-    private String jwtToken;
-	
     @JsonProperty("RequestMetaData")
     private ClaimIntimationRequestMetaData requestMetaData;
 

@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -74,7 +75,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     private InputValidationUtil validation;
 
     @Override
-    public CommonResponse saveClaimIntimation(SaveClaimRequest requestPayload) {
+    public CommonResponse createFnol(SaveClaimRequest requestPayload) {
         CommonResponse response = new CommonResponse();
         ApiTransactionLog log = new ApiTransactionLog();
         log.setRequestTime(LocalDateTime.now());
@@ -278,21 +279,38 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        String requestBody = objectMapper.writeValueAsString(formattedRequest);
 	        log.setRequest(requestBody);
 
-	        // Send request to external authentication API
-	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), requestBody, String.class);
+	        // Set the headers, including Content-Type as application/json
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.APPLICATION_JSON);  // Fix the Content-Type to application/json
+
+	        // Create HttpEntity containing headers and the request body
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+
+	        // Send request to external authentication API using RestTemplate
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
+	        
+	        // Log the response
 	        log.setResponse(apiResponse.getBody());
 	        log.setStatus("SUCCESS");
 
-	        // Parse API response to Map
+	        // Parse API response and prepare CommonResponse
 	        response.setMessage("Authentication successful");
 	        response.setIsError(false);
 	        response.setResponse(apiResponse.getBody());
 
+	    } catch (HttpClientErrorException e) {
+	        // Handle 4xx errors, possibly including 415
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	        response.setMessage("Authentication failed: " + e.getStatusCode());
+	        response.setIsError(true);
+	        response.setResponse(e.getResponseBodyAsString());
 	    } catch (Exception e) {
 	        log.setStatus("FAILURE");
 	        log.setErrorMessage(e.getMessage());
 	        response.setMessage("Authentication failed");
 	        response.setIsError(true);
+	        response.setResponse(e.getMessage());
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
 	        apiTransactionLogRepo.save(log);
@@ -300,6 +318,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	    return response;
 	}
+
 	
 	public SaveClaimRequestDTO mapToSaveClaimRequestDTO(SaveClaimRequest request) {
 	    if (request == null) {
@@ -496,9 +515,16 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        // Convert Map to JSON string
 	        String requestBody = objectMapper.writeValueAsString(formattedRequest);
 	        log.setRequest(requestBody);
+	        
+	        // Set the headers, including Content-Type as application/json
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.APPLICATION_JSON);  // Fix the Content-Type to application/json
+
+	        // Create HttpEntity containing headers and the request body
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 
 	        // Send request to external authentication API
-	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), requestBody, String.class);
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
 	        log.setResponse(apiResponse.getBody());
 	        log.setStatus("SUCCESS");
 

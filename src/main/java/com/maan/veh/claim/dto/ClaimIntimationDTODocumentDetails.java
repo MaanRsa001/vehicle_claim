@@ -6,24 +6,24 @@ import lombok.Data;
 
 @Data
 public class ClaimIntimationDTODocumentDetails {
-    @JsonProperty("DocumentData")
+    @JsonProperty("documentData")
     private String documentData;
 
-    @JsonProperty("DocumentFormat")
+    @JsonProperty("documentFormat")
     private String documentFormat;
 
-    @JsonProperty("DocumentId")
+    @JsonProperty("documentId")
     private String documentId;
 
-    @JsonProperty("DocumentName")
+    @JsonProperty("documentName")
     private String documentName;
 
-    @JsonProperty("DocumentRefNo")
+    @JsonProperty("documentRefNo")
     private String documentRefNo;
 
-    @JsonProperty("DocumentType")
+    @JsonProperty("documentType")
     private String documentType;
 
-    @JsonProperty("DocumentURL")
+    @JsonProperty("documentURL")
     private String documentURL;
 }

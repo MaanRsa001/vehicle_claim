@@ -6,42 +6,42 @@ import lombok.Data;
 
 @Data
 public class ClaimIntimationDTORequestMetaData {
-    @JsonProperty("ConsumerTrackingID")
+    @JsonProperty("consumerTrackingID")
     private String consumerTrackingID;
 
-    @JsonProperty("CurrentBranch")
+    @JsonProperty("currentBranch")
     private String currentBranch;
 
-    @JsonProperty("IpAddress")
+    @JsonProperty("ipAddress")
     private String ipAddress;
 
-    @JsonProperty("OriginBranch")
+    @JsonProperty("originBranch")
     private String originBranch;
 
-    @JsonProperty("RequestData")
+    @JsonProperty("requestData")
     private String requestData;
 
-    @JsonProperty("RequestGeneratedDateTime")
+    @JsonProperty("requestGeneratedDateTime")
     private String requestGeneratedDateTime;
 
-    @JsonProperty("RequestId")
+    @JsonProperty("requestId")
     private String requestId;
 
-    @JsonProperty("RequestOrigin")
+    @JsonProperty("requestOrigin")
     private String requestOrigin;
 
-    @JsonProperty("RequestReference")
+    @JsonProperty("requestReference")
     private String requestReference;
 
-    @JsonProperty("RequestedService")
+    @JsonProperty("requestedService")
     private String requestedService;
 
-    @JsonProperty("ResponseData")
+    @JsonProperty("responseData")
     private String responseData;
 
-    @JsonProperty("SourceCode")
+    @JsonProperty("sourceCode")
     private String sourceCode;
 
-    @JsonProperty("UserName")
+    @JsonProperty("userName")
     private String userName;
 }

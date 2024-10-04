@@ -375,6 +375,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 				
 				GarageWorkOrder workOrder = garageWorkOrderRepo.findByClaimNoAndQuotationNo(claimNo,quotationNo);
 				workOrder.setSparepartsDealerId(dealerId);
+				workOrder.setStatus("Dealer");
 				garageWorkOrderRepo.save(workOrder);
 				
 	            response.setErrors(Collections.emptyList());

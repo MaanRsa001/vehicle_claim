@@ -8,7 +8,7 @@ import com.maan.veh.claim.response.CommonResponse;
 
 public interface ExternalApiService {
 
-	CommonResponse saveClaimIntimation(SaveClaimRequest requestPayload);
+	CommonResponse createFnol(SaveClaimRequest requestPayload);
 
 	CommonResponse findFNOL(FnolRequest request);
 

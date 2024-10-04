@@ -7,79 +7,79 @@ import java.util.List;
 @Data
 public class SaveClaimRequestDTO {
 	
-    @JsonProperty("RequestMetaData")
+    @JsonProperty("requestMetaData")
     private ClaimIntimationDTORequestMetaData requestMetaData;
 
-    @JsonProperty("LanguageCode")
+    @JsonProperty("languageCode")
     private String languageCode;
 
-    @JsonProperty("PolicyNo")
+    @JsonProperty("policyNo")
     private String policyNo;
 
-    @JsonProperty("InsuredId")
+    @JsonProperty("insuredId")
     private String insuredId;
 
-    @JsonProperty("LossDate")
+    @JsonProperty("lossDate")
     private String lossDate;
 
-    @JsonProperty("IntimatedDate")
+    @JsonProperty("intimatedDate")
     private String intimatedDate;
 
-    @JsonProperty("LossLocation")
+    @JsonProperty("lossLocation")
     private String lossLocation;
 
-    @JsonProperty("PoliceStation")
+    @JsonProperty("policeStation")
     private String policeStation;
 
-    @JsonProperty("PoliceReportNo")
+    @JsonProperty("policeReportNo")
     private String policeReportNo;
 
-    @JsonProperty("LossDescription")
+    @JsonProperty("lossDescription")
     private String lossDescription;
 
-    @JsonProperty("AtFault")
+    @JsonProperty("atFault")
     private String atFault;
 
-    @JsonProperty("PolicyPeriod")
+    @JsonProperty("policyPeriod")
     private String policyPeriod;
 
-    @JsonProperty("ContactPersonPhoneNo")
+    @JsonProperty("contactPersonPhoneNo")
     private String contactPersonPhoneNo;
 
-    @JsonProperty("ContactPersonPhoneCode")
+    @JsonProperty("contactPersonPhoneCode")
     private String contactPersonPhoneCode;
 
-    @JsonProperty("PolicyReferenceNo")
+    @JsonProperty("policyReferenceNo")
     private String policyReferenceNo;
 
-    @JsonProperty("PolicyICReferenceNo")
+    @JsonProperty("policyICReferenceNo")
     private String policyICReferenceNo;
 
-    @JsonProperty("ClaimRequestReference")
+    @JsonProperty("claimRequestReference")
     private String claimRequestReference;
 
-    @JsonProperty("ClaimCategory")
+    @JsonProperty("claimCategory")
     private String claimCategory;
 
-    @JsonProperty("Driver")
+    @JsonProperty("driver")
     private ClaimIntimationDTODriver driver;
 
-    @JsonProperty("AttachmentDetails")
+    @JsonProperty("attachmentDetails")
     private ClaimIntimationDTOAttachmentDetails attachmentDetails;
 
-    @JsonProperty("CreatedUser")
+    @JsonProperty("createdUser")
     private String createdUser;
 
-    @JsonProperty("ClaimType")
+    @JsonProperty("claimType")
     private String claimType;
 
-    @JsonProperty("AccidentNumber")
+    @JsonProperty("accidentNumber")
     private String accidentNumber;
 
-    @JsonProperty("IsThirdPartyInvolved")
+    @JsonProperty("isThirdPartyInvolved")
     private String isThirdPartyInvolved;
 
-    @JsonProperty("ThirdPartyInfo")
+    @JsonProperty("thirdPartyInfo")
     private List<ClaimIntimationDTOThirdPartyInfo> thirdPartyInfo;
 
       

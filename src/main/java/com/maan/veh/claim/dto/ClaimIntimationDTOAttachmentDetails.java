@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 public class ClaimIntimationDTOAttachmentDetails {
-    @JsonProperty("DocumentDetails")
+    @JsonProperty("documentDetails")
     private List<ClaimIntimationDTODocumentDetails> documentDetails;
 
     

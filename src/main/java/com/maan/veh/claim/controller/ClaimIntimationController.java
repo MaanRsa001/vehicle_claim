@@ -21,9 +21,9 @@ public class ClaimIntimationController {
     @Autowired
     private ExternalApiService externalApiService;
 
-    @PostMapping("/saveClaimIntimation")
-    public ResponseEntity<CommonResponse> saveClaimIntimation(@RequestBody SaveClaimRequest requestPayload) {
-        	CommonResponse res = externalApiService.saveClaimIntimation(requestPayload);
+    @PostMapping("/createfnol")
+    public ResponseEntity<CommonResponse> createFnol(@RequestBody SaveClaimRequest requestPayload) {
+        	CommonResponse res = externalApiService.createFnol(requestPayload);
             return ResponseEntity.ok(res);
     }
     

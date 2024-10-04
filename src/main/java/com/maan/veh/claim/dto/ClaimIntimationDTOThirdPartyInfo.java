@@ -6,51 +6,51 @@ import lombok.Data;
 
 @Data
 public class ClaimIntimationDTOThirdPartyInfo {
-    @JsonProperty("TPDriverLiability")
+    @JsonProperty("tPDriverLiability")
     private String tpDriverLiability;
 
-    @JsonProperty("TPDriverLicenceNo")
+    @JsonProperty("tPDriverLicenceNo")
     private String tpDriverLicenceNo;
 
-    @JsonProperty("TPDriverName")
+    @JsonProperty("tPDriverName")
     private String tpDriverName;
 
-    @JsonProperty("TPDriverNationalityCode")
+    @JsonProperty("tPDriverNationalityCode")
     private String tpDriverNationalityCode;
 
-    @JsonProperty("TPDriverTrafficNo")
+    @JsonProperty("tPDriverTrafficNo")
     private String tpDriverTrafficNo;
 
-    @JsonProperty("TPMobileNumber")
+    @JsonProperty("tPMobileNumber")
     private String tpMobileNumber;
 
-    @JsonProperty("TPVehicleCurrentInsurer")
+    @JsonProperty("tPVehicleCurrentInsurer")
     private String tpVehicleCurrentInsurer;
 
-    @JsonProperty("TPVehicleMake")
+    @JsonProperty("tPVehicleMake")
     private String tpVehicleMake;
 
-    @JsonProperty("TPVehicleMakeCode")
+    @JsonProperty("tPVehicleMakeCode")
     private String tpVehicleMakeCode;
 
-    @JsonProperty("TPVehicleModel")
+    @JsonProperty("tPVehicleModel")
     private String tpVehicleModel;
 
-    @JsonProperty("TPVehicleModelCode")
+    @JsonProperty("tPVehicleModelCode")
     private String tpVehicleModelCode;
 
-    @JsonProperty("TPVehiclePlateCode")
+    @JsonProperty("tPVehiclePlateCode")
     private String tpVehiclePlateCode;
 
-    @JsonProperty("TPVehiclePlateNo")
+    @JsonProperty("tPVehiclePlateNo")
     private String tpVehiclePlateNo;
 
-    @JsonProperty("TPVehiclePlateTypeCode")
+    @JsonProperty("tPVehiclePlateTypeCode")
     private String tpVehiclePlateTypeCode;
 
-    @JsonProperty("ThirdPartyReference")
+    @JsonProperty("thirdPartyReference")
     private String thirdPartyReference;
 
-    @JsonProperty("ThirdPartyType")
+    @JsonProperty("thirdPartyType")
     private String thirdPartyType;
 }
