@@ -73,4 +73,10 @@ public class DamageSectionDetailsController {
         CommonResponse response = service.viewDealerDamageSectionDetails(req);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    
+    @PostMapping("/surveyorview")
+    public ResponseEntity<CommonResponse> viewSurveyorDamageSectionDetails(@RequestBody GarageSectionDetailsSaveReq req) {
+        CommonResponse response = service.viewSurveyorDamageSectionDetails(req);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

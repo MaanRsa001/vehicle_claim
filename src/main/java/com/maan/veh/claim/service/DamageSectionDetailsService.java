@@ -25,4 +25,6 @@ public interface DamageSectionDetailsService {
 	CommonResponse viewDealerDamageSectionDetails(GarageSectionDetailsSaveReq req);
 
 	CommonResponse deleteGarageDamageSectionDetails(List<GarageSectionDetailsSaveReq> req);
+
+	CommonResponse viewSurveyorDamageSectionDetails(GarageSectionDetailsSaveReq req);
 }

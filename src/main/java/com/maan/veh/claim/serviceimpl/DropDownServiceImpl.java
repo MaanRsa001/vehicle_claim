@@ -220,7 +220,7 @@ public class DropDownServiceImpl implements DropDownService {
             List<LoginMaster> getList = loginRepo.findByUserType("Dealer");
             for (LoginMaster data : getList) {
                 DropDownRes res = new DropDownRes();
-                res.setCode(data.getOaCode().toString());
+                res.setCode(data.getLoginId());
                 res.setCodeDesc(data.getLoginId());
                 resList.add(res);
             }

@@ -63,4 +63,15 @@ public class VehicleInfoController {
     	CommonResponse response = vehicleInfoService.dealerView(request);
         return ResponseEntity.ok(response);
     }
+    
+    @Operation(
+            summary = "Surveyor's View after Dealer entered the amount",
+            description = "This API provides the surveyor with a view of claims related to vehicles. "
+                        + "The surveyor will be able to see the details of each claim, including vehicle information and claim status."
+        )
+    @PostMapping("/surveyorViewV1")
+    public ResponseEntity<CommonResponse> surveyorViewV1(@RequestBody VehicleInfoRequest request) {
+    	CommonResponse response = vehicleInfoService.surveyorViewV1(request);
+        return ResponseEntity.ok(response);
+    }
 }

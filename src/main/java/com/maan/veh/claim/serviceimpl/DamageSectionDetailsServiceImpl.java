@@ -19,9 +19,11 @@ import org.springframework.stereotype.Service;
 
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
+import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.entity.TotalAmountDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
+import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.TotalAmountDetailsRepository;
 import com.maan.veh.claim.request.DamageSectionDetailsRequest;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
@@ -30,6 +32,7 @@ import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DamageSectionDetailsResponse;
 import com.maan.veh.claim.response.ErrorList;
+import com.maan.veh.claim.response.VehicleInfoResponse;
 import com.maan.veh.claim.response.SaveClaimResponse.ErrorDetail;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
 
@@ -46,6 +49,9 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	
 	@Autowired
 	private GarageWorkOrderRepository garageWorkOrderRepo;
+	
+	@Autowired
+    private InsuredVehicleInfoRepository insuredVehicleInfoRepository;
 	
 	@Autowired
     private InputValidationUtil validation;
@@ -399,7 +405,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 
 	@Override
 	public CommonResponse viewGarageDamageSectionDetails(GarageSectionDetailsSaveReq req) {
-	    CommonResponse response = new CommonResponse();
+		CommonResponse response = new CommonResponse();
 	    try {
 	        
 	        List<GarageSectionDetailsSaveReq> groupedDamageDetails = new ArrayList<>();
@@ -425,7 +431,11 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            
 	            groupedDamageDetails.add(res); 
 	        }
-
+	        
+//	        groupedDamageDetails = groupedDamageDetails.stream()
+//	        	    .filter(res -> "Replace".equalsIgnoreCase(res.getRepairReplace())) // Filter condition
+//	        	    .collect(Collectors.toList()); // Collect the filtered results back to a list
+	        
 	        // Set the response
 	        response.setErrors(Collections.emptyList());
 	        response.setMessage("Success");
@@ -519,7 +529,11 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            
 	            groupedDamageDetails.add(res); 
 	        }
-
+	        
+	        groupedDamageDetails = groupedDamageDetails.stream()
+	        	    .filter(res -> "Replace".equalsIgnoreCase(res.getRepairReplace())) // Filter condition
+	        	    .collect(Collectors.toList()); 
+	        
 	        // Set the response
 	        response.setErrors(Collections.emptyList());
 	        response.setMessage("Success");
@@ -570,6 +584,30 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	        response.setMessage("Failed");
 	        String exceptionDetails = e.getClass().getSimpleName() + ": " + e.getMessage();
 	        response.setResponse(exceptionDetails);
+	    }
+	    return response;
+	}
+
+	@Override
+	public CommonResponse viewSurveyorDamageSectionDetails(GarageSectionDetailsSaveReq req) {
+		CommonResponse response = new CommonResponse();
+	    try {
+	        
+			List<DamageSectionDetails> detailsList = repository.findByClaimNoAndQuotationNo(req.getClaimNo(),req.getQuotationNo());
+
+			List<DamageSectionDetailsResponse> list = detailsList.stream().map(this::mapToResponse).collect(Collectors.toList());
+
+	        // Set the response
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Success");
+	        response.setResponse(list);  
+	        
+	    } catch (Exception e) {
+	        // Handle exceptions
+	    	String exceptionDetails = e.getClass().getSimpleName() + ": " + e.getMessage();
+	        response.setResponse(exceptionDetails);
+	        response.setMessage("Failed");
+	        response.setResponse(null);
 	    }
 	    return response;
 	}
