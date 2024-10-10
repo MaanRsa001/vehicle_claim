@@ -58,4 +58,23 @@ public class TotalAmountDetails {
 
     @Column(name = "tot_labour_cost", precision = 10, scale = 2)
     private BigDecimal totLabourCost;
+
+    // New columns
+    @Column(name = "insurance_amount", precision = 10, scale = 2)
+    private BigDecimal insuranceAmount;
+
+    @Column(name = "insurance_vat", precision = 10, scale = 2)
+    private BigDecimal insuranceVat;
+
+    @Column(name = "customer_amount", precision = 10, scale = 2)
+    private BigDecimal customerAmount;
+
+    @Column(name = "customer_vat", precision = 10, scale = 2)
+    private BigDecimal customerVat;
+
+    @Column(name = "ins_amount_with_vat", precision = 10, scale = 2)
+    private BigDecimal insAmountWithVat;
+
+    @Column(name = "cust_amount_with_vat", precision = 10, scale = 2)
+    private BigDecimal custAmountWithVat;
 }
