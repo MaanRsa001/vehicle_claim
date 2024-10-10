@@ -19,7 +19,7 @@ import com.maan.veh.claim.response.DamageSectionDetailsResponse;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
 
 @RestController
-@RequestMapping("/api/damagedetails")
+@RequestMapping("/damage")
 public class DamageSectionDetailsController {
 
     @Autowired
@@ -38,13 +38,13 @@ public class DamageSectionDetailsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
-    @PostMapping("/garagesave")
+    @PostMapping("/garage/save")
     public ResponseEntity<CommonResponse> saveGarageDamageSectionDetails(@RequestBody List<GarageSectionDetailsSaveReq> req) {
         CommonResponse response = service.saveGarageDamageSectionDetails(req);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
-    @PostMapping("/garageview")
+    @PostMapping("/garage/view")
     public ResponseEntity<CommonResponse> viewGarageDamageSectionDetails(@RequestBody GarageSectionDetailsSaveReq req) {
         CommonResponse response = service.viewGarageDamageSectionDetails(req);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -62,13 +62,13 @@ public class DamageSectionDetailsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
-    @PostMapping("/dealersave")
+    @PostMapping("/dealer/save")
     public ResponseEntity<CommonResponse> saveDealerDamageSectionDetails(@RequestBody List<DealerSectionDetailsSaveReq> req) {
         CommonResponse response = service.saveDealerDamageSectionDetails(req);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
-    @PostMapping("/dealerview")
+    @PostMapping("/dealer/view")
     public ResponseEntity<CommonResponse> viewDealerDamageSectionDetails(@RequestBody GarageSectionDetailsSaveReq req) {
         CommonResponse response = service.viewDealerDamageSectionDetails(req);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -77,6 +77,12 @@ public class DamageSectionDetailsController {
     @PostMapping("/surveyorview")
     public ResponseEntity<CommonResponse> viewSurveyorDamageSectionDetails(@RequestBody GarageSectionDetailsSaveReq req) {
         CommonResponse response = service.viewSurveyorDamageSectionDetails(req);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
+    @PostMapping("/surveyor/view")
+    public ResponseEntity<CommonResponse> viewGarageDamageSectionDetailsV1(@RequestBody GarageSectionDetailsSaveReq req) {
+        CommonResponse response = service.viewGarageDamageSectionDetails(req);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

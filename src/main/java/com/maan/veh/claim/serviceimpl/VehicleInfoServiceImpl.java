@@ -17,6 +17,7 @@ import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
+import com.maan.veh.claim.request.VehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleInfoRequest;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.SurveyorViewResponse;
@@ -36,7 +37,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
     private GarageWorkOrderRepository garageWorkOrderRepository;
 
     @Override
-    public CommonResponse getVehicleInfoByCompanyId(VehicleInfoRequest request) {
+    public CommonResponse getVehicleInfoByCompanyId(VehicleGarageViewRequest request) {
     	CommonResponse response = new CommonResponse(); 	
     	List<VehicleInfoResponse> vehList = new ArrayList<>();
         

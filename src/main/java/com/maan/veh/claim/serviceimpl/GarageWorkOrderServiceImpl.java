@@ -17,8 +17,10 @@ import org.springframework.stereotype.Service;
 
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
+import com.maan.veh.claim.entity.VcClaimStatus;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
+import com.maan.veh.claim.repository.VcClaimStatusRepository;
 import com.maan.veh.claim.request.GarageWorkOrderRequest;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.ErrorList;
@@ -39,6 +41,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
     
     @Autowired
     private InputValidationUtil validation;
+    
 
     @Override
     public CommonResponse getGarageWorkOrders(GarageWorkOrderRequest req) {
@@ -209,7 +212,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
                 response.setIsError(true);
                 return response;
             }
-
+            
             // Step 15: Prepare response
             Map<String, String> resMap = new HashMap<>();
             resMap.put("ClaimNo", workOrder.getClaimNo());

@@ -16,7 +16,7 @@ import com.maan.veh.claim.service.GarageWorkOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
-@RequestMapping("/garage")
+@RequestMapping("/workOrder")
 public class GarageWorkOrderController {
 
     @Autowired
@@ -32,7 +32,7 @@ public class GarageWorkOrderController {
     	        + "5. In the ***status*** column of the ***work order table***, the ***UserType*** is saved for identification. \n"
     	        + "6. The ***status*** column of the ***vehicle info*** table is updated with the current ***quote status*** in the end."
     	)
-    @PostMapping("/save")
+    @PostMapping("/garage/save")
     public ResponseEntity<CommonResponse> saveWorkOrder(@RequestBody GarageWorkOrderSaveReq claim) {
     	CommonResponse savedClaim = service.saveWorkOrder(claim);
     	return new ResponseEntity<>(savedClaim, HttpStatus.OK);
@@ -40,7 +40,7 @@ public class GarageWorkOrderController {
 
 
     @Operation(summary = "Get work orders by claim number", description = "Fetches garage work orders based on the provided claim number.")
-    @PostMapping("/getbyclaimno")
+    @PostMapping("/garage/view")
     public ResponseEntity<CommonResponse> getGarageWorkOrdersByClaimNo(@RequestBody GarageWorkOrderRequest request) {
         CommonResponse response = service.getGarageWorkOrdersByClaimNo(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -57,6 +57,18 @@ public class GarageWorkOrderController {
     @PostMapping("/getAll")
     public ResponseEntity<CommonResponse> getAllGarageWorkOrders(@RequestBody GarageWorkOrderRequest request) {
         CommonResponse response = service.getAllGarageWorkOrders(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
+    @PostMapping("/surveyor/assign")
+    public ResponseEntity<CommonResponse> assignWorkOrder(@RequestBody GarageWorkOrderSaveReq claim) {
+    	CommonResponse savedClaim = service.saveWorkOrder(claim);
+    	return new ResponseEntity<>(savedClaim, HttpStatus.OK);
+    }
+    
+    @PostMapping("/surveyor/view")
+    public ResponseEntity<CommonResponse> surveyorViewGarageWorkOrdersByClaimNo(@RequestBody GarageWorkOrderRequest request) {
+        CommonResponse response = service.getGarageWorkOrdersByClaimNo(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
