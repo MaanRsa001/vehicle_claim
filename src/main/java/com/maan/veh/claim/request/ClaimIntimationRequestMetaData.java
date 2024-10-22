@@ -1,5 +1,8 @@
 package com.maan.veh.claim.request;
 
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
@@ -22,7 +25,8 @@ public class ClaimIntimationRequestMetaData {
     private String requestData;
 
     @JsonProperty("RequestGeneratedDateTime")
-    private String requestGeneratedDateTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private Date requestGeneratedDateTime;
 
     @JsonProperty("RequestId")
     private String requestId;

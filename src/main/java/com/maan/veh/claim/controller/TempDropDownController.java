@@ -2,6 +2,7 @@ package com.maan.veh.claim.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.maan.veh.claim.response.CommonRes;
 import com.maan.veh.claim.response.DropDownRes;
+import com.maan.veh.claim.service.ClaimDropDownService;
 
 @RestController
 @RequestMapping("/claim/dropdown")
 public class TempDropDownController {
+	
+	@Autowired
+	private ClaimDropDownService dropDownService;
 	
 	 @GetMapping(value = "/claimType")
 	    public ResponseEntity<CommonRes> getClaimType() {
@@ -56,15 +61,6 @@ public class TempDropDownController {
 	            new DropDownRes("1", "Code1"),
 	            new DropDownRes("2", "Code2"),
 	            new DropDownRes("3", "Code3")
-	        ));
-	    }
-
-	    @GetMapping(value = "/policeStation")
-	    public ResponseEntity<CommonRes> getPoliceStation() {
-	        return getDropdownResponse(List.of(
-	            new DropDownRes("1", "Station A"),
-	            new DropDownRes("2", "Station B"),
-	            new DropDownRes("3", "Station C")
 	        ));
 	    }
 
@@ -132,5 +128,56 @@ public class TempDropDownController {
 	        data.setErroCode(0);
 
 	        return new ResponseEntity<>(data, HttpStatus.OK);
+	    }
+	    
+	    @GetMapping(value = "/policeStation")
+	    public ResponseEntity<CommonRes> getPoliceStation() {
+	    	CommonRes data = new CommonRes();
+
+			List<DropDownRes> res = dropDownService.getPoliceStation();
+			data.setCommonResponse(res);
+			data.setIsError(false);
+			data.setErrorMessage(null);
+			data.setMessage("Success");
+
+			if (res != null) {
+				return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+			} else {
+				return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+			}
+	    }
+	    
+	    @GetMapping(value = "/losslocation")
+	    public ResponseEntity<CommonRes> getLossLocation() {
+	    	CommonRes data = new CommonRes();
+
+			List<DropDownRes> res = dropDownService.getLossLocation();
+			data.setCommonResponse(res);
+			data.setIsError(false);
+			data.setErrorMessage(null);
+			data.setMessage("Success");
+
+			if (res != null) {
+				return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+			} else {
+				return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+			}
+	    }
+	    
+	    @GetMapping(value = "/natureofloss")
+	    public ResponseEntity<CommonRes> getNatureOfLoss() {
+	    	CommonRes data = new CommonRes();
+
+			List<DropDownRes> res = dropDownService.getNatureOfLoss();
+			data.setCommonResponse(res);
+			data.setIsError(false);
+			data.setErrorMessage(null);
+			data.setMessage("Success");
+
+			if (res != null) {
+				return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+			} else {
+				return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+			}
 	    }
 }

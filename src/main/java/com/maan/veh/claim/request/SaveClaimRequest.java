@@ -1,7 +1,11 @@
 package com.maan.veh.claim.request;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import java.util.Date;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
 
 @Data
 public class SaveClaimRequest {
@@ -19,11 +23,16 @@ public class SaveClaimRequest {
     private String insuredId;
 
     @JsonProperty("LossDate")
-    private String lossDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private Date lossDate;
 
     @JsonProperty("IntimatedDate")
-    private String intimatedDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private Date intimatedDate;
 
+    @JsonProperty("NatureOfLoss")
+    private String natureOfLoss;
+    
     @JsonProperty("LossLocation")
     private String lossLocation;
 

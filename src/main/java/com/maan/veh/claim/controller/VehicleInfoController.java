@@ -75,4 +75,10 @@ public class VehicleInfoController {
     	CommonResponse response = vehicleInfoService.surveyorViewV1(request);
         return ResponseEntity.ok(response);
     }
+    
+    @PostMapping("/surveyor/asigned/completed")
+    public ResponseEntity<CommonResponse> surveyorAsignedView(@RequestBody VehicleInfoRequest request) {
+    	CommonResponse response = vehicleInfoService.surveyorAsignedView(request);
+        return ResponseEntity.ok(response);
+    }
 }

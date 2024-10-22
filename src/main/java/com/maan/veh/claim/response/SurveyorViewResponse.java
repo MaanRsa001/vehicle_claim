@@ -83,4 +83,7 @@ public class SurveyorViewResponse {
 
     @JsonProperty("DealerLoginId")
     private String dealerLoginId;
+    
+    @JsonProperty("AssignedTo")
+    private String assignedTo;
 }

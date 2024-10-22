@@ -1,11 +1,24 @@
 package com.maan.veh.claim.serviceimpl;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,25 +43,35 @@ import com.maan.veh.claim.dto.FnolRequestDTO;
 import com.maan.veh.claim.dto.FnolRequestDTOMetaData;
 import com.maan.veh.claim.dto.SaveClaimRequestDTO;
 import com.maan.veh.claim.entity.ApiTransactionLog;
+import com.maan.veh.claim.entity.ClaimIntimationDetails;
+import com.maan.veh.claim.entity.ClaimIntimationDetailsId;
 import com.maan.veh.claim.repository.ApiTransactionLogRepository;
+import com.maan.veh.claim.repository.ClaimIntimationDetailsRepository;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
+import com.maan.veh.claim.request.ClaimIntimationRequestMetaData;
 import com.maan.veh.claim.request.ClaimIntimationThirdPartyInfo;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.request.SaveClaimRequest;
+import com.maan.veh.claim.response.ClaimIntimationResponse;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.service.ExternalApiService;
 
 @Service
 public class ExternalApiServiceImpl implements ExternalApiService {
+	
+	private static final Logger logger = Logger.getLogger(ExternalApiServiceImpl.class.getName());
 
     @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
     private ObjectMapper objectMapper;
+    
+    @Autowired
+    private ClaimIntimationDetailsRepository claimIntimationDetailsRepository;
 
     @Autowired
     private ApiTransactionLogRepository apiTransactionLogRepo;
@@ -91,6 +114,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             response.setIsError(true);
             return response;
         }
+        
 
         try {
             // Extract JWT token from request
@@ -103,9 +127,36 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             
             // Convert requestPayload to JSON and add headers
             SaveClaimRequestDTO dto = mapToSaveClaimRequestDTO(requestPayload);
+            
+            String saveOrUpdateResult = saveOrUpdateClaimIntimation(requestPayload);
+            
             String requestBody = objectMapper.writeValueAsString(dto);
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
             log.setRequest(requestBody);
+            
+			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+					return null;
+				}
+
+				public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+				}
+
+				public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+				}
+			} };
+
+			SSLContext sc = SSLContext.getInstance("SSL");
+			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+
+				@Override
+				public boolean verify(String hostname, SSLSession session) {
+					// TODO Auto-generated method stub
+					return true;
+				}
+			});
 
             // Send request to external API with JWT in Authorization header
             ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
@@ -331,8 +382,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    dto.setLanguageCode(request.getLanguageCode());
 	    dto.setPolicyNo(request.getPolicyNo());
 	    dto.setInsuredId(request.getInsuredId());
-	    dto.setLossDate(request.getLossDate());
-	    dto.setIntimatedDate(request.getIntimatedDate());
+	    dto.setLossDate(request.getLossDate().toString());
+	    dto.setIntimatedDate(request.getIntimatedDate().toString());
+	    dto.setNatureOfLoss(request.getNatureOfLoss());
 	    dto.setLossLocation(request.getLossLocation());
 	    dto.setPoliceStation(request.getPoliceStation());
 	    dto.setPoliceReportNo(request.getPoliceReportNo());
@@ -358,7 +410,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        metaData.setIpAddress(request.getRequestMetaData().getIpAddress());
 	        metaData.setOriginBranch(request.getRequestMetaData().getOriginBranch());
 	        metaData.setRequestData(request.getRequestMetaData().getRequestData());
-	        metaData.setRequestGeneratedDateTime(request.getRequestMetaData().getRequestGeneratedDateTime());
+//	        metaData.setRequestGeneratedDateTime(request.getRequestMetaData().getRequestGeneratedDateTime());
 	        metaData.setRequestId(request.getRequestMetaData().getRequestId());
 	        metaData.setRequestOrigin(request.getRequestMetaData().getRequestOrigin());
 	        metaData.setRequestReference(request.getRequestMetaData().getRequestReference());
@@ -544,6 +596,158 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	    return null; // Return null if authentication fails
 	}
+	
+	public String saveOrUpdateClaimIntimation(SaveClaimRequest saveClaimRequestDTO) {
+        try {
+            // Check if a record already exists for the given policyNo
+            Optional<ClaimIntimationDetails> existingRecord = claimIntimationDetailsRepository.findById(
+                    new ClaimIntimationDetailsId(saveClaimRequestDTO.getPolicyNo())
+            );
 
+            ClaimIntimationDetails claimIntimationDetails;
+
+            if (existingRecord.isPresent()) {
+                // Update the existing record
+                claimIntimationDetails = existingRecord.get();
+                logger.info("Updating existing record for policyNo: " + saveClaimRequestDTO.getPolicyNo());
+            } else {
+                // Insert new data
+                claimIntimationDetails = new ClaimIntimationDetails();
+                claimIntimationDetails.setPolicyNo(saveClaimRequestDTO.getPolicyNo());
+                logger.info("Inserting new record for policyNo: " + saveClaimRequestDTO.getPolicyNo());
+            }
+
+            // Map the fields from SaveClaimRequestDTO to ClaimIntimationDetails entity
+            claimIntimationDetails.setRequestOrigin(saveClaimRequestDTO.getRequestMetaData().getRequestOrigin());
+            claimIntimationDetails.setCurrentBranch(saveClaimRequestDTO.getRequestMetaData().getCurrentBranch());
+            claimIntimationDetails.setOriginBranch(saveClaimRequestDTO.getRequestMetaData().getOriginBranch());
+            claimIntimationDetails.setUserName(saveClaimRequestDTO.getRequestMetaData().getUserName());
+            claimIntimationDetails.setIpAddress(saveClaimRequestDTO.getRequestMetaData().getIpAddress());
+
+            claimIntimationDetails.setRequestGeneratedDateTime(saveClaimRequestDTO.getRequestMetaData().getRequestGeneratedDateTime());
+  
+            claimIntimationDetails.setConsumerTrackingId(saveClaimRequestDTO.getRequestMetaData().getConsumerTrackingID());
+            claimIntimationDetails.setLanguageCode(saveClaimRequestDTO.getLanguageCode());
+            claimIntimationDetails.setInsuredId(saveClaimRequestDTO.getInsuredId());
+
+            claimIntimationDetails.setLossDate(saveClaimRequestDTO.getLossDate());
+            claimIntimationDetails.setIntimatedDate(saveClaimRequestDTO.getIntimatedDate());
+
+            claimIntimationDetails.setLossLocation(saveClaimRequestDTO.getLossLocation());
+            claimIntimationDetails.setNatureOfLoss(saveClaimRequestDTO.getNatureOfLoss());
+            claimIntimationDetails.setPoliceStation(saveClaimRequestDTO.getPoliceStation());
+            claimIntimationDetails.setPoliceReportNo(saveClaimRequestDTO.getPoliceReportNo());
+            claimIntimationDetails.setLossDescription(saveClaimRequestDTO.getLossDescription());
+            claimIntimationDetails.setAtFault(saveClaimRequestDTO.getAtFault());
+
+            // Save or update the record in the database
+            claimIntimationDetailsRepository.save(claimIntimationDetails);
+            return "Success: Data saved/updated for policyNo: " + saveClaimRequestDTO.getPolicyNo();
+
+        } catch (Exception e) {
+            logger.severe("Error saving/updating data for policyNo: " + saveClaimRequestDTO.getPolicyNo() + " - " + e.getMessage());
+            return "Error: Unable to save/update data for policyNo: " + saveClaimRequestDTO.getPolicyNo();
+        }
+    }
+
+	@Override
+	public CommonResponse getClaimByPolicy(String policyNo) {
+	    CommonResponse response = new CommonResponse();
+	    try {
+	        // Fetch data by policy number
+	        Optional<ClaimIntimationDetails> dataOptional = claimIntimationDetailsRepository.findByPolicyNo(policyNo);
+	        
+	        if (dataOptional.isPresent()) {
+	            ClaimIntimationDetails data = dataOptional.get();
+	            ClaimIntimationResponse formattedResponse = mapToClaimIntimationResponse(data);
+	            
+	            response.setResponse(formattedResponse);
+	            response.setMessage("Data fetched successfully");
+	            response.setIsError(false);
+	        } else {
+	            response.setMessage("No data found for policy number: " + policyNo);
+	            response.setIsError(true);
+	        }
+	    } catch (Exception e) {
+	        response.setMessage("Failed to fetch data");
+	        response.setIsError(true);
+	    }
+	    return response;
+	}
+
+	@Override
+	public CommonResponse getAllClaims() {
+	    CommonResponse response = new CommonResponse();
+	    try {
+	        List<ClaimIntimationDetails> dataList = claimIntimationDetailsRepository.findAll();
+	        List<ClaimIntimationResponse> responseList = dataList.stream()
+	                .map(this::mapToClaimIntimationResponse)
+	                .collect(Collectors.toList());
+	        
+	        response.setResponse(responseList);
+	        response.setMessage("Data fetched successfully");
+	        response.setIsError(false);
+	    } catch (Exception e) {
+	        response.setMessage("Failed to fetch data");
+	        response.setIsError(true);
+	    }
+	    return response;
+	}
+
+	private ClaimIntimationResponse mapToClaimIntimationResponse(ClaimIntimationDetails data) {
+	    ClaimIntimationResponse response = new ClaimIntimationResponse();
+
+	    try {
+	        // Set fields from ClaimIntimationDetails entity to ClaimIntimationResponse
+	        response.setLanguageCode(data.getLanguageCode());
+	        response.setPolicyNo(data.getPolicyNo());
+	        response.setInsuredId(data.getInsuredId());
+
+	        response.setLossDate(data.getLossDate());
+	        response.setIntimatedDate(data.getIntimatedDate());
+	        response.setNatureOfLoss(data.getNatureOfLoss());
+	        response.setLossLocation(data.getLossLocation());
+	        response.setPoliceStation(data.getPoliceStation());
+	        response.setPoliceReportNo(data.getPoliceReportNo());
+	        response.setLossDescription(data.getLossDescription());
+	        response.setAtFault(data.getAtFault());
+	        response.setPolicyPeriod("Not available");  // Map other fields as needed
+
+	        // Set nested objects like requestMetaData, driver, attachmentDetails
+	        response.setRequestMetaData(mapToRequestMetaData(data));
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return response;
+	}
+
+	// Example of mapping nested objects (you need to complete as per your structure)
+	private ClaimIntimationRequestMetaData mapToRequestMetaData(ClaimIntimationDetails data) {
+	    ClaimIntimationRequestMetaData metaData = new ClaimIntimationRequestMetaData();
+
+	    try {
+	        // Map fields from ClaimIntimationDetails to ClaimIntimationRequestMetaData
+	        metaData.setConsumerTrackingID(data.getConsumerTrackingId());
+	        metaData.setCurrentBranch(data.getCurrentBranch());
+	        metaData.setIpAddress(data.getIpAddress());
+	        metaData.setOriginBranch(data.getOriginBranch()); 
+
+	        // Format requestGeneratedDateTime similarly
+	        if (data.getRequestGeneratedDateTime() != null) {
+	            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	            metaData.setRequestGeneratedDateTime(data.getRequestGeneratedDateTime());
+	        }
+	        
+	        metaData.setRequestOrigin(data.getRequestOrigin());
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } 
+
+	    return metaData;
+	}
+
+
+	
 
 }

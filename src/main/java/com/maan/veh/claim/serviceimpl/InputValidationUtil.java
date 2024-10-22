@@ -815,9 +815,9 @@ public class InputValidationUtil {
 	        */
 	        
 	        // Validate RequestGeneratedDateTime
-	        if (StringUtils.isBlank(metaData.getRequestGeneratedDateTime())) {
-	            errors.add(new ErrorList("100", "RequestMetaData.RequestGeneratedDateTime", "RequestGeneratedDateTime cannot be blank"));
-	        }
+//	        if (StringUtils.isBlank(metaData.getRequestGeneratedDateTime())) {
+//	            errors.add(new ErrorList("100", "RequestMetaData.RequestGeneratedDateTime", "RequestGeneratedDateTime cannot be blank"));
+//	        }
 	        
 	        // Validate RequestId
 	        /*
@@ -870,12 +870,12 @@ public class InputValidationUtil {
 	    if (StringUtils.isBlank(request.getInsuredId())) {
 	        errors.add(new ErrorList("100", "InsuredId", "InsuredId cannot be blank"));
 	    }
-	    if (StringUtils.isBlank(request.getLossDate())) {
-	        errors.add(new ErrorList("100", "LossDate", "LossDate cannot be blank"));
-	    }
-	    if (StringUtils.isBlank(request.getIntimatedDate())) {
-	        errors.add(new ErrorList("100", "IntimatedDate", "IntimatedDate cannot be blank"));
-	    }
+//	    if (StringUtils.isBlank(request.getLossDate())) {
+//	        errors.add(new ErrorList("100", "LossDate", "LossDate cannot be blank"));
+//	    }
+//	    if (StringUtils.isBlank(request.getIntimatedDate())) {
+//	        errors.add(new ErrorList("100", "IntimatedDate", "IntimatedDate cannot be blank"));
+//	    }
 	    if (StringUtils.isBlank(request.getLossLocation())) {
 	        errors.add(new ErrorList("100", "LossLocation", "LossLocation cannot be blank"));
 	    }

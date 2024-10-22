@@ -24,6 +24,9 @@ public class SaveClaimRequestDTO {
 
     @JsonProperty("intimatedDate")
     private String intimatedDate;
+    
+    @JsonProperty("natureOfLoss")
+    private String natureOfLoss;
 
     @JsonProperty("lossLocation")
     private String lossLocation;

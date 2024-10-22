@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.FnolRequest;
+import com.maan.veh.claim.request.GetClaimRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.request.SaveClaimRequest;
 import com.maan.veh.claim.response.CommonResponse;
@@ -41,5 +42,19 @@ public class ClaimIntimationController {
     public ResponseEntity<CommonResponse> authenticateUser(@RequestBody LoginRequest request) {
         CommonResponse response = externalApiService.authenticateUser(request);
         return ResponseEntity.ok(response);
+    }
+    
+ // New API to get a single claim by policy number
+    @PostMapping("/getClaimByPolicy")
+    public ResponseEntity<CommonResponse> getClaimByPolicy(@RequestBody GetClaimRequest request) {
+        CommonResponse res = externalApiService.getClaimByPolicy(request.getPolicyNo());
+        return ResponseEntity.ok(res);
+    }
+
+    // New API to get all claims
+    @PostMapping("/getAllClaims")
+    public ResponseEntity<CommonResponse> getAllClaims(@RequestBody GetClaimRequest request) {
+        CommonResponse res = externalApiService.getAllClaims();
+        return ResponseEntity.ok(res);
     }
 }

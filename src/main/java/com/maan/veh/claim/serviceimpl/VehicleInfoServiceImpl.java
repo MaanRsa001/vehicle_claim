@@ -442,4 +442,77 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	    return response;
 	}
 
+	@Override
+	public CommonResponse surveyorAsignedView(VehicleInfoRequest request) {
+		CommonResponse response = new CommonResponse();
+	    try {
+	        
+	    	List<SurveyorViewResponse> vehList = new ArrayList<>();
+	        
+	        // Fetch damage section details based on Status
+	        List<DamageSectionDetails> details = damageRepository.findByGarageLoginIdAndGarageDealerIsNotNull(request.getGarageId());
+	        if(details != null) {
+	        	
+	        for(DamageSectionDetails damage : details) {
+	        	
+	        	SurveyorViewResponse veh = new SurveyorViewResponse();
+	        	
+	        	veh.setDamageSno(String.valueOf(damage.getDamageSno()));
+	        	veh.setDamageDictDesc(Optional.ofNullable(damage.getDamageDirection()).orElse(""));
+	        	veh.setDamagePart(Optional.ofNullable(damage.getDamagePart()).orElse(""));
+	        	veh.setRepairReplace(Optional.ofNullable(damage.getRepairReplace()).orElse(""));
+	        	veh.setNoOfParts(Optional.ofNullable(damage.getNoOfParts()).map(String::valueOf).orElse(""));
+	        	veh.setGaragePrice(Optional.ofNullable(damage.getGaragePrice()).map(String::valueOf).orElse(""));
+	        	veh.setDealerPrice(Optional.ofNullable(damage.getDealerPrice()).map(String::valueOf).orElse(""));
+	        	veh.setGarageLoginId(Optional.ofNullable(damage.getGarageLoginId()).orElse(""));
+	        	veh.setDealerLoginId(Optional.ofNullable(damage.getDealerLoginId()).orElse(""));
+	        	
+	        	veh.setAssignedTo(damage.getGarageDealer());
+	        	
+	        	Optional<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNo(damage.getClaimNo());
+	        	if(vehicleInfoList.isPresent()) {
+	        		
+	        		InsuredVehicleInfo vehicle = vehicleInfoList.get();
+	        		
+	        		veh.setCompanyId(vehicle.getCompanyId() != null ? String.valueOf(vehicle.getCompanyId()) : null);
+                    veh.setPolicyNo(vehicle.getPolicyNo());
+                    veh.setClaimNo(vehicle.getClaimNo());
+                    veh.setVehicleMake(vehicle.getVehicleMake());
+                    veh.setVehicleModel(vehicle.getVehicleModel());
+                    veh.setMakeYear(vehicle.getMakeYear() != null ? String.valueOf(vehicle.getMakeYear()) : null);
+                    veh.setChassisNo(vehicle.getChassisNo());
+                    veh.setInsuredName(vehicle.getInsuredName());
+                    veh.setType(vehicle.getType());
+                    veh.setVehicleRegNo(vehicle.getVehicleRegNo()); 
+                    veh.setEntryDate(vehicle.getEntryDate());
+                    veh.setStatus(vehicle.getStatus());
+                    veh.setQuoteStatus(vehicle.getStatus());
+                    veh.setQuotationNo(damage.getQuotationNo());
+	        	}
+	        	 vehList.add(veh);
+	        }
+	        vehList = vehList.stream()
+	        	    .filter(res -> "Replace".equalsIgnoreCase(res.getRepairReplace())) // Filter condition
+	        	    .collect(Collectors.toList()); 
+	        
+                response.setErrors(Collections.emptyList());
+                response.setMessage("Success");
+                response.setResponse(vehList);
+            } else {
+                response.setErrors(Collections.singletonList("No vehicles found for the provided claim numbers and status"));
+                response.setMessage("Failed");
+                response.setIsError(true);
+                response.setResponse(Collections.emptyList());
+            }
+	        
+	    } catch (Exception e) {
+	        // Handle exceptions
+	    	String exceptionDetails = e.getClass().getSimpleName() + ": " + e.getMessage();
+	        response.setResponse(exceptionDetails);
+	        response.setMessage("Failed");
+	        response.setResponse(null);
+	    }
+	    return response;
+	}
+
 }
