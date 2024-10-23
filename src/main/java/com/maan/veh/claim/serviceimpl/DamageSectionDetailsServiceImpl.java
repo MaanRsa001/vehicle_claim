@@ -3,10 +3,10 @@ package com.maan.veh.claim.serviceimpl;
 import java.math.BigDecimal;
 //import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
-import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.entity.TotalAmountDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
@@ -32,8 +31,6 @@ import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DamageSectionDetailsResponse;
 import com.maan.veh.claim.response.ErrorList;
-import com.maan.veh.claim.response.VehicleInfoResponse;
-import com.maan.veh.claim.response.SaveClaimResponse.ErrorDetail;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
 
 @Service
@@ -112,6 +109,10 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            List<DamageSectionDetails> saveList = new ArrayList<>();
 	            int damageSno = 1;
 	            
+	            List<String> claimList = new ArrayList<>(new HashSet<>(reqList.stream().map(DamageSectionDetailsSaveReq::getClaimNo).collect(Collectors.toList())));
+	            String surveyorId = reqList.get(0).getSurveyorId();
+
+	            
 	            String claimNo = reqList.get(0).getClaimNo();
 	            for (DamageSectionDetailsSaveReq req : reqList) {
 	                
@@ -181,7 +182,9 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 
 	            // Create or Update a Record in total_amount_details
 	            //updateTotalAmountDetails(claimNo);
-
+	            
+	            asignRepairWorkToGarage(claimList,surveyorId);
+	            
 	            response.setErrors(Collections.emptyList());
 	            response.setMessage("Success");
 	            response.setResponse(Collections.emptyList());
@@ -201,8 +204,36 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    return response;
 	}
 
+	private void asignRepairWorkToGarage(List<String> claimList, String surveyorId) {
 
-	
+		try {
+			List<DamageSectionDetails> saveList = new ArrayList<>();
+
+			for (String claim : claimList) {
+
+				List<DamageSectionDetails> details = repository.findByClaimNoAndRepairReplace(claim, "REPAIR");
+
+				for (DamageSectionDetails data : details) {
+
+					data.setSurveyorId(surveyorId);
+					data.setGarageDealer("Garage");
+
+					data.setTotamtOfLabour(data.getLabourCost());
+					data.setTotPrice(data.getLabourCost());
+
+					data.setStatus("Surveyor");
+					data.setEntryDate(new Date());
+
+					saveList.add(data);
+				}
+
+			}
+			repository.saveAllAndFlush(saveList);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void updateTotalAmountDetails(String claimNo) {
 	    // Aggregate data for the specific claim_no
 	    List<DamageSectionDetails> damageDetailsList = repository.findByClaimNo(claimNo);
