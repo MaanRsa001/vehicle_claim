@@ -1,7 +1,5 @@
 package com.maan.veh.claim.serviceimpl;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,10 +11,8 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -45,6 +41,9 @@ import com.maan.veh.claim.dto.SaveClaimRequestDTO;
 import com.maan.veh.claim.entity.ApiTransactionLog;
 import com.maan.veh.claim.entity.ClaimIntimationDetails;
 import com.maan.veh.claim.entity.ClaimIntimationDetailsId;
+import com.maan.veh.claim.external.ErrorDetail;
+import com.maan.veh.claim.external.ErrorResponse;
+import com.maan.veh.claim.external.ExternalApiResponse;
 import com.maan.veh.claim.repository.ApiTransactionLogRepository;
 import com.maan.veh.claim.repository.ClaimIntimationDetailsRepository;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
@@ -106,15 +105,14 @@ public class ExternalApiServiceImpl implements ExternalApiService {
         log.setEndpoint(externalApiUrlCreatefnol);
 
         // Validate requestPayload
-        List<ErrorList> errors = validation.validateClaimIntemationDetails(requestPayload);
-        if (!errors.isEmpty()) {
-            response.setErrors(errors);
+        List<ErrorList> validationErrors = validation.validateClaimIntemationDetails(requestPayload);
+        if (!validationErrors.isEmpty()) {
+            response.setErrors(validationErrors);
             response.setMessage("Validation failed");
             response.setResponse(Collections.emptyMap());
             response.setIsError(true);
             return response;
         }
-        
 
         try {
             // Extract JWT token from request
@@ -128,50 +126,60 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             // Convert requestPayload to JSON and add headers
             SaveClaimRequestDTO dto = mapToSaveClaimRequestDTO(requestPayload);
             
-            String saveOrUpdateResult = saveOrUpdateClaimIntimation(requestPayload);
-            
             String requestBody = objectMapper.writeValueAsString(dto);
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
             log.setRequest(requestBody);
             
-			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-					return null;
-				}
+            // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
 
-				public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-				}
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
 
-				public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-				}
-			} };
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
 
-			SSLContext sc = SSLContext.getInstance("SSL");
-			sc.init(null, trustAllCerts, new java.security.SecureRandom());
-			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-
-				@Override
-				public boolean verify(String hostname, SSLSession session) {
-					// TODO Auto-generated method stub
-					return true;
-				}
-			});
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
 
             // Send request to external API with JWT in Authorization header
             ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
             log.setResponse(apiResponse.getBody());
             log.setStatus("SUCCESS");
 
-            response.setMessage("Data saved successfully");
-            response.setIsError(false);
-            response.setResponse(apiResponse.getBody());
+            // Parse the raw response into ExternalApiResponse object
+            ExternalApiResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), ExternalApiResponse.class);
+
+            if (externalApiResponse.isHasError()) {
+                // Create custom error response
+                List<ErrorResponse> errorList = new ArrayList<>();
+                for (ErrorDetail error : externalApiResponse.getData().getErrorDetailsList()) {
+                    errorList.add(new ErrorResponse(error.getErrorCode(), error.getErrorField(), error.getErrorDescription()));
+                }
+                response.setErrors(errorList);
+                response.setMessage(externalApiResponse.getMessage());
+                response.setResponse(Collections.emptyMap());
+                response.setIsError(true);
+            } else {
+                response.setMessage("Data saved successfully");
+                response.setIsError(false);
+                response.setResponse(externalApiResponse);
+            }
 
         } catch (Exception e) {
             log.setStatus("FAILURE");
             log.setErrorMessage(e.getMessage());
             response.setMessage("Failed to save data");
             response.setIsError(true);
+            response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage()))); // General error
         } finally {
             log.setResponseTime(LocalDateTime.now());
             apiTransactionLogRepo.save(log);
@@ -179,6 +187,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
         return response;
     }
+
 
 	@Override
 	public CommonResponse findFNOL(FnolRequest requestPayload) {
@@ -375,15 +384,17 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    if (request == null) {
 	        return null;
 	    }
-
+	    
+	    SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	    
 	    SaveClaimRequestDTO dto = new SaveClaimRequestDTO();
 	    
 	    // Map simple fields
 	    dto.setLanguageCode(request.getLanguageCode());
 	    dto.setPolicyNo(request.getPolicyNo());
 	    dto.setInsuredId(request.getInsuredId());
-	    dto.setLossDate(request.getLossDate().toString());
-	    dto.setIntimatedDate(request.getIntimatedDate().toString());
+	    dto.setLossDate(isoDateFormat.format(request.getLossDate()));
+	    dto.setIntimatedDate(isoDateFormat.format(request.getIntimatedDate()));
 	    dto.setNatureOfLoss(request.getNatureOfLoss());
 	    dto.setLossLocation(request.getLossLocation());
 	    dto.setPoliceStation(request.getPoliceStation());
@@ -410,7 +421,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        metaData.setIpAddress(request.getRequestMetaData().getIpAddress());
 	        metaData.setOriginBranch(request.getRequestMetaData().getOriginBranch());
 	        metaData.setRequestData(request.getRequestMetaData().getRequestData());
-//	        metaData.setRequestGeneratedDateTime(request.getRequestMetaData().getRequestGeneratedDateTime());
+	        metaData.setRequestGeneratedDateTime(isoDateFormat.format(new Date()));
 	        metaData.setRequestId(request.getRequestMetaData().getRequestId());
 	        metaData.setRequestOrigin(request.getRequestMetaData().getRequestOrigin());
 	        metaData.setRequestReference(request.getRequestMetaData().getRequestReference());
