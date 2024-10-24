@@ -491,9 +491,9 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	        	}
 	        	 vehList.add(veh);
 	        }
-	        vehList = vehList.stream()
-	        	    .filter(res -> "Replace".equalsIgnoreCase(res.getRepairReplace())) // Filter condition
-	        	    .collect(Collectors.toList()); 
+//	        vehList = vehList.stream()
+//	        	    .filter(res -> "Replace".equalsIgnoreCase(res.getRepairReplace())) // Filter condition
+//	        	    .collect(Collectors.toList()); 
 	        
                 response.setErrors(Collections.emptyList());
                 response.setMessage("Success");
