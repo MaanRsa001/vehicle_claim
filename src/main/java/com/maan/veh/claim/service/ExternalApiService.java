@@ -1,5 +1,6 @@
 package com.maan.veh.claim.service;
 
+import com.maan.veh.claim.request.ClaimListRequest;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.GetClaimRequest;
@@ -20,5 +21,7 @@ public interface ExternalApiService {
 	CommonResponse getClaimByPolicy(String policyNo);
 
 	CommonResponse getAllClaims();
+
+	CommonResponse getClaimListing(ClaimListRequest requestPayload);
 
 }

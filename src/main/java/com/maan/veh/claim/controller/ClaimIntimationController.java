@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.maan.veh.claim.request.ClaimListRequest;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.GetClaimRequest;
@@ -56,5 +57,11 @@ public class ClaimIntimationController {
     public ResponseEntity<CommonResponse> getAllClaims(@RequestBody GetClaimRequest request) {
         CommonResponse res = externalApiService.getAllClaims();
         return ResponseEntity.ok(res);
+    }
+    
+    @PostMapping("/claimListing")
+    public ResponseEntity<CommonResponse> getClaimListing(@RequestBody ClaimListRequest requestPayload) {
+        	CommonResponse res = externalApiService.getClaimListing(requestPayload);
+            return ResponseEntity.ok(res);
     }
 }

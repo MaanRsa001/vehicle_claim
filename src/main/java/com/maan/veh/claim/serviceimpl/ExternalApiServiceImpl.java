@@ -49,11 +49,14 @@ import com.maan.veh.claim.repository.ClaimIntimationDetailsRepository;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
 import com.maan.veh.claim.request.ClaimIntimationRequestMetaData;
 import com.maan.veh.claim.request.ClaimIntimationThirdPartyInfo;
+import com.maan.veh.claim.request.ClaimListRequest;
+import com.maan.veh.claim.request.ClaimListRequestDTO;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.request.SaveClaimRequest;
 import com.maan.veh.claim.response.ClaimIntimationResponse;
+import com.maan.veh.claim.response.ClaimListResponse;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.service.ExternalApiService;
@@ -77,6 +80,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     
     @Value("${external.api.url.createfnol}")  
     private String externalApiUrlCreatefnol;
+    
+    @Value("${external.api.url.claimlisting}")  
+    private String externalApiUrlClaimListing;
     
     @Value("${external.api.url.getfnol}")  
     private String externalApiUrlGetfnol;
@@ -756,6 +762,95 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    } 
 
 	    return metaData;
+	}
+
+
+	@Override
+	public CommonResponse getClaimListing(ClaimListRequest requestPayload) {
+		CommonResponse response = new CommonResponse();
+        ApiTransactionLog log = new ApiTransactionLog();
+        log.setRequestTime(LocalDateTime.now());
+        log.setEntryDate(new Date());
+        log.setEndpoint(externalApiUrlClaimListing);
+
+        try {
+            // Extract JWT token from request
+            String jwtToken = authenticateUserCall();
+            
+            // Create headers with JWT token
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + jwtToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            // Convert requestPayload to JSON and add headers
+            ClaimListRequestDTO dto = mapToClaimListingDTO(requestPayload);
+            
+            String requestBody = objectMapper.writeValueAsString(dto);
+            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+            log.setRequest(requestBody);
+            
+            // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+
+            // Send request to external API with JWT in Authorization header
+            ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
+            log.setResponse(apiResponse.getBody());
+            log.setStatus("SUCCESS");
+
+            // Parse the raw response into ExternalApiResponse object
+            ClaimListResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), ClaimListResponse.class);
+
+            if ("true".equalsIgnoreCase(externalApiResponse.getHasError())) {
+                // Create custom error response
+                List<ErrorResponse> errorList = new ArrayList<>();
+//                for (ErrorDetail error : externalApiResponse.getData().getErrorDetailsList()) {
+//                    errorList.add(new ErrorResponse(error.getErrorCode(), error.getErrorField(), error.getErrorDescription()));
+//                }
+                response.setErrors(errorList);
+                response.setMessage(externalApiResponse.getMessage());
+                response.setResponse(Collections.emptyMap());
+                response.setIsError(true);
+            } else {
+                response.setMessage("Data saved successfully");
+                response.setIsError(false);
+                response.setResponse(externalApiResponse);
+            }
+
+        } catch (Exception e) {
+            log.setStatus("FAILURE");
+            log.setErrorMessage(e.getMessage());
+            response.setMessage("Failed to save data");
+            response.setIsError(true);
+            response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage()))); // General error
+        } finally {
+            log.setResponseTime(LocalDateTime.now());
+            apiTransactionLogRepo.save(log);
+        }
+
+        return response;
+	}
+
+
+	private ClaimListRequestDTO mapToClaimListingDTO(ClaimListRequest requestPayload) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

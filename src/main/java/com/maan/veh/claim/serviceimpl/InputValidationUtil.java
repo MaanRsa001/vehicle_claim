@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -69,102 +70,92 @@ public class InputValidationUtil {
 		
 	}
 	
-	public List<ErrorList> validateWorkOrder(GarageWorkOrderSaveReq req){
-		List<ErrorList> list = new ArrayList<ErrorList>();
-		
-		// Validate and set claimNo
-        if (StringUtils.isBlank(req.getClaimNo())) {
-            list.add(new ErrorList("100","Claim number","Claim number cannot be blank"));
-        }
+	public List<ErrorList> validateWorkOrder(GarageWorkOrderSaveReq req) {
+	    List<ErrorList> list = new ArrayList<>();
 
-        // Validate and set workOrderNo
-        if (StringUtils.isBlank(req.getWorkOrderNo())) {
-            list.add(new ErrorList("100","WorkOrderNo","Work order number cannot be blank"));
+	    // Existing validations
+	    if (StringUtils.isBlank(req.getClaimNo())) {
+	        list.add(new ErrorList("100", "Claim number", "Claim number cannot be blank"));
+	    }
 
-        }
+	    if (StringUtils.isBlank(req.getWorkOrderNo())) {
+	        list.add(new ErrorList("100", "WorkOrderNo", "Work order number cannot be blank"));
+	    }
 
-        // Validate and set workOrderType
-        if (StringUtils.isBlank(req.getWorkOrderType())) {
-            list.add(new ErrorList("100","WorkOrderType","Work order type cannot be blank"));
-        }
+	    if (StringUtils.isBlank(req.getWorkOrderType())) {
+	        list.add(new ErrorList("100", "WorkOrderType", "Work order type cannot be blank"));
+	    }
 
-        // Validate and set settlementType
-        if (StringUtils.isBlank(req.getSettlementType())) {
-            list.add(new ErrorList("100","SettlementType","Settlement type cannot be blank"));
+	    if (StringUtils.isBlank(req.getSettlementType())) {
+	        list.add(new ErrorList("100", "SettlementType", "Settlement type cannot be blank"));
+	    }
 
-        }
+	    if (StringUtils.isBlank(req.getSettlementTo())) {
+	        list.add(new ErrorList("100", "SettlementTo", "Settlement to cannot be blank"));
+	    }
 
-        // Validate and set settlementTo
-        if (StringUtils.isBlank(req.getSettlementTo())) {
-            list.add(new ErrorList("100","SettlementTo","Settlement to cannot be blank"));
+	    if (StringUtils.isBlank(req.getLocation())) {
+	        list.add(new ErrorList("100", "Location", "Location cannot be blank"));
+	    }
 
-        }
+	    if (StringUtils.isBlank(req.getRepairType())) {
+	        list.add(new ErrorList("100", "RepairType", "Repair type cannot be blank"));
+	    }
 
-//        // Validate and set garageName
-//        if (StringUtils.isBlank(req.getGarageName())) {
-//            list.add(new ErrorList("100","GarageName","Garage name cannot be blank"));
-//
-//        }
+	    if (StringUtils.isNotBlank(req.getSparepartsDealerId())) {
+	        if (StringUtils.isBlank(req.getQuotationNo())) {
+	            list.add(new ErrorList("100", "QuotationNo", "Quotation number cannot be blank"));
+	        }
+	    }
 
-        // Validate and set location
-        if (StringUtils.isBlank(req.getLocation())) {
-            list.add(new ErrorList("100","Location","Location cannot be blank"));
+	    if (StringUtils.isBlank(req.getLossType())) {
+	        list.add(new ErrorList("100", "LossType", "Loss type cannot be blank"));
+	    }
 
-        }
+	    if (StringUtils.isBlank(req.getCreatedBy())) {
+	        list.add(new ErrorList("100", "CreatedBy", "Created by cannot be blank"));
+	    }
 
-        // Validate and set repairType
-        if (StringUtils.isBlank(req.getRepairType())) {
-            list.add(new ErrorList("100","RepairType","Repair type cannot be blank"));
+	    Date workOrderDate = null;
+	    Date deliveryDate = null;
 
-        }
+	    // Parse and validate workOrderDate
+	    try {
+	        if (!StringUtils.isBlank(req.getWorkOrderDate())) {
+	            workOrderDate = DD_MM_YYYY.parse(req.getWorkOrderDate());
+	        }
+	    } catch (ParseException e) {
+	        list.add(new ErrorList("100", "WorkOrderDate", "Work order date is invalid or not in the correct format (dd/MM/yyyy)"));
+	    }
 
-        if (StringUtils.isNotBlank(req.getSparepartsDealerId())) {
-			// Validate and set quotationNo
-			if (StringUtils.isBlank(req.getQuotationNo())) {
-				list.add(new ErrorList("100", "QuotationNo", "Quotation number cannot be blank"));
+	    // Parse and validate deliveryDate
+	    try {
+	        if (!StringUtils.isBlank(req.getDeliveryDate())) {
+	            deliveryDate = DD_MM_YYYY.parse(req.getDeliveryDate());
+	        }
+	    } catch (ParseException e) {
+	        list.add(new ErrorList("100", "DeliveryDate", "Delivery Date is invalid or not in the correct format (dd/MM/yyyy)"));
+	    }
 
-			} 
-		}
-		// Validate and set lossType
-        if (StringUtils.isBlank(req.getLossType())) {
-            list.add(new ErrorList("100","Loss type","Loss type cannot be blank"));
+	    // Validate deliveryDate is not before workOrderDate
+	    if (workOrderDate != null && deliveryDate != null) {
+	        if (deliveryDate.before(workOrderDate)) {
+	            list.add(new ErrorList("101", "DeliveryDate", "Delivery date must not be less than work order date"));
+	        }
+	    }
 
-        }
+	    // Validate totalLoss
+	    try {
+	        if (!StringUtils.isBlank(req.getTotalLoss())) {
+	            new BigDecimal(req.getTotalLoss());
+	        }
+	    } catch (NumberFormatException e) {
+	        list.add(new ErrorList("100", "TotalLoss", "Total loss must be a valid number"));
+	    }
 
-        // Validate and set createdBy
-        if (StringUtils.isBlank(req.getCreatedBy())) {
-            list.add(new ErrorList("100","CreatedBy","Created by cannot be blank"));
-
-        }
-        
-        try {
-            if (!StringUtils.isBlank(req.getWorkOrderDate())) {
-                DD_MM_YYYY.parse(req.getWorkOrderDate());
-            }
-        } catch (ParseException e) {
-            list.add(new ErrorList("100", "WorkOrderDate", "Work order date is invalid or not in the correct format (dd/MM/yyyy)"));
-        }
-        
-        try {
-            if (!StringUtils.isBlank(req.getDeliveryDate())) {
-                DD_MM_YYYY.parse(req.getDeliveryDate());
-            }
-        } catch (ParseException e) {
-            list.add(new ErrorList("100", "Delivery Date", "Delivery Date is invalid or not in the correct format (dd/MM/yyyy)"));
-        }
-        
-        try {
-            if (!StringUtils.isBlank(req.getTotalLoss())) {
-                new BigDecimal(req.getTotalLoss());
-            }
-        } catch (NumberFormatException e) {
-            list.add(new ErrorList("100", "TotalLoss", "Total loss must be a valid number"));
-        }
-
-       
-		
-		return list;
+	    return list;
 	}
+
 
 	public List<ErrorList> validateDamageDetails(List<DamageSectionDetailsSaveReq> reqList) {
 	    List<ErrorList> list = new ArrayList<>();
