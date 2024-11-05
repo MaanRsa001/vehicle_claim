@@ -115,6 +115,10 @@ public class InputValidationUtil {
 	    if (StringUtils.isBlank(req.getCreatedBy())) {
 	        list.add(new ErrorList("100", "CreatedBy", "Created by cannot be blank"));
 	    }
+	    
+	    if (StringUtils.isBlank(req.getQuoteStatus())) {
+	        list.add(new ErrorList("100", "Status", "status cannot be blank"));
+	    }
 
 	    Date workOrderDate = null;
 	    Date deliveryDate = null;

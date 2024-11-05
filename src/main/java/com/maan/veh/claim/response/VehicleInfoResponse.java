@@ -55,4 +55,7 @@ public class VehicleInfoResponse {
     
     @JsonProperty("QuotationNo")
     private String quotationNo;
+    
+    @JsonProperty("DealerLogin")
+    private String dealerLogin;
 }

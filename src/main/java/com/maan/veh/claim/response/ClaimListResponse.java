@@ -11,16 +11,16 @@ import java.util.List;
 @AllArgsConstructor
 public class ClaimListResponse {
 
-    @JsonProperty("HasError")
+    @JsonProperty("hasError")
     private String hasError;
 
-    @JsonProperty("Status")
+    @JsonProperty("status")
     private String status;
 
-    @JsonProperty("Data")
+    @JsonProperty("data")
     private List<ClaimData> data;
 
-    @JsonProperty("Message")
+    @JsonProperty("message")
     private String message;
 
 }

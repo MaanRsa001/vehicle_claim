@@ -1,10 +1,9 @@
 package com.maan.veh.claim.response;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,47 +13,65 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClaimData {
 
-    @JsonProperty("HasError")
-    private String hasError;
+    @JsonProperty("hasError")
+    private boolean hasError;
 
-    @JsonProperty("StatusCode")
-    private String statusCode;
+    @JsonProperty("statusCode")
+    private int statusCode;
 
-    @JsonProperty("PolicyNo")
+    @JsonProperty("policyNo")
     private String policyNo;
 
-    @JsonProperty("ProductName")
+    @JsonProperty("productName")
     private String productName;
 
-    @JsonProperty("ClaimNo")
+    @JsonProperty("claimNo")
     private String claimNo;
 
-    @JsonProperty("ClaimIntimationDate")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @JsonProperty("claimIntimationDate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private Date claimIntimationDate;
 
-    @JsonProperty("ClaimLossDate")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @JsonProperty("claimLossDate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private Date claimLossDate;
 
-    @JsonProperty("LossDescription")
+    @JsonProperty("lossDescription")
     private String lossDescription;
 
-    @JsonProperty("LossLocation")
+    @JsonProperty("lossLocation")
     private String lossLocation;
 
-    @JsonProperty("ProductId")
+    @JsonProperty("productId")
     private String productId;
 
-    @JsonProperty("Status")
+    @JsonProperty("status")
     private String status;
 
-    @JsonProperty("LobName")
+    @JsonProperty("lobName")
     private String lobName;
 
-    @JsonProperty("LobCode")
+    @JsonProperty("lobCode")
     private String lobCode;
 
-    @JsonProperty("SgsId")
+    @JsonProperty("sgsId")
     private String sgsId;
+
+    // Custom getter to return claimIntimationDate in "dd/MM/yyyy" format
+    public String getClaimIntimationDate() {
+        return formatDate(claimIntimationDate);
+    }
+
+    // Custom getter to return claimLossDate in "dd/MM/yyyy" format
+    public String getClaimLossDate() {
+        return formatDate(claimLossDate);
+    }
+
+    // Helper method to format Date
+    private String formatDate(Date date) {
+        if (date != null) {
+            return new SimpleDateFormat("dd/MM/yyyy").format(date);
+        }
+        return null;
+    }
 }

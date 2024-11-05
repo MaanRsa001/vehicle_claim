@@ -167,7 +167,14 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
             // Collect claim numbers and map claim to quotation numbers in one step
             Map<String, String> claimToQuotationMap = workOrders.stream()
                 .collect(Collectors.toMap(GarageWorkOrder::getClaimNo, GarageWorkOrder::getQuotationNo));
+            
+            Map<String, String> claimToDealerMap = workOrders.stream()
+            	    .collect(Collectors.toMap(
+            	        GarageWorkOrder::getClaimNo,
+            	        workOrder -> workOrder.getSparepartsDealerId() != null ? workOrder.getSparepartsDealerId() : ""
+            	    ));
 
+            
             List<String> claimNumbers = new ArrayList<>(claimToQuotationMap.keySet());
             
             List<String> claimWithReplacement = new ArrayList<>();
@@ -206,6 +213,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
                     veh.setQuoteStatus(vehicle.getStatus());
                     veh.setQuotationNo(claimToQuotationMap.get(vehicle.getClaimNo()));
                     
+                    veh.setDealerLogin(claimToDealerMap.get(vehicle.getClaimNo()));
                     // Add the populated response to the list
                     vehList.add(veh);
                 }

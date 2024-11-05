@@ -825,7 +825,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 //                }
                 response.setErrors(errorList);
                 response.setMessage(externalApiResponse.getMessage());
-                response.setResponse(Collections.emptyMap());
+                response.setResponse(externalApiResponse);
                 response.setIsError(true);
             } else {
                 response.setMessage("Data saved successfully");
@@ -849,11 +849,86 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 
 	private ClaimListRequestDTO mapToClaimListingDTO(ClaimListRequest requestPayload) {
-		// TODO Auto-generated method stub
-		return null;
+	    if (requestPayload == null) {
+	        return null;
+	    }
+
+	    ClaimIntimationDTORequestMetaData dtoRequestMetaData = new ClaimIntimationDTORequestMetaData();
+
+	    try {
+	        ClaimIntimationRequestMetaData requestMetaData = requestPayload.getRequestMetaData();
+
+	        if (requestMetaData != null) {
+	            try {
+	                dtoRequestMetaData.setConsumerTrackingID(requestMetaData.getConsumerTrackingID());
+	                dtoRequestMetaData.setCurrentBranch(requestMetaData.getCurrentBranch());
+	                dtoRequestMetaData.setIpAddress(requestMetaData.getIpAddress());
+	                dtoRequestMetaData.setOriginBranch(requestMetaData.getOriginBranch());
+	                dtoRequestMetaData.setRequestData(requestMetaData.getRequestData());
+	                
+	                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+	                dtoRequestMetaData.setRequestGeneratedDateTime(
+	                    requestMetaData.getRequestGeneratedDateTime() != null 
+	                        ? dateFormat.format(requestMetaData.getRequestGeneratedDateTime()) 
+	                        : null
+	                );
+	                
+	                dtoRequestMetaData.setRequestId(requestMetaData.getRequestId());
+	                dtoRequestMetaData.setRequestOrigin(requestMetaData.getRequestOrigin());
+	                dtoRequestMetaData.setRequestReference(requestMetaData.getRequestReference());
+	                dtoRequestMetaData.setRequestedService(requestMetaData.getRequestedService());
+	                dtoRequestMetaData.setResponseData(requestMetaData.getResponseData());
+	                dtoRequestMetaData.setSourceCode(requestMetaData.getSourceCode());
+	                dtoRequestMetaData.setUserName(requestMetaData.getUserName());
+	            } catch (Exception e) {
+	                System.err.println("Error mapping requestMetaData: " + e.getMessage());
+	                e.printStackTrace();
+	            }
+	        }
+	    } catch (Exception e) {
+	        System.err.println("Error accessing requestMetaData from requestPayload: " + e.getMessage());
+	        e.printStackTrace();
+	    }
+
+	    String claimNotificationFromDate = null;
+	    String claimNotificationToDate = null;
+	    String claimLossFromDate = null;
+	    String claimLossToDate = null;
+
+	    try {
+	        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+	        claimNotificationFromDate = requestPayload.getClaimNotificationFromDate() != null 
+	            ? dateFormat.format(requestPayload.getClaimNotificationFromDate()) : "";
+
+	        claimNotificationToDate = requestPayload.getClaimNotificationToDate() != null 
+	            ? dateFormat.format(requestPayload.getClaimNotificationToDate()) : "";
+
+	        claimLossFromDate = requestPayload.getClaimLossFromDate() != null 
+	            ? dateFormat.format(requestPayload.getClaimLossFromDate()) : "";
+
+	        claimLossToDate = requestPayload.getClaimLossToDate() != null 
+	            ? dateFormat.format(requestPayload.getClaimLossToDate()) : "";
+
+	    } catch (Exception e) {
+	        System.err.println("Error converting date fields: " + e.getMessage());
+	        e.printStackTrace();
+	    }
+
+	    return new ClaimListRequestDTO(
+	        requestPayload.getLobCode(),
+	        requestPayload.getProdCode(),
+	        requestPayload.getPolicyNumber(),
+	        requestPayload.getClaimNotificationNumber(),
+	        requestPayload.getCreatedBy(),
+	        claimNotificationFromDate,
+	        claimNotificationToDate,
+	        claimLossFromDate,
+	        claimLossToDate,
+	        dtoRequestMetaData
+	    );
 	}
 
-
-	
 
 }
