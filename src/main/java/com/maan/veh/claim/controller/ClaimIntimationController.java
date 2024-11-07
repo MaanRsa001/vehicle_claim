@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.maan.veh.claim.dto.SaveSparePartsDTO;
 import com.maan.veh.claim.request.ClaimListRequest;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.FnolRequest;
@@ -62,6 +63,12 @@ public class ClaimIntimationController {
     @PostMapping("/claimListing")
     public ResponseEntity<CommonResponse> getClaimListing(@RequestBody ClaimListRequest requestPayload) {
         	CommonResponse res = externalApiService.getClaimListing(requestPayload);
+            return ResponseEntity.ok(res);
+    }
+    
+    @PostMapping("/saveSpareParts")
+    public ResponseEntity<CommonResponse> saveSpareParts(@RequestBody SaveSparePartsDTO requestPayload) {
+        	CommonResponse res = externalApiService.saveSpareParts(requestPayload);
             return ResponseEntity.ok(res);
     }
 }

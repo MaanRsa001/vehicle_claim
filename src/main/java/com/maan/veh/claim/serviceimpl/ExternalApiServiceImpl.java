@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -38,14 +39,19 @@ import com.maan.veh.claim.dto.ClaimTransactionRequestDTOMetaData;
 import com.maan.veh.claim.dto.FnolRequestDTO;
 import com.maan.veh.claim.dto.FnolRequestDTOMetaData;
 import com.maan.veh.claim.dto.SaveClaimRequestDTO;
+import com.maan.veh.claim.dto.SaveSparePartsDTO;
 import com.maan.veh.claim.entity.ApiTransactionLog;
 import com.maan.veh.claim.entity.ClaimIntimationDetails;
 import com.maan.veh.claim.entity.ClaimIntimationDetailsId;
+import com.maan.veh.claim.entity.DamageSectionDetails;
+import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.external.ErrorDetail;
 import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.external.ExternalApiResponse;
 import com.maan.veh.claim.repository.ApiTransactionLogRepository;
 import com.maan.veh.claim.repository.ClaimIntimationDetailsRepository;
+import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
+import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
 import com.maan.veh.claim.request.ClaimIntimationRequestMetaData;
 import com.maan.veh.claim.request.ClaimIntimationThirdPartyInfo;
@@ -55,6 +61,9 @@ import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.request.SaveClaimRequest;
+import com.maan.veh.claim.request.SaveSparePartsRequest;
+import com.maan.veh.claim.request.SaveSparePartsRequestMetaData;
+import com.maan.veh.claim.request.VehicleDamageDetailRequest;
 import com.maan.veh.claim.response.ClaimIntimationResponse;
 import com.maan.veh.claim.response.ClaimListResponse;
 import com.maan.veh.claim.response.CommonResponse;
@@ -78,11 +87,20 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     @Autowired
     private ApiTransactionLogRepository apiTransactionLogRepo;
     
+    @Autowired
+    private GarageWorkOrderRepository garageWorkOrderRepo;
+    
+    @Autowired
+    private DamageSectionDetailsRepository damageSectionDetailsRepo;
+    
     @Value("${external.api.url.createfnol}")  
     private String externalApiUrlCreatefnol;
     
     @Value("${external.api.url.claimlisting}")  
     private String externalApiUrlClaimListing;
+    
+    @Value("${external.api.url.savespareparts}")  
+    private String externalApiUrlSaveSpareparts;
     
     @Value("${external.api.url.getfnol}")  
     private String externalApiUrlGetfnol;
@@ -591,7 +609,28 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	        // Create HttpEntity containing headers and the request body
 	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+	        
+	     // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
 
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+	        
+	        
 	        // Send request to external authentication API
 	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
 	        log.setResponse(apiResponse.getBody());
@@ -866,7 +905,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                dtoRequestMetaData.setOriginBranch(requestMetaData.getOriginBranch());
 	                dtoRequestMetaData.setRequestData(requestMetaData.getRequestData());
 	                
-	                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 	                dtoRequestMetaData.setRequestGeneratedDateTime(
 	                    requestMetaData.getRequestGeneratedDateTime() != null 
@@ -897,7 +936,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    String claimLossToDate = null;
 
 	    try {
-	        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 	        claimNotificationFromDate = requestPayload.getClaimNotificationFromDate() != null 
 	            ? dateFormat.format(requestPayload.getClaimNotificationFromDate()) : "";
@@ -929,6 +968,201 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        dtoRequestMetaData
 	    );
 	}
+
+
+	@Override
+	public CommonResponse saveSpareParts(SaveSparePartsDTO request) {
+
+	    CommonResponse response = new CommonResponse();
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+	    log.setEndpoint(externalApiUrlSaveSpareparts);
+
+	    try {
+	        // Retrieve data from repositories
+	    	Optional<GarageWorkOrder> optionalWorkOrder = garageWorkOrderRepo.findByClaimNo(request.getClaimNo());
+	        List<DamageSectionDetails> damageDetails = damageSectionDetailsRepo.findByClaimNo(request.getClaimNo());
+	        if (optionalWorkOrder.isPresent()) {
+	        	GarageWorkOrder workOrder = optionalWorkOrder.get();
+	        
+	        if (workOrder == null || damageDetails.isEmpty()) {
+	            response.setMessage("No data found for the provided claim or work order number");
+	            response.setIsError(true);
+	            response.setErrors(Collections.singletonList(new ErrorResponse("404", "Data Not Found", "Data not found for the provided claim or work order number")));
+	            return response;
+	        }
+
+	        // Map entities to request DTO
+	        SaveSparePartsRequest dto = mapToSaveSparePartsRequest(workOrder, damageDetails);
+
+	        // Authenticate and retrieve JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Create headers and add JWT token
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Convert DTO to JSON for request body and add headers
+	        String requestBody = objectMapper.writeValueAsString(dto);
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+	        log.setRequest(requestBody);
+	        
+	     // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+	        
+	        // Send request to external API
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
+	        log.setResponse(apiResponse.getBody());
+	        log.setStatus("SUCCESS");
+
+	        // Parse response into ExternalApiResponse object
+	        ClaimListResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), ClaimListResponse.class);
+
+	        // Process response based on external API success status
+	        if ("true".equalsIgnoreCase(externalApiResponse.getHasError())) {
+	            response.setMessage(externalApiResponse.getMessage());
+	            //response.setErrors(externalApiResponse.getErrors());
+	            response.setResponse(externalApiResponse);
+	            response.setIsError(true);
+	        } else {
+	            response.setMessage("Data saved successfully");
+	            response.setIsError(false);
+	            response.setResponse(externalApiResponse);
+	        }
+	        
+	      }
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        apiTransactionLogRepo.save(log);
+	    }
+
+	    return response;
+	}
+	
+	private SaveSparePartsRequest mapToSaveSparePartsRequest(GarageWorkOrder workOrder, List<DamageSectionDetails> damageDetails) {
+	    SaveSparePartsRequest request = new SaveSparePartsRequest();
+
+	    try {
+	    	SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	    	
+			// Map fields from GarageWorkOrder to SaveSparePartsRequest
+			request.setWorkOrderType(workOrder.getWorkOrderType());
+			request.setWorkOrderNo(workOrder.getWorkOrderNo());
+			request.setWorkOrderDate(isoDateFormat.format(workOrder.getWorkOrderDate())); 
+			request.setAccForSettlementType(workOrder.getSettlementType());
+			request.setAccForSettlement(workOrder.getSettlementToDesc());
+			request.setSparePartsDealer(workOrder.getSparepartsDealerId());
+			request.setGarageCode(workOrder.getGarageId());
+			request.setGarageQuotationNo(workOrder.getQuotationNo());
+			request.setDeliveryDate(isoDateFormat.format(workOrder.getDeliveryDate()));
+			request.setDeliveredTo(workOrder.getGarageName());
+			request.setSubrogation("Y".equalsIgnoreCase(workOrder.getSubrogationYn()));
+			request.setJointOrder("Y".equalsIgnoreCase(workOrder.getJointOrderYn()));
+			request.setTotalLoss(workOrder.getTotalLoss().toString());
+			request.setTotalLossType(workOrder.getLossType());
+			request.setRemarks(workOrder.getRemarks());
+			
+//			request.setReplacementCost(workOrder.getReplacementCost().toString());
+//			request.setReplacementCostDeductible(workOrder.getReplacementCostDeductible().toString());
+//			request.setSparePartDepreciation(workOrder.getSparePartDepreciation().toString());
+//			request.setDiscountonSpareParts(workOrder.getDiscountonSpareParts().toString());
+//			request.setTotalAmountReplacement(workOrder.getTotalAmountReplacement().toString());
+//			request.setRepairLabour(workOrder.getRepairLabour().toString());
+//			request.setRepairLabourDeductible(workOrder.getRepairLabourDeductible().toString());
+//			request.setRepairLabourDiscountAmount(workOrder.getRepairLabourDiscountAmount().toString());
+//			request.setTotalAmountRepairLabour(workOrder.getTotalAmountRepairLabour().toString());
+//			request.setNetAmount(workOrder.getNetAmount().toString());
+//			request.setUnkownAccidentDeduction(workOrder.getUnkownAccidentDeduction().toString());
+//			request.setAmounttobeRecovered(workOrder.getAmounttobeRecovered().toString());
+//			request.setTotalafterDeductions(workOrder.getTotalafterDeductions().toString());
+//			request.setVatRatePer(workOrder.getVatRatePer().toString());
+//			request.setVatRate(workOrder.getVatRate().toString());
+//			request.setVatAmount(workOrder.getVatAmount().toString());
+//			request.setTotalWithVAT(workOrder.getTotalWithVAT().toString());
+
+			// Map DamageSectionDetails list to vehicleDamageDetails
+			List<VehicleDamageDetailRequest> vehicleDamageDetails = damageDetails.stream().map(detail -> {
+			    VehicleDamageDetailRequest damageRequest = new VehicleDamageDetailRequest();
+			    damageRequest.setDamageDirection(detail.getDamageDirection());
+			    damageRequest.setPartyType(detail.getDamagePart());
+			    damageRequest.setReplaceOrRepair(detail.getRepairReplace());
+			    damageRequest.setNoUnits(detail.getNoOfParts());
+			    damageRequest.setUnitPrice(detail.getGaragePrice());
+			    damageRequest.setReplacementCharge(detail.getReplaceCost());
+			    damageRequest.setTotal(detail.getTotPrice());
+			    return damageRequest;
+			}).collect(Collectors.toList());
+			request.setVehicleDamageDetails(vehicleDamageDetails);
+
+			// Populate metadata (assumed to be populated elsewhere in your code)
+			SaveSparePartsRequestMetaData metaData = new SaveSparePartsRequestMetaData();
+			metaData.setRequestOrigin("API"); 
+			metaData.setCurrentBranch("2222");
+			metaData.setOriginBranch("2222");
+			metaData.setUserName("09988877772");
+			//metaData.setIpAddress(workOrder.getIpAddress());
+			metaData.setRequestGeneratedDateTime(isoDateFormat.format(new Date()));
+			//metaData.setConsumerTrackingID(UUID.randomUUID().toString()); // example, replace as necessary
+			request.setRequestMetaData(metaData);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	    return request;
+	}
+
+
+	/**
+	 * Configures SSL Trust Managers to trust all certificates.
+	 * This should only be used in a development or testing environment.
+	 */
+	private void configureSSLTrustManagers() throws Exception {
+	    TrustManager[] trustAllCerts = new TrustManager[]{
+	        new X509TrustManager() {
+	            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+
+	            public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+	            }
+
+	            public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+	            }
+	        }
+	    };
+
+	    SSLContext sc = SSLContext.getInstance("SSL");
+	    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+	    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+	    HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+	}
+
 
 
 }
