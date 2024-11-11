@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,16 +43,11 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
     	List<VehicleInfoResponse> vehList = new ArrayList<>();
         
         try {
-        	List<String> status = new ArrayList<>();
-        	status.add("P");
-        	status.add("Y");
-        	status.add("I");
-        	status.add("C");
-        	status.add("R");
         	
             // Fetch the list of vehicle info based on company ID
-            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByCompanyIdAndStatusIn(Integer.valueOf(request.getCompanyId()),status);
-
+            //List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByCompanyIdAndStatusIn(Integer.valueOf(request.getCompanyId()),status);
+        	List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByCompanyIdAndGarageId(Integer.valueOf(request.getCompanyId()),request.getGarageId());
+        	
             if(vehicleInfoList.size()>0) {
 	            // Convert each entity to a response object and add to the response list
 	            for (InsuredVehicleInfo vehicle : vehicleInfoList) {
@@ -72,7 +68,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	                veh.setEntryDate(vehicle.getEntryDate());
 	                if("Y".equalsIgnoreCase(vehicle.getStatus())) {
 	                	//veh.setStatus("P");
-	                	veh.setQuoteStatus("P");
+	                	veh.setQuoteStatus("PFG");
 	                }else {
 	                	//veh.setStatus(vehicle.getStatus());
 	                	veh.setQuoteStatus(vehicle.getStatus());
@@ -116,7 +112,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
                 InsuredVehicleInfo insuredVehicleInfo = optionalVehicleInfo.get();
                 
                 // Update the status of the vehicle info to "Rejected"
-                insuredVehicleInfo.setStatus("R");
+                insuredVehicleInfo.setStatus(request.getQuoteStatus());
                 
                 // Save the updated vehicle info
                 insuredVehicleInfoRepository.save(insuredVehicleInfo);
@@ -150,8 +146,6 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
         List<VehicleInfoResponse> vehList = new ArrayList<>();
         
         try {
-            // Define the status to filter by
-            List<String> status = Arrays.asList("C");
 
             // Fetch the work orders based on the garage ID
             List<GarageWorkOrder> workOrders = garageWorkOrderRepository.findByGarageId(request.getGarageId());
@@ -190,7 +184,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
             	    .collect(Collectors.toList()); // Collect the results into a list
             
             // Fetch the list of vehicle info based on claim numbers and status
-            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoInAndStatusIn(claimWithReplacement, status);
+            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoIn(claimWithReplacement);
             
             // Check if any vehicles were found for the provided claim numbers and status
             if (!vehicleInfoList.isEmpty()) {
@@ -243,8 +237,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
         List<VehicleInfoResponse> vehList = new ArrayList<>();
         
         try {
-            // Define the status to filter by
-            List<String> status = Arrays.asList("C");
+
 
             // Fetch the work orders based on the garage ID
             List<GarageWorkOrder> workOrders = garageWorkOrderRepository.findBySparepartsDealerId(request.getSparepartsDealerId());
@@ -268,7 +261,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
             List<String> claimNumbers = new ArrayList<>(claimToQuotationMap.keySet());
 
             // Fetch the list of vehicle info based on claim numbers and status
-            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoInAndStatusIn(claimNumbers, status);
+            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoIn(claimNumbers);
 
             // Check if any vehicles were found for the provided claim numbers and status
             if (!vehicleInfoList.isEmpty()) {
@@ -521,6 +514,55 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	        response.setResponse(null);
 	    }
 	    return response;
+	}
+
+	@Override
+	public CommonResponse dealerStatusSave(VehicleInfoRequest request) {
+		CommonResponse response = new CommonResponse();
+        
+        try {
+
+            Optional<GarageWorkOrder> workOrdersOptional = garageWorkOrderRepository.findByClaimNo(request.getClaimNo());
+            	
+            if (!workOrdersOptional.isPresent()) {
+                response.setErrors(Collections.singletonList("No work orders found for the given Claim No"));
+                response.setMessage("Failed");
+                response.setIsError(true);
+                return response;
+            }else if(StringUtils.isBlank(request.getQuoteStatus())) {
+            	response.setErrors(Collections.singletonList("Status Cannot be empty"));
+                response.setMessage("Failed");
+                response.setIsError(true);
+                return response;
+            }
+            
+            GarageWorkOrder workOrders = workOrdersOptional.get();
+            workOrders.setQuoteStatus(request.getQuoteStatus());
+            garageWorkOrderRepository.save(workOrders);
+
+            Optional<InsuredVehicleInfo> vehicleInfoOptional = insuredVehicleInfoRepository.findByClaimNo(request.getClaimNo());
+            
+            if (!vehicleInfoOptional.isPresent()) {
+                response.setErrors(Collections.singletonList("No Vehicle found for the given Claim No"));
+                response.setMessage("Failed");
+                response.setIsError(true);
+                return response;
+            }
+            InsuredVehicleInfo vehicleInfo = vehicleInfoOptional.get();
+            vehicleInfo.setStatus(request.getQuoteStatus());
+            insuredVehicleInfoRepository.save(vehicleInfo);
+            
+                response.setErrors(Collections.emptyList());
+                response.setMessage("Success");
+
+        } catch (Exception e) {
+            response.setErrors(Collections.singletonList("An error occurred: " + e.getMessage()));
+            response.setMessage("Failed");
+            response.setIsError(true);
+            e.printStackTrace();
+        }
+
+        return response;
 	}
 
 }

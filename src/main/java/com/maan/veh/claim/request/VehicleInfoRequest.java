@@ -17,4 +17,7 @@ public class VehicleInfoRequest {
     
     @JsonProperty("SparepartsDealerId")
     private String sparepartsDealerId;
+    
+    @JsonProperty("QuoteStatus")
+    private String quoteStatus;
 }

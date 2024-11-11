@@ -49,7 +49,7 @@ public class VehicleInfoController {
                     + "The surveyor will be able to see claim details, status, and other related information."
     )
     @PostMapping("/surveyor/view/pending")
-    public ResponseEntity<CommonResponse> surveyorView(@RequestBody VehicleInfoRequest request) {
+    public ResponseEntity<CommonResponse> surveyorViewPending(@RequestBody VehicleInfoRequest request) {
     	CommonResponse response = vehicleInfoService.surveyorView(request);
         return ResponseEntity.ok(response);
     }
@@ -79,6 +79,18 @@ public class VehicleInfoController {
     @PostMapping("/surveyor/asigned/completed")
     public ResponseEntity<CommonResponse> surveyorAsignedView(@RequestBody VehicleInfoRequest request) {
     	CommonResponse response = vehicleInfoService.surveyorAsignedView(request);
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/surveyor/view")
+    public ResponseEntity<CommonResponse> surveyorView(@RequestBody VehicleInfoRequest request) {
+    	CommonResponse response = vehicleInfoService.surveyorView(request);
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/dealer/status/save")
+    public ResponseEntity<CommonResponse> dealerStatusSave(@RequestBody VehicleInfoRequest request) {
+    	CommonResponse response = vehicleInfoService.dealerStatusSave(request);
         return ResponseEntity.ok(response);
     }
 }

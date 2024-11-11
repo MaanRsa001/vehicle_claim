@@ -9,4 +9,7 @@ public class VehicleGarageViewRequest {
 	
 	@JsonProperty("CompanyId")
     private String companyId;
+	
+	@JsonProperty("GarageId")
+    private String garageId;
 }

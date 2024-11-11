@@ -23,5 +23,7 @@ public interface InsuredVehicleInfoRepository extends JpaRepository<InsuredVehic
 
 	List<InsuredVehicleInfo> findByClaimNoIn(List<String> claimNoList);
 
+	List<InsuredVehicleInfo> findByCompanyIdAndGarageId(Integer valueOf, String garageId);
+
    
 }

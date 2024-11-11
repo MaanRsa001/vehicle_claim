@@ -57,4 +57,7 @@ public class InsuredVehicleInfo {
 
     @Column(name = "status", length = 20)
     private String status;
+    
+    @Column(name = "garage_id", length = 50)
+    private String garageId;
 }

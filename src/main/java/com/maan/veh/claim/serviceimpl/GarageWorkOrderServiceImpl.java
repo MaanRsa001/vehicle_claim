@@ -115,12 +115,11 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
                 return response;
             }
 
-            // Step 2: Find existing work order by claim and quotation number
-            GarageWorkOrder workOrder = garageWorkOrderRepository.findByClaimNoAndQuotationNo(req.getClaimNo(), req.getQuotationNo());
-
-            // Step 3: Create new work order if it doesn't exist
-            if (workOrder == null) {
-                workOrder = new GarageWorkOrder();
+            // Step 2: Find existing work order by claim 
+            Optional<GarageWorkOrder> optionalWorkOrder = garageWorkOrderRepository.findByClaimNo(req.getClaimNo());
+            GarageWorkOrder workOrder = new GarageWorkOrder();
+            if(optionalWorkOrder.isPresent()) {
+            	workOrder = optionalWorkOrder.get();
             }
 
             // Step 4: Set common work order fields
@@ -178,7 +177,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             workOrder.setSubrogationYn(req.getSubrogationYn());
 
             // Step 9: Financial details
-            workOrder.setTotalLoss(new BigDecimal(req.getTotalLoss()));
+            workOrder.setTotalLoss(!StringUtils.isBlank(req.getTotalLoss())? new BigDecimal(req.getTotalLoss()) : BigDecimal.ZERO);
             workOrder.setLossType(req.getLossType());
             workOrder.setRemarks(req.getRemarks());
 

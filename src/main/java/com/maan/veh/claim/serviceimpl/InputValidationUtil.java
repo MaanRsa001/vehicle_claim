@@ -6,14 +6,21 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.maan.veh.claim.auth.passwordEnc;
+import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.LoginMaster;
+import com.maan.veh.claim.entity.VcFlowMaster;
+import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
+import com.maan.veh.claim.repository.VcFlowMasterRepository;
 import com.maan.veh.claim.request.ClaimDetailsSaveRequest;
 import com.maan.veh.claim.request.ClaimIntimationAttachmentDetails;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
@@ -38,6 +45,12 @@ public class InputValidationUtil {
 	
 	@Autowired
 	private LoginMasterRepository loginRepo;
+	
+	@Autowired
+    private GarageWorkOrderRepository garageWorkOrderRepository;
+	
+	@Autowired
+    private VcFlowMasterRepository flowMasterRepo;
 	
 	private static SimpleDateFormat DD_MM_YYYY = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -87,11 +100,11 @@ public class InputValidationUtil {
 	    }
 
 	    if (StringUtils.isBlank(req.getSettlementType())) {
-	        list.add(new ErrorList("100", "SettlementType", "Settlement type cannot be blank"));
+	        //list.add(new ErrorList("100", "SettlementType", "Settlement type cannot be blank"));
 	    }
 
 	    if (StringUtils.isBlank(req.getSettlementTo())) {
-	        list.add(new ErrorList("100", "SettlementTo", "Settlement to cannot be blank"));
+	       // list.add(new ErrorList("100", "SettlementTo", "Settlement to cannot be blank"));
 	    }
 
 	    if (StringUtils.isBlank(req.getLocation())) {
@@ -109,7 +122,7 @@ public class InputValidationUtil {
 	    }
 
 	    if (StringUtils.isBlank(req.getLossType())) {
-	        list.add(new ErrorList("100", "LossType", "Loss type cannot be blank"));
+	        //list.add(new ErrorList("100", "LossType", "Loss type cannot be blank"));
 	    }
 
 	    if (StringUtils.isBlank(req.getCreatedBy())) {
@@ -156,6 +169,52 @@ public class InputValidationUtil {
 	    } catch (NumberFormatException e) {
 	        list.add(new ErrorList("100", "TotalLoss", "Total loss must be a valid number"));
 	    }
+	    
+	    // Status check block
+	    try {
+	        Optional<GarageWorkOrder> optional = garageWorkOrderRepository.findByClaimNo(req.getClaimNo());
+	        
+	        if (optional.isPresent()) {
+	            String quoteStatus = optional.get().getQuoteStatus();
+	            
+	            // Dynamically retrieve flowList based on usertype and quoteStatus
+	            List<VcFlowMaster> flowList = flowMasterRepo.findByStatusId(quoteStatus);
+	            
+	            // Extract the list of valid status IDs dynamically
+	            Set<String> validStatusIds = flowList.stream()
+	                                                 .map(VcFlowMaster::getSubStatus)
+	                                                 .collect(Collectors.toSet());
+	            
+	            // Check if the requested quote status is valid
+	            if (!validStatusIds.contains(req.getQuoteStatus())) {
+	            	List<VcFlowMaster> flowListStatus = flowMasterRepo.findByStatusId(req.getQuoteStatus());
+	            	String stausDesc = (flowListStatus!=null && flowListStatus.size()>0) ? flowListStatus.get(0).getStatusDescription() : "Current Status";
+	                list.add(new ErrorList("101", "Status", 
+	                        String.format("The Status cannot be %s", stausDesc)));
+	            }
+	        }else {
+                String quoteStatus = "PFG";
+	            
+	            // Dynamically retrieve flowList based on usertype and quoteStatus
+	            List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndStatusId("Garage", quoteStatus);
+	            
+	            // Extract the list of valid status IDs dynamically
+	            Set<String> validStatusIds = flowList.stream()
+	                                                 .map(VcFlowMaster::getSubStatus)
+	                                                 .collect(Collectors.toSet());
+	            
+	            // Check if the requested quote status is valid
+	            if (!validStatusIds.contains(req.getQuoteStatus())) {
+	            	List<VcFlowMaster> flowListStatus = flowMasterRepo.findByStatusId(req.getQuoteStatus());
+	            	String stausDesc = (flowListStatus!=null && flowListStatus.size()>0) ? flowListStatus.get(0).getStatusDescription() : "Current Status";
+	                list.add(new ErrorList("101", "Status", 
+	                        String.format("The Status cannot be %s", stausDesc)));
+	            }
+	        }
+	    } catch (Exception ex) {
+	        //log.error("Exception during status check: {}", ex.getMessage(), ex);
+	    }
+
 
 	    return list;
 	}

@@ -16,4 +16,6 @@ public interface VehicleInfoService {
 	CommonResponse surveyorViewV1(VehicleInfoRequest request);
 
 	CommonResponse surveyorAsignedView(VehicleInfoRequest request);
+
+	CommonResponse dealerStatusSave(VehicleInfoRequest request);
 }

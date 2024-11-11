@@ -47,4 +47,7 @@ public class VcFlowMaster {
 
     @Column(name = "THRESHOLD_DAYS", length = 50)
     private String thresholdDays;
+    
+    @Column(name = "GRID_DESCRIPTION")
+    private String gridDescription;
 }
