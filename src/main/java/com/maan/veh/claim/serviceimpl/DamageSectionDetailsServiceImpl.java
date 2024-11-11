@@ -22,7 +22,6 @@ import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.TotalAmountDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
-import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.TotalAmountDetailsRepository;
 import com.maan.veh.claim.request.DamageSectionDetailsRequest;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
@@ -46,9 +45,6 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	
 	@Autowired
 	private GarageWorkOrderRepository garageWorkOrderRepo;
-	
-	@Autowired
-    private InsuredVehicleInfoRepository insuredVehicleInfoRepository;
 	
 	@Autowired
     private InputValidationUtil validation;
@@ -113,7 +109,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            String surveyorId = reqList.get(0).getSurveyorId();
 
 	            
-	            String claimNo = reqList.get(0).getClaimNo();
+	            //String claimNo = reqList.get(0).getClaimNo();
 	            for (DamageSectionDetailsSaveReq req : reqList) {
 	                
 	                DamageSectionDetails details = repository.findByClaimNoAndQuotationNoAndDamageSno(

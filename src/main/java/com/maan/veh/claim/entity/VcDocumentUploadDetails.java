@@ -13,20 +13,18 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Entity
 @DynamicInsert
 @DynamicUpdate
-@Builder
 @Table(name = "vc_document_upload_details")
 @IdClass(VcDocumentUploadDetailsId.class)
 public class VcDocumentUploadDetails {
@@ -34,11 +32,10 @@ public class VcDocumentUploadDetails {
     @Id
     @Column(name = "CLAIM_NO", nullable = false, length = 100)
     private String claimNo;
-
+    
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DOCUMENT_REF", nullable = false)
-    private int documentRef;
+    @Column(name = "DOCUMENT_REF")
+    private Long documentRef;
 
     @Id
     @Column(name = "COMPANY_ID", nullable = false)
@@ -76,4 +73,7 @@ public class VcDocumentUploadDetails {
 
     @Column(name = "REMARKS", length = 200)
     private String remarks;
+    
+    @Column(name = "FILE_TYPE")
+    private String fileType;
 }

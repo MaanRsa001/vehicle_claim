@@ -14,7 +14,7 @@ public class VcDocumentUploadDetailsId implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private String claimNo;
-    private int documentRef;
     private int companyId;
+    private Long documentRef;
 }
 
