@@ -173,12 +173,10 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
             
             List<String> claimWithReplacement = new ArrayList<>();
             
-            List<String> usertype = Arrays.asList("Dealer");
-            
-            List<DamageSectionDetails> damageDetailsList = damageRepository.findByClaimNoInAndStatusNotIn(claimNumbers,usertype);
+            List<DamageSectionDetails> damageDetailsList = damageRepository.findByClaimNoIn(claimNumbers);
             
             claimWithReplacement = damageDetailsList.stream()
-            	    .filter(damage -> "Replace".equalsIgnoreCase(damage.getRepairReplace())) // Filter condition
+            	    //.filter(damage -> "Replace".equalsIgnoreCase(damage.getRepairReplace())) // Filter condition
             	    .map(DamageSectionDetails::getClaimNo) // Map to claimNo
             	    .distinct() // Ensure distinct claimNo values
             	    .collect(Collectors.toList()); // Collect the results into a list

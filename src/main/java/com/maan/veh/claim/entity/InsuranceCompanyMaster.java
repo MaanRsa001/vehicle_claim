@@ -88,25 +88,12 @@ private static final long serialVersionUID = 1L;
     @Column(name="COMPANY_LOGO", length=100)
     private String     companyLogo ;
 
-    @Column(name="REGARDS", length=50)
-    private String     regards ;
-
     @Column(name="STATUS", length=1)
     private String     status ;
-
-    @Column(name="FOOTER_IMAGE", length=100)
-    private String     footerImage ;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="ENTRY_DATE")
     private Date       entryDate ;
-
-    @Column(name="FOOTER_DESCRIPTION", length=100)
-    private String     footerDescription ;
-
-    @Column(name="SIGNATURE", length=100)
-    private String     signature ;
-
    
     @Column(name="REMARKS", length=100)
     private String     remarks ;
@@ -127,6 +114,9 @@ private static final long serialVersionUID = 1L;
 
     @Column(name="COUNTRY_ID", length=50)
     private String     countryId ;
+    
+    @Column(name="CITY_ID", length=50)
+    private String     cityId ;
     
     @Column(name="PO_BOX", length=100)
     private String  pOBox;

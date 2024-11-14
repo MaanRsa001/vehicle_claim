@@ -33,4 +33,8 @@ public interface DropDownService {
 	List<DropDownRes> getStatus();
 
 	List<DropDownRes> getDealerLoginId();
+
+	List<DropDownRes> getRepairType();
+
+	List<DropDownRes> geDocumentType();
 }

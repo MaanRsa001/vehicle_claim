@@ -11,13 +11,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.maan.veh.claim.auth.passwordEnc;
+import com.maan.veh.claim.dto.GarageLoginMasterDTO;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.VcFlowMaster;
+import com.maan.veh.claim.file.DocumentUploadDetailsReqRes;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.VcFlowMasterRepository;
@@ -34,9 +37,11 @@ import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
 import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.FnolRequestMetaData;
 import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
+import com.maan.veh.claim.request.InsuranceCompanyMasterRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.request.SaveClaimRequest;
 import com.maan.veh.claim.request.TotalAmountDetailsRequest;
+import com.maan.veh.claim.request.VcSparePartsDetailsRequest;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
 
@@ -96,7 +101,7 @@ public class InputValidationUtil {
 	    }
 
 	    if (StringUtils.isBlank(req.getWorkOrderType())) {
-	        list.add(new ErrorList("100", "WorkOrderType", "Work order type cannot be blank"));
+	        //list.add(new ErrorList("100", "WorkOrderType", "Work order type cannot be blank"));
 	    }
 
 	    if (StringUtils.isBlank(req.getSettlementType())) {
@@ -137,22 +142,22 @@ public class InputValidationUtil {
 	    Date deliveryDate = null;
 
 	    // Parse and validate workOrderDate
-	    try {
-	        if (!StringUtils.isBlank(req.getWorkOrderDate())) {
-	            workOrderDate = DD_MM_YYYY.parse(req.getWorkOrderDate());
-	        }
-	    } catch (ParseException e) {
-	        list.add(new ErrorList("100", "WorkOrderDate", "Work order date is invalid or not in the correct format (dd/MM/yyyy)"));
-	    }
+//	    try {
+//	        if (!StringUtils.isBlank(req.getWorkOrderDate())) {
+//	            workOrderDate = DD_MM_YYYY.parse(req.getWorkOrderDate());
+//	        }
+//	    } catch (ParseException e) {
+//	        list.add(new ErrorList("100", "WorkOrderDate", "Work order date is invalid or not in the correct format (dd/MM/yyyy)"));
+//	    }
 
 	    // Parse and validate deliveryDate
-	    try {
-	        if (!StringUtils.isBlank(req.getDeliveryDate())) {
-	            deliveryDate = DD_MM_YYYY.parse(req.getDeliveryDate());
-	        }
-	    } catch (ParseException e) {
-	        list.add(new ErrorList("100", "DeliveryDate", "Delivery Date is invalid or not in the correct format (dd/MM/yyyy)"));
-	    }
+//	    try {
+//	        if (!StringUtils.isBlank(req.getDeliveryDate())) {
+//	            deliveryDate = DD_MM_YYYY.parse(req.getDeliveryDate());
+//	        }
+//	    } catch (ParseException e) {
+//	        list.add(new ErrorList("100", "DeliveryDate", "Delivery Date is invalid or not in the correct format (dd/MM/yyyy)"));
+//	    }
 
 	    // Validate deliveryDate is not before workOrderDate
 	    if (workOrderDate != null && deliveryDate != null) {
@@ -334,18 +339,22 @@ public class InputValidationUtil {
 				list.add(new ErrorList("104", "RepairReplace", "Repair/Replace field cannot be blank in line number : "+line));
 			}
 			if ("Replace".equalsIgnoreCase(req.getRepairReplace())) {
-				if (StringUtils.isBlank(req.getNoOfUnits())) {
-					list.add(new ErrorList("105", "NoOfUnits", "Number of Units cannot be blank in line number : "+line));
-				}
-				if (StringUtils.isBlank(req.getReplacementCharge())) {
-					list.add(new ErrorList("111", "ReplacementCharge", "Replacement Charge cannot be blank in line number : "+line));
+				
+				if (StringUtils.isBlank(req.getUnitPrice())) {
+					list.add(new ErrorList("106", "UnitPrice", "Unit price cannot be blank in line number : "+line));
 				}
 				
 			}
 			
-			if (StringUtils.isBlank(req.getUnitPrice())) {
-				list.add(new ErrorList("106", "UnitPrice", "Unit price cannot be blank in line number : "+line));
+			if (StringUtils.isBlank(req.getNoOfUnits())) {
+				list.add(new ErrorList("105", "NoOfUnits", "Number of Units cannot be blank in line number : "+line));
 			}
+			
+			if (StringUtils.isBlank(req.getReplacementCharge())) {
+				list.add(new ErrorList("111", "ReplacementCharge", "Replacement Charge cannot be blank in line number : "+line));
+			}
+			
+			
 			if (StringUtils.isBlank(req.getGarageLoginId())) {
 				list.add(new ErrorList("108", "GarageLoginId", "Garage login ID cannot be blank in line number : "+line));
 			}
@@ -1239,4 +1248,249 @@ List<ErrorList> errors = new ArrayList<>();
 		}
 		return list;
 	}
+
+	public List<ErrorList> validateCreateCompany(InsuranceCompanyMasterRequest req) {
+	    List<ErrorList> list = new ArrayList<>();
+
+	    // Validate mandatory fields
+	    if (StringUtils.isBlank(req.getCompanyId())) {
+	        list.add(new ErrorList("100", "CompanyId", "Company ID cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getEffectiveDateStart())) {
+	        list.add(new ErrorList("100", "EffectiveDateStart", "Effective start date cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getCompanyName())) {
+	        list.add(new ErrorList("100", "CompanyName", "Company name cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getCoreAppCode())) {
+	        list.add(new ErrorList("100", "CoreAppCode", "Core app code cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getCreatedBy())) {
+	        list.add(new ErrorList("100", "CreatedBy", "Created by cannot be blank"));
+	    }
+
+	    // Email validation
+	    if (StringUtils.isNotBlank(req.getCompanyEmail()) && !EmailValidator.getInstance().isValid(req.getCompanyEmail())) {
+	        list.add(new ErrorList("100", "CompanyEmail", "Company email is not valid"));
+	    }
+
+	    // Phone validation
+	    if (StringUtils.isNotBlank(req.getCompanyPhone()) && !req.getCompanyPhone().matches("^\\+?[0-9]{7,15}$")) {
+	        list.add(new ErrorList("100", "CompanyPhone", "Company phone must contain only numbers and optional '+' at the beginning"));
+	    }
+
+	    // Date validation for EffectiveDateStart
+	    Date effectiveDateStart = null;
+	    try {
+	        if (StringUtils.isNotBlank(req.getEffectiveDateStart())) {
+	            effectiveDateStart = DD_MM_YYYY.parse(req.getEffectiveDateStart());
+	        }
+	    } catch (ParseException e) {
+	        list.add(new ErrorList("100", "EffectiveDateStart", "Effective start date is invalid or not in the correct format (dd/MM/yyyy)"));
+	    }
+
+	    // Validate Status as a single character
+	    if (StringUtils.isNotBlank(req.getStatus()) && req.getStatus().length() > 1) {
+	        list.add(new ErrorList("100", "Status", "Status must be a single character"));
+	    }
+
+
+	    return list;
+	}
+
+	public List<ErrorList> validateGarageLogin(GarageLoginMasterDTO req) {
+	    List<ErrorList> list = new ArrayList<>();
+
+	    // Validate mandatory fields
+	    if (StringUtils.isBlank(req.getGarageName())) {
+	        list.add(new ErrorList("100", "Garagename", "Garage name cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getGarageId())) {
+	        list.add(new ErrorList("100", "Garageid", "Garage ID cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getCompanyId())) {
+	        list.add(new ErrorList("100", "CompanyId", "Company ID cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getCoreAppCode())) {
+	        list.add(new ErrorList("100", "CoreAppCode", "Core App Code cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getAddress())) {
+	        list.add(new ErrorList("100", "Address", "Address cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getCityName())) {
+	        list.add(new ErrorList("100", "CityName", "City name cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getStatus())) {
+	        list.add(new ErrorList("100", "Status", "Status cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getPassWord())) {
+	        list.add(new ErrorList("100", "PassWord", "Password cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getRepassWord())) {
+	        list.add(new ErrorList("100", "RePassWord", "Re-entered password cannot be blank"));
+	    } else if (!req.getPassWord().equals(req.getRepassWord())) {
+	        list.add(new ErrorList("101", "RePassWord", "Passwords do not match"));
+	    }
+
+	    if (StringUtils.isBlank(req.getBranchCode())) {
+	        list.add(new ErrorList("100", "BranchCode", "Branch code cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getGarageAddress())) {
+	        list.add(new ErrorList("100", "Garageaddress", "Garage address cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getStateName())) {
+	        list.add(new ErrorList("100", "Statename", "State name cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getContactPersonName())) {
+	        list.add(new ErrorList("100", "Contactpersonname", "Contact person name cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getMobileNo())) {
+	        list.add(new ErrorList("100", "Mobileno", "Mobile number cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getEmailid())) {
+	        list.add(new ErrorList("100", "Emailid", "Email ID cannot be blank"));
+	    } else if (!EmailValidator.getInstance().isValid(req.getEmailid())) {
+	        list.add(new ErrorList("101", "Emailid", "Invalid email format"));
+	    }
+
+	    if (req.getEffectiveDate() == null) {
+	        list.add(new ErrorList("100", "Effectivedate", "Effective date cannot be blank"));
+	    }
+
+	    // Additional rule: effectiveDate should not be before entryDate
+	    if (req.getEffectiveDate() != null && req.getEffectiveDate().before(new Date())) {
+	        list.add(new ErrorList("101", "Effectivedate", "Effective date cannot be before entry date"));
+	    }
+
+	    return list;
+	}
+	
+	public List<ErrorList> validateDocumentUploadDetails(DocumentUploadDetailsReqRes req) {
+	    List<ErrorList> list = new ArrayList<>();
+
+	    // Validate mandatory fields
+	    if (StringUtils.isBlank(req.getClaimNo())) {
+	        list.add(new ErrorList("100", "ClaimNo", "Claim number cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getDocumentRef())) {
+	        list.add(new ErrorList("100", "DocumentRef", "Document reference cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getDocTypeId())) {
+	        list.add(new ErrorList("100", "DocTypeId", "Document type ID cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getCompanyId())) {
+	        list.add(new ErrorList("100", "CompanyId", "Company ID cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getFilePathName())) {
+	        list.add(new ErrorList("100", "FilePathName", "File path name cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getFileName())) {
+	        list.add(new ErrorList("100", "FileName", "File name cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getUploadType())) {
+	        list.add(new ErrorList("100", "UploadType", "Upload type cannot be blank"));
+	    }
+
+	    if (StringUtils.isBlank(req.getUploadedBy())) {
+	        list.add(new ErrorList("100", "UploadedBy", "Uploader's name cannot be blank"));
+	    }
+
+	    // Optional field validations
+	    if (StringUtils.isNotBlank(req.getErrorRes()) && req.getErrorRes().length() > 255) {
+	        list.add(new ErrorList("101", "ErrorRes", "Error response text is too long"));
+	    }
+
+	    if (StringUtils.isNotBlank(req.getImgUrl()) && !isValidUrl(req.getImgUrl())) {
+	        list.add(new ErrorList("101", "ImgUrl", "Invalid URL format for ImgUrl"));
+	    }
+
+	    if (StringUtils.isNotBlank(req.getFileType()) && !isValidFileType(req.getFileType())) {
+	        list.add(new ErrorList("101", "FileType", "Unsupported file type"));
+	    }
+
+	    return list;
+	}
+
+	// Helper method to validate URL format
+	private boolean isValidUrl(String url) {
+	    try {
+	        new java.net.URL(url).toURI();
+	        return true;
+	    } catch (Exception e) {
+	        return false;
+	    }
+	}
+
+	// Helper method to validate file types (customize as needed)
+	private boolean isValidFileType(String fileType) {
+	    return List.of("pdf", "jpeg", "png", "docx").contains(fileType.toLowerCase());
+	}
+
+    public List<ErrorList> validateSaveSpareParts(VcSparePartsDetailsRequest req) {
+	    List<ErrorList> errors = new ArrayList<>();
+
+	    // Validate mandatory fields
+	    if (StringUtils.isBlank(req.getClaimNo())) {
+	        errors.add(new ErrorList("100", "ClaimNumber", "Claim number cannot be blank"));
+	    }
+
+	    // Optional fields that must be valid numbers if provided
+	    validateDecimalField(req.getReplacementCost(), "ReplacementCost", errors);
+	    validateDecimalField(req.getReplacementCostDeductible(), "ReplacementCostDeductible", errors);
+	    validateDecimalField(req.getSparePartDepreciation(), "SparePartDepreciation", errors);
+	    validateDecimalField(req.getDiscountOnSpareParts(), "DiscountOnSpareParts", errors);
+	    validateDecimalField(req.getTotalAmountReplacement(), "TotalAmountReplacement", errors);
+	    validateDecimalField(req.getRepairLabour(), "RepairLabour", errors);
+	    validateDecimalField(req.getRepairLabourDeductible(), "RepairLabourDeductible", errors);
+	    validateDecimalField(req.getRepairLabourDiscountAmount(), "RepairLabourDiscountAmount", errors);
+	    validateDecimalField(req.getTotalAmountRepairLabour(), "TotalAmountRepairLabour", errors);
+	    validateDecimalField(req.getNetAmount(), "NetAmount", errors);
+	    validateDecimalField(req.getUnknownAccidentDeduction(), "UnknownAccidentDeduction", errors);
+	    validateDecimalField(req.getAmountToBeRecovered(), "AmountToBeRecovered", errors);
+	    validateDecimalField(req.getTotalAfterDeductions(), "TotalAfterDeductions", errors);
+	    validateDecimalField(req.getVatRatePer(), "VatRatePer", errors);
+	    validateDecimalField(req.getVatRate(), "VatRate", errors);
+	    validateDecimalField(req.getVatAmount(), "VatAmount", errors);
+	    validateDecimalField(req.getTotalWithVAT(), "TotalWithVAT", errors);
+
+	    return errors;
+	}
+
+    private void validateDecimalField(String value, String fieldName, List<ErrorList> errors) {
+        if (StringUtils.isBlank(value)) {
+            // Field is blank, so we add a blank validation error
+            errors.add(new ErrorList("100", fieldName, fieldName + " cannot be blank"));
+        } else {
+            try {
+                new BigDecimal(value);  // Validates if value is a valid decimal
+            } catch (NumberFormatException e) {
+                errors.add(new ErrorList("101", fieldName, fieldName + " must be a valid decimal number"));
+            }
+        }
+    }
+
+	
 }

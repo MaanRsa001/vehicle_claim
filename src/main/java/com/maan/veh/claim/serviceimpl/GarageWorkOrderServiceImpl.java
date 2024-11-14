@@ -129,14 +129,14 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             workOrder.setWorkOrderTypeDesc(req.getWorkOrderTypeDesc());
 
             // Parse and set the work order date with error handling
-            try {
-                workOrder.setWorkOrderDate(DD_MM_YYYY.parse(req.getWorkOrderDate()));
-            } catch (ParseException e) {
-                response.setErrors(Collections.singletonList("Invalid work order date format."));
-                response.setMessage("Failed");
-                response.setIsError(true);
-                return response;
-            }
+            //try {
+                workOrder.setWorkOrderDate(req.getWorkOrderDate());
+//            } catch (ParseException e) {
+//                response.setErrors(Collections.singletonList("Invalid work order date format."));
+//                response.setMessage("Failed");
+//                response.setIsError(true);
+//                return response;
+//            }
 
             // Step 5: Set settlement details
             workOrder.setSettlementType(req.getSettlementType());
@@ -164,14 +164,14 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             }
 
             // Step 8: Set delivery and other dates
-            try {
-                workOrder.setDeliveryDate(DD_MM_YYYY.parse(req.getDeliveryDate()));
-            } catch (ParseException e) {
-                response.setErrors(Collections.singletonList("Invalid delivery date format."));
-                response.setMessage("Failed");
-                response.setIsError(true);
-                return response;
-            }
+            //try {
+                workOrder.setDeliveryDate(req.getDeliveryDate());
+//            } catch (ParseException e) {
+//                response.setErrors(Collections.singletonList("Invalid delivery date format."));
+//                response.setMessage("Failed");
+//                response.setIsError(true);
+//                return response;
+//            }
 
             workOrder.setJointOrderYn(req.getJointOrderYn());
             workOrder.setSubrogationYn(req.getSubrogationYn());

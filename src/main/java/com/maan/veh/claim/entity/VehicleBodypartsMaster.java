@@ -69,7 +69,6 @@ private static final long serialVersionUID = 1L;
     @Column(name="COMPANY_ID", nullable=false)
     private BigDecimal companyId ;
 
-    @Id
     @Column(name="SECTION_ID", nullable=false)
     private BigDecimal sectionId ;
 

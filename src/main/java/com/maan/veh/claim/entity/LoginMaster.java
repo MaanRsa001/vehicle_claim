@@ -124,7 +124,9 @@ private static final long serialVersionUID = 1L;
 
     @Column(name="PWD_COUNT", length=10)
     private String     pwdCount ;
-
+    
+    @Column(name="CORE_APP_CODE", length=100)
+    private String    coreAppCode;
 
     //--- ENTITY LINKS ( RELATIONSHIP )
 

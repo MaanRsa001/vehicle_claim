@@ -13,10 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.maan.veh.claim.entity.ClaimLossTypeMaster;
 import com.maan.veh.claim.entity.ListItemValue;
 import com.maan.veh.claim.entity.LoginMaster;
+import com.maan.veh.claim.entity.VcDocumentMaster;
 import com.maan.veh.claim.entity.VehicleBodypartsMaster;
+import com.maan.veh.claim.entity.VcDocumentMaster;
 import com.maan.veh.claim.repository.ClaimLosstypeMasterRepository;
 import com.maan.veh.claim.repository.ListItemValueRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
+import com.maan.veh.claim.repository.VcDocumentMasterRepository;
 import com.maan.veh.claim.repository.VehicleBodypartsMasterRepository;
 import com.maan.veh.claim.response.DropDownRes;
 import com.maan.veh.claim.service.DropDownService;
@@ -45,6 +48,9 @@ public class DropDownServiceImpl implements DropDownService {
     
     @Autowired
     private VehicleBodypartsMasterRepository bodyPartRepo;
+    
+    @Autowired
+    private VcDocumentMasterRepository documentMasterRepo;
     
     @Autowired
     private LoginMasterRepository loginRepo;
@@ -97,6 +103,10 @@ public class DropDownServiceImpl implements DropDownService {
 	@Override
 	public List<DropDownRes> getStatus() {
 		 return getDropdownValues("STATUS");
+	}
+	@Override
+	public List<DropDownRes> getRepairType() {
+		return getDropdownValues("REPAIR_TYPE");
 	}
 	
     private List<DropDownRes> getDropdownValues(String itemType) {
@@ -231,4 +241,25 @@ public class DropDownServiceImpl implements DropDownService {
         }
         return resList;
 	}
+
+	@Override
+	public List<DropDownRes> geDocumentType() {
+		List<DropDownRes> resList = new ArrayList<>();
+        try {
+            List<VcDocumentMaster> getList = documentMasterRepo.findByStatusOrderByDocumentIdAsc("Y");
+            for (VcDocumentMaster data : getList) {
+                DropDownRes res = new DropDownRes();
+                res.setCode(data.getDocumentId().toString());
+                res.setCodeDesc(data.getDocumentName());
+                resList.add(res);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("Exception is ---> " + e.getMessage());
+            return null;
+        }
+        return resList;
+	}
+
+	
 }

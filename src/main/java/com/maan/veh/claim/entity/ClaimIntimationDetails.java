@@ -12,6 +12,9 @@ public class ClaimIntimationDetails {
     @Id
     @Column(name = "policy_no")
     private String policyNo;
+    
+    @Column(name = "fnol_no")
+    private String fnolNo;
 
     @Column(name = "request_origin")
     private String requestOrigin;

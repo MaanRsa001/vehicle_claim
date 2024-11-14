@@ -23,6 +23,9 @@ public class ClaimIntimationResponse {
 
 	@JsonProperty("PolicyNo")
 	private String policyNo;
+	
+	@JsonProperty("FnolNo")
+	private String fnolNo;
 
 	@JsonProperty("InsuredId")
 	private String insuredId;

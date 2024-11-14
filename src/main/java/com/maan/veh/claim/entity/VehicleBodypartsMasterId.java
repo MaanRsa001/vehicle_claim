@@ -28,7 +28,6 @@ public class VehicleBodypartsMasterId implements Serializable {
     
     private BigDecimal companyId ;
     
-    private BigDecimal sectionId ;
     
      
 }

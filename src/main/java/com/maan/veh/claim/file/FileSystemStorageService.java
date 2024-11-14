@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,8 @@ import com.maan.veh.claim.entity.VcDocumentUploadDetails;
 import com.maan.veh.claim.error.Error;
 import com.maan.veh.claim.repository.VcDocumentUploadDetailsRepository;
 import com.maan.veh.claim.response.CommonRes;
+import com.maan.veh.claim.response.ErrorList;
+import com.maan.veh.claim.serviceimpl.InputValidationUtil;
 
 @Service
 public class FileSystemStorageService implements StorageService {
@@ -36,6 +39,9 @@ public class FileSystemStorageService implements StorageService {
 	
 	@Autowired
 	private VcDocumentUploadDetailsRepository documentUploadDetailsRepo;
+	
+	@Autowired
+    private InputValidationUtil validation;
 
 	@Autowired
 	public FileSystemStorageService(StorageProperties properties) {
@@ -50,7 +56,17 @@ public class FileSystemStorageService implements StorageService {
 	@Override
 	public CommonRes store(MultipartFile file, DocumentUploadDetailsReqRes req) {
 	    CommonRes response = new CommonRes();  // Initialize the response object
-
+	    
+	   // Validate requestPayload
+        List<ErrorList> validationErrors = validation.validateDocumentUploadDetails(req);
+        if (!validationErrors.isEmpty()) {
+            response.setErrorMessage(validationErrors);
+            response.setMessage("Validation failed");
+            response.setCommonResponse(Collections.emptyMap());
+            response.setIsError(true);
+            return response;
+        }
+	    
 	    try {
 	        if (file.isEmpty()) {
 	            throw new StorageException("Failed to store empty file.");
@@ -119,7 +135,7 @@ public class FileSystemStorageService implements StorageService {
 	        Error error = new Error();
 	        error.setCode("500");  // Example error code
 	        error.setMessage(""+e.getMessage());
-	        response.setErrorMessage(List.of(error));  // Include a list with the error details
+	        //response.setErrorMessage(List.of(error));  // Include a list with the error details
 
 	        response.setErroCode(500);  // Standard error code for failed operation
 	    }
@@ -228,7 +244,7 @@ public class FileSystemStorageService implements StorageService {
 	        Error error = new Error();
 	        error.setCode("500");  // Example error code
 	        error.setMessage(e.getMessage());
-	        response.setErrorMessage(List.of(error));  // Include a list with the error details
+	        //response.setErrorMessage(List.of(error));  // Include a list with the error details
 
 	        response.setErroCode(500);  // Standard error code for failed operation
 	    }
@@ -312,7 +328,7 @@ public class FileSystemStorageService implements StorageService {
 	        Error error = new Error();
 	        error.setCode("500");  // Example error code
 	        error.setMessage(e.getMessage());
-	        response.setErrorMessage(List.of(error));  // Include a list with the error details
+	        //response.setErrorMessage(List.of(error));  // Include a list with the error details
 
 	        response.setErroCode(500);  // Standard error code for failed operation
 	    }

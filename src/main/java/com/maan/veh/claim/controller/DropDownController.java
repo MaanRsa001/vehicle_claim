@@ -260,4 +260,38 @@ public class DropDownController {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	@GetMapping(value = "/repairtype")
+	public ResponseEntity<CommonRes> getRepairType() {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getRepairType();
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@GetMapping(value = "/documentType")
+	public ResponseEntity<CommonRes> geDocumentType() {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.geDocumentType();
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
 }

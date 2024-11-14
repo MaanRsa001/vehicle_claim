@@ -99,6 +99,9 @@ private static final long serialVersionUID = 1L;
 
     @Column(name="COUNTRY_ID", length=100)
     private String     countryId ;
+    
+    @Column(name="CITY_ID")
+    private String     cityId ;
 
     @Column(name="ADDRESS1", nullable=false, length=100)
     private String     address1 ;

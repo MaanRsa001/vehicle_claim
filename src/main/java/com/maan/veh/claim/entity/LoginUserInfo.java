@@ -167,6 +167,9 @@ private static final long serialVersionUID = 1L;
     @Column(name="CUSTOMER_NAME", length=100)
     private String    customerName;
     
+    @Column(name="CORE_APP_CODE", length=100)
+    private String    coreAppCode;
+    
   
     //--- ENTITY LINKS ( RELATIONSHIP )
 

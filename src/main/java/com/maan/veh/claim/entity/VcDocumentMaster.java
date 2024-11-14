@@ -16,11 +16,11 @@ public class VcDocumentMaster {
 
     @Id
     @Column(name = "DOCUMENT_ID", nullable = false)
-    private int documentId;
+    private Integer documentId;
 
     @Id
     @Column(name = "COMPANY_ID", nullable = false)
-    private int companyId;
+    private Integer companyId;
 
     @Column(name = "DOCUMENT_NAME", nullable = false, length = 100)
     private String documentName;

@@ -6,6 +6,7 @@ import com.maan.veh.claim.request.DamageSectionDetailsRequest;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
 import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
+import com.maan.veh.claim.request.VcSparePartsDetailsRequest;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DamageSectionDetailsResponse;
 
@@ -27,4 +28,8 @@ public interface DamageSectionDetailsService {
 	CommonResponse deleteGarageDamageSectionDetails(List<GarageSectionDetailsSaveReq> req);
 
 	CommonResponse viewSurveyorDamageSectionDetails(GarageSectionDetailsSaveReq req);
+
+	CommonResponse saveSpareParts(VcSparePartsDetailsRequest req);
+
+	CommonResponse viewsaveSpareParts(GarageSectionDetailsSaveReq req);
 }

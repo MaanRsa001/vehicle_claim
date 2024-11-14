@@ -137,7 +137,36 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             response.setIsError(true);
             return response;
         }
-
+        try {
+			ClaimIntimationDetails newData = new ClaimIntimationDetails();
+			Optional<ClaimIntimationDetails> optional = claimIntimationDetailsRepository.findByPolicyNo(requestPayload.getPolicyNo());
+			if(optional.isPresent()){
+				newData = optional.get();
+			}
+    // Set fields from requestPayload into newData
+			newData.setPolicyNo(requestPayload.getPolicyNo());
+			newData.setRequestOrigin("API");
+			newData.setCurrentBranch(requestPayload.getRequestMetaData().getCurrentBranch());
+			newData.setOriginBranch(requestPayload.getRequestMetaData().getOriginBranch());
+			newData.setUserName(requestPayload.getRequestMetaData().getUserName());
+			newData.setIpAddress(requestPayload.getRequestMetaData().getIpAddress());
+			newData.setRequestGeneratedDateTime(new Date()); // Assuming this is the current date and time
+			newData.setConsumerTrackingId(requestPayload.getRequestMetaData().getConsumerTrackingID());
+			newData.setLanguageCode(requestPayload.getLanguageCode());
+			newData.setInsuredId(requestPayload.getInsuredId());
+			newData.setLossDate(requestPayload.getLossDate());
+			newData.setIntimatedDate(requestPayload.getIntimatedDate());
+			newData.setLossLocation(requestPayload.getLossLocation());
+			newData.setNatureOfLoss(requestPayload.getNatureOfLoss());
+			newData.setPoliceStation(requestPayload.getPoliceStation());
+			newData.setPoliceReportNo(requestPayload.getPoliceReportNo());
+			newData.setLossDescription(requestPayload.getLossDescription());
+			newData.setAtFault(requestPayload.getAtFault());
+			claimIntimationDetailsRepository.save(newData);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println("Error while saving data");
+		}
         try {
             // Extract JWT token from request
             String jwtToken = authenticateUserCall();
@@ -178,9 +207,24 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
             log.setResponse(apiResponse.getBody());
             log.setStatus("SUCCESS");
-
+            
             // Parse the raw response into ExternalApiResponse object
             ExternalApiResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), ExternalApiResponse.class);
+            
+          //saving fnol number
+            try{
+            	ClaimIntimationDetails oldData = new ClaimIntimationDetails();
+    			Optional<ClaimIntimationDetails> optional = claimIntimationDetailsRepository.findByPolicyNo(requestPayload.getPolicyNo());
+    			if(optional.isPresent()){
+    				oldData = optional.get();
+    				oldData.setFnolNo(externalApiResponse.getData().getFnolNo());
+    				claimIntimationDetailsRepository.save(oldData);
+    			}
+    			
+            }catch (Exception e) {
+    			// TODO Auto-generated catch block
+    			System.out.println("Error while saving data");
+    		}
 
             if (externalApiResponse.isHasError()) {
                 // Create custom error response
@@ -757,6 +801,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        // Set fields from ClaimIntimationDetails entity to ClaimIntimationResponse
 	        response.setLanguageCode(data.getLanguageCode());
 	        response.setPolicyNo(data.getPolicyNo());
+	        response.setFnolNo(data.getFnolNo());
 	        response.setInsuredId(data.getInsuredId());
 
 	        response.setLossDate(data.getLossDate());

@@ -3,7 +3,7 @@ package com.maan.veh.claim.response;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.maan.veh.claim.error.Error;
+
 import lombok.Data;
 
 @Data
@@ -16,7 +16,7 @@ public class CommonRes {
 	private Boolean isError;
 	
 	@JsonProperty("ErrorMessage")
-	private List<Error> errorMessage;
+	private List<ErrorList> errorMessage;
 
 	//Dynamic
 	@JsonProperty("Result")

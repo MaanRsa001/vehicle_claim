@@ -1,5 +1,8 @@
 package com.maan.veh.claim.response;
 
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
@@ -18,9 +21,10 @@ public class GarageWorkOrderSaveReq {
 	 	
 	 	 @JsonProperty("WorkOrderTypeDesc")
 	     private String workOrderTypeDesc;
-
+	 	 
+	 	@JsonFormat(pattern="dd/MM/yyyy")
 	 	@JsonProperty("WorkOrderDate")
-	    private String workOrderDate;
+	    private Date workOrderDate;
 
 	 	@JsonProperty("SettlementType")
 	    private String settlementType;
@@ -49,8 +53,9 @@ public class GarageWorkOrderSaveReq {
 	 	@JsonProperty("QuotationNo")
 	    private String quotationNo;
 	 	
+	 	@JsonFormat(pattern="dd/MM/yyyy")
 	 	@JsonProperty("DeliveryDate")
-	    private String deliveryDate;
+	    private Date deliveryDate;
 	 	
 	 	@JsonProperty("JointOrderYn")
 	    private String jointOrderYn;

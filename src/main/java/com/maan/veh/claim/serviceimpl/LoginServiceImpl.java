@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import com.maan.veh.claim.auth.EncryDecryService;
 import com.maan.veh.claim.auth.JwtTokenUtil;
 import com.maan.veh.claim.auth.passwordEnc;
+import com.maan.veh.claim.dto.GarageLoginMasterDTO;
 import com.maan.veh.claim.entity.BranchMaster;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.LoginMasterId;
@@ -41,6 +42,7 @@ import com.maan.veh.claim.repository.MenuMasterRepository;
 import com.maan.veh.claim.repository.SessionMasterRepository;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.response.CommonResponse;
+import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.service.LoginService;
 
 import jakarta.persistence.EntityManager;
@@ -77,6 +79,9 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	
 	@Autowired
 	private LoginUserInfoRepository LoginUserInfoRepo;
+	
+	@Autowired
+	private InputValidationUtil validation;
 	
 	@Override
 	public CommonResponse isValidUser(LoginRequest req) {
@@ -283,6 +288,63 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 		comResponse.setIsError(false);
 
 		return comResponse;
+	}
+
+	@Override
+	public CommonResponse createGarageLogin(GarageLoginMasterDTO req) {
+		CommonResponse comResponse = new CommonResponse();
+	    try {
+	    	List<ErrorList> errors = validation.validateGarageLogin(req);
+			if(errors.size()>0){
+				comResponse.setErrors(errors);
+				comResponse.setIsError(true);
+				comResponse.setMessage("User Not Found");
+				comResponse.setResponse(Collections.EMPTY_LIST);
+				return comResponse;
+			}
+			
+			LoginMaster loginMaster = loginRepo.findByLoginId(req.getGarageId());
+			
+			if(loginMaster!=null && StringUtils.isNotBlank(req.getUserType())) {
+				loginMaster.setCoreAppCode(req.getCoreAppCode());
+				loginMaster.setBranchCode(req.getBranchCode());
+				loginMaster.setUpdatedBy(req.getCreatedBy());
+				loginMaster.setUpdatedDate(new Date());
+				loginMaster.setStatus(req.getStatus());
+				loginRepo.save(loginMaster);
+			}else {
+				LoginMaster loginMasterNew = new LoginMaster();
+				loginMasterNew.setLoginId(req.getGarageId());
+				loginMasterNew.setCoreAppCode(req.getCoreAppCode());
+				loginMasterNew.setUserType("Garage");
+				passwordEnc passEnc = new passwordEnc();
+				String password = passEnc.crypt(req.getPassWord().trim());
+				loginMasterNew.setPassword(password);
+				loginMasterNew.setStatus(req.getStatus());
+				loginMasterNew.setBranchCode(req.getBranchCode());
+				loginMasterNew.setCompanyId(req.getCompanyId());
+				loginMasterNew.setPwdCount("1");
+				loginMasterNew.setLpassDate(new Date());
+				loginMasterNew.setCreatedBy(req.getCreatedBy());
+				loginMasterNew.setEntryDate(new Date());
+			}
+	        
+			Map<String, String> response = new HashMap<>();
+			
+	        comResponse.setMessage("Success");
+	        comResponse.setResponse(response);
+	        comResponse.setErrors(Collections.emptyList());
+	        comResponse.setIsError(false);
+	        return comResponse;
+	        
+	    } catch (Exception e) {
+	        log.error("Error validating user", e);
+	        comResponse.setMessage("Failure");
+	        comResponse.setResponse(Collections.emptyMap());
+	        comResponse.setErrors(Collections.singletonList(e.getMessage()));
+	        comResponse.setIsError(true);
+	        return comResponse;
+	    }
 	}
 	
 }

@@ -14,7 +14,7 @@ public class VcDocumentMasterId implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int documentId;
-    private int companyId;
+	private Integer documentId;
+    private Integer companyId;
 }
 
