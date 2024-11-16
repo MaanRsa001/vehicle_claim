@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
@@ -29,6 +30,7 @@ import com.maan.veh.claim.entity.VcDocumentUploadDetails;
 import com.maan.veh.claim.error.Error;
 import com.maan.veh.claim.repository.VcDocumentUploadDetailsRepository;
 import com.maan.veh.claim.response.CommonRes;
+import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.serviceimpl.InputValidationUtil;
 
@@ -112,6 +114,7 @@ public class FileSystemStorageService implements StorageService {
 	        data.setUploadType(req.getUploadType());
 	        data.setCommonFilePath(req.getCommonFilePath());
 	        data.setErrorRes(req.getErrorRes());
+	        data.setUserType(req.getUserType());
 	        data.setUploadedBy(req.getUploadedBy());
 	        data.setRemarks("Uploaded successfully");
 	        data.setFileType(fileType);
@@ -205,6 +208,17 @@ public class FileSystemStorageService implements StorageService {
 
 	        // Fetch documents by claim number
 	        List<VcDocumentUploadDetails> docList = documentUploadDetailsRepo.findByClaimNo(req.getClaimNo());
+	        
+	        if("Dealer".equalsIgnoreCase(req.getUserType())) {
+	        	docList = docList.stream().filter(doc -> doc.getUploadedBy().equalsIgnoreCase(req.getLoginId()) 
+                        || "Surveyor".equalsIgnoreCase(doc.getUserType()))
+            .collect(Collectors.toList());
+	        }else{
+	        	docList = docList.stream().filter(doc -> doc.getUploadedBy().equalsIgnoreCase(req.getGarageLoginId()) 
+                        || "Surveyor".equalsIgnoreCase(doc.getUserType()))
+            .collect(Collectors.toList());
+
+	        }
 
 	        // Map each VcDocumentUploadDetails to DocumentUploadDetailsReqRes
 	        for (VcDocumentUploadDetails doc : docList) {
@@ -282,8 +296,10 @@ public class FileSystemStorageService implements StorageService {
 	}
 	
 	@Override
-	public CommonRes deleteFile(String claimNo, String documentRef) {
-	    CommonRes response = new CommonRes();  // Initialize the response object
+	public CommonResponse deleteFile(String claimNo, String documentRef, String loginId) {
+		CommonResponse response = new CommonResponse();  // Initialize the response object
+		
+		List<ErrorList> errors = new ArrayList<>();
 
 	    try {
 	        // Find document by claimNo and documentRef
@@ -297,25 +313,27 @@ public class FileSystemStorageService implements StorageService {
 	            File file = new File(filePath);
 
 	            // Delete the file from storage
-	            if (file.exists() && file.delete()) {
+	            if (file.exists() && file.delete() && document.getUploadedBy().equalsIgnoreCase(loginId)) {
 	                // Delete the record from the database
 	                documentUploadDetailsRepo.delete(document);
 
 	                // Set success response details
 	                response.setMessage("File and record deleted successfully for documentRef: " + documentRef);
 	                response.setIsError(false);
-	                response.setErroCode(0);
+	                response.setErrors(0);
 	            } else {
 	                // Handle file not found or deletion failure
 	                response.setMessage("File could not be found or deleted for documentRef: " + documentRef);
 	                response.setIsError(true);
-	                response.setErroCode(404);  // Not found error code
+	                errors.add(new ErrorList("100", "Delete", "File could not be found or deleted for documentRef: " + documentRef));
+	                response.setErrors(errors);  // Not found error code
 	            }
 	        } else {
 	            // Handle case where document was not found in the database
 	            response.setMessage("Document not found for claimNo: " + claimNo + ", documentRef: " + documentRef);
 	            response.setIsError(true);
-	            response.setErroCode(404);  // Not found error code
+	            errors.add(new ErrorList("100", "Document", "File could not be found "));
+	            response.setErrors(errors);  // Not found error code
 	        }
 	    } catch (Exception e) {
 	        // Log and set error response details
@@ -328,9 +346,8 @@ public class FileSystemStorageService implements StorageService {
 	        Error error = new Error();
 	        error.setCode("500");  // Example error code
 	        error.setMessage(e.getMessage());
-	        //response.setErrorMessage(List.of(error));  // Include a list with the error details
-
-	        response.setErroCode(500);  // Standard error code for failed operation
+	        errors.add(new ErrorList("100", "Delete", "File could not be found or deleted for documentRef: " + documentRef));
+	        response.setErrors(errors);  // Standard error code for failed operation
 	    }
 
 	    return response;

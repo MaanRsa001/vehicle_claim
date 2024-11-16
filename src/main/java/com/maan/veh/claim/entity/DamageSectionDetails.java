@@ -33,6 +33,7 @@ public class DamageSectionDetails {
     @Column(name = "damage_sno")
     private Integer damageSno;
     
+    @Id
     @Column(name = "quotation_no")
     private String quotationNo;
 

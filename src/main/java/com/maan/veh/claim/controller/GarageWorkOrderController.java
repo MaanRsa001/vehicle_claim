@@ -62,7 +62,7 @@ public class GarageWorkOrderController {
     
     @PostMapping("/surveyor/assign")
     public ResponseEntity<CommonResponse> assignWorkOrder(@RequestBody GarageWorkOrderSaveReq claim) {
-    	CommonResponse savedClaim = service.saveWorkOrder(claim);
+    	CommonResponse savedClaim = service.assignWorkOrder(claim);
     	return new ResponseEntity<>(savedClaim, HttpStatus.OK);
     }
     

@@ -74,7 +74,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	                	veh.setQuoteStatus(vehicle.getStatus());
 	                }
 	                //setting quote number
-	                Optional<GarageWorkOrder> workorder = garageWorkOrderRepository.findByClaimNo(vehicle.getClaimNo());
+	                Optional<GarageWorkOrder> workorder = garageWorkOrderRepository.findByClaimNoAndGarageId(vehicle.getClaimNo(),vehicle.getGarageId());
 	                veh.setQuotationNo(workorder.map(GarageWorkOrder::getQuotationNo).orElse(""));
 	                
 	                // Add the populated response to the list
@@ -105,7 +105,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
         
         try {
             // Fetch the vehicle info based on claim No
-            Optional<InsuredVehicleInfo> optionalVehicleInfo = insuredVehicleInfoRepository.findByClaimNo(request.getClaimNo());
+            Optional<InsuredVehicleInfo> optionalVehicleInfo = insuredVehicleInfoRepository.findByClaimNoAndGarageId(request.getClaimNo(),request.getGarageId());
             
             // Check if the vehicle info is present
             if (optionalVehicleInfo.isPresent()) {
@@ -173,7 +173,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
             
             List<String> claimWithReplacement = new ArrayList<>();
             
-            List<DamageSectionDetails> damageDetailsList = damageRepository.findByClaimNoIn(claimNumbers);
+            List<DamageSectionDetails> damageDetailsList = damageRepository.findByClaimNoInAndGarageLoginId(claimNumbers,request.getGarageId());
             
             claimWithReplacement = damageDetailsList.stream()
             	    //.filter(damage -> "Replace".equalsIgnoreCase(damage.getRepairReplace())) // Filter condition
@@ -182,7 +182,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
             	    .collect(Collectors.toList()); // Collect the results into a list
             
             // Fetch the list of vehicle info based on claim numbers and status
-            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoIn(claimWithReplacement);
+            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoInAndGarageId(claimWithReplacement,request.getGarageId());
             
             // Check if any vehicles were found for the provided claim numbers and status
             if (!vehicleInfoList.isEmpty()) {
@@ -206,6 +206,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
                     veh.setQuotationNo(claimToQuotationMap.get(vehicle.getClaimNo()));
                     
                     veh.setDealerLogin(claimToDealerMap.get(vehicle.getClaimNo()));
+                    veh.setGarageLoginId(vehicle.getGarageId());
                     // Add the populated response to the list
                     vehList.add(veh);
                 }
@@ -236,7 +237,6 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
         
         try {
 
-
             // Fetch the work orders based on the garage ID
             List<GarageWorkOrder> workOrders = garageWorkOrderRepository.findBySparepartsDealerId(request.getSparepartsDealerId());
 
@@ -247,16 +247,14 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
                 response.setIsError(true);
                 return response;
             }
-
-            // Collect claim numbers and map claim to quotation numbers in one step
-            Map<String, String> claimToQuotationMap = workOrders.stream()
-                .collect(Collectors.toMap(GarageWorkOrder::getClaimNo, GarageWorkOrder::getQuotationNo));
+            // Claim Number List
+            List<String> claimNumbers = workOrders.stream().map(GarageWorkOrder::getClaimNo)
+                    .collect(Collectors.toList());
             
-         // Collect claim numbers and map claim to status in one step
-            Map<String, String> claimToStatusMap = workOrders.stream()
-                .collect(Collectors.toMap(GarageWorkOrder::getClaimNo, GarageWorkOrder::getStatus));
-
-            List<String> claimNumbers = new ArrayList<>(claimToQuotationMap.keySet());
+         // Collect quotation numbers and map claim to status in one step
+            Map<String, String> quotationToStatusMap = workOrders.stream()
+                .collect(Collectors.toMap(GarageWorkOrder::getQuotationNo, GarageWorkOrder::getStatus));
+           
 
             // Fetch the list of vehicle info based on claim numbers and status
             List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoIn(claimNumbers);
@@ -279,8 +277,8 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
                     veh.setVehicleRegNo(vehicle.getVehicleRegNo()); 
                     veh.setEntryDate(vehicle.getEntryDate());
                     veh.setQuoteStatus(vehicle.getStatus());
-                    veh.setStatus(claimToStatusMap.get(vehicle.getClaimNo()));
-                    veh.setQuotationNo(claimToQuotationMap.get(vehicle.getClaimNo()));
+                    veh.setStatus(quotationToStatusMap.get(vehicle.getQuotationNo()));
+                    veh.setQuotationNo(vehicle.getQuotationNo());
                     
                     // Add the populated response to the list
                     vehList.add(veh);
@@ -395,7 +393,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	        	veh.setGarageLoginId(Optional.ofNullable(damage.getGarageLoginId()).orElse(""));
 	        	veh.setDealerLoginId(Optional.ofNullable(damage.getDealerLoginId()).orElse(""));
 	        	
-	        	Optional<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNo(damage.getClaimNo());
+	        	Optional<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoAndGarageId(damage.getClaimNo(),damage.getGarageLoginId());
 	        	if(vehicleInfoList.isPresent()) {
 	        		
 	        		InsuredVehicleInfo vehicle = vehicleInfoList.get();
@@ -468,7 +466,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	        	
 	        	veh.setAssignedTo(damage.getGarageDealer());
 	        	
-	        	Optional<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNo(damage.getClaimNo());
+	        	Optional<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoAndGarageId(damage.getClaimNo(),damage.getGarageLoginId());
 	        	if(vehicleInfoList.isPresent()) {
 	        		
 	        		InsuredVehicleInfo vehicle = vehicleInfoList.get();
@@ -520,7 +518,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
         
         try {
 
-            Optional<GarageWorkOrder> workOrdersOptional = garageWorkOrderRepository.findByClaimNo(request.getClaimNo());
+            Optional<GarageWorkOrder> workOrdersOptional = garageWorkOrderRepository.findByClaimNoAndGarageId(request.getClaimNo(),request.getGarageId());
             	
             if (!workOrdersOptional.isPresent()) {
                 response.setErrors(Collections.singletonList("No work orders found for the given Claim No"));
@@ -538,7 +536,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
             workOrders.setQuoteStatus(request.getQuoteStatus());
             garageWorkOrderRepository.save(workOrders);
 
-            Optional<InsuredVehicleInfo> vehicleInfoOptional = insuredVehicleInfoRepository.findByClaimNo(request.getClaimNo());
+            Optional<InsuredVehicleInfo> vehicleInfoOptional = insuredVehicleInfoRepository.findByClaimNoAndGarageId(request.getClaimNo(),request.getGarageId());
             
             if (!vehicleInfoOptional.isPresent()) {
                 response.setErrors(Collections.singletonList("No Vehicle found for the given Claim No"));

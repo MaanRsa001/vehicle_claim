@@ -70,6 +70,9 @@ public class VcDocumentUploadDetails {
 
     @Column(name = "UPLOADED_BY", length = 100)
     private String uploadedBy;
+    
+    @Column(name = "USER_TYPE")
+    private String userType;
 
     @Column(name = "REMARKS", length = 200)
     private String remarks;

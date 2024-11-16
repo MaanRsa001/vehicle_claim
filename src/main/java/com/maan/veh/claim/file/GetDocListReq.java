@@ -13,4 +13,13 @@ public class GetDocListReq {
 	@JsonProperty("DocumentRef")
 	private String documentRef;
 	
+	@JsonProperty("GarageLoginId")
+	private String garageLoginId;
+	
+	@JsonProperty("LoginId")
+	private String loginId;
+	
+	@JsonProperty("UserType")
+	private String userType;
+	
 }

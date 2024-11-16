@@ -1026,10 +1026,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	    try {
 	        // Retrieve data from repositories
-	    	Optional<GarageWorkOrder> optionalWorkOrder = garageWorkOrderRepo.findByClaimNo(request.getClaimNo());
+	    	GarageWorkOrder workOrder = garageWorkOrderRepo.findByClaimNoAndQuotationNo(request.getClaimNo(),request.getWorkOrderNo());
 	        List<DamageSectionDetails> damageDetails = damageSectionDetailsRepo.findByClaimNo(request.getClaimNo());
-	        if (optionalWorkOrder.isPresent()) {
-	        	GarageWorkOrder workOrder = optionalWorkOrder.get();
 	        
 	        if (workOrder == null || damageDetails.isEmpty()) {
 	            response.setMessage("No data found for the provided claim or work order number");
@@ -1094,7 +1092,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	            response.setResponse(externalApiResponse);
 	        }
 	        
-	      }
+	      
 
 	    } catch (Exception e) {
 	        log.setStatus("FAILURE");

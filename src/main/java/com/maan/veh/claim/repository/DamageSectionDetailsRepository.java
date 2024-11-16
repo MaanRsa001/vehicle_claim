@@ -19,11 +19,11 @@ public interface DamageSectionDetailsRepository extends JpaRepository<DamageSect
 
 	List<DamageSectionDetails> findByStatusAndGarageLoginId(String string, String garageId);
 
-	List<DamageSectionDetails> findByClaimNoIn(List<String> claimNumbers);
-
 	List<DamageSectionDetails> findByClaimNoInAndStatusNotIn(List<String> claimNumbers, List<String> usertype);
 
 	List<DamageSectionDetails> findByGarageLoginIdAndGarageDealerIsNotNull(String garageId);
 
 	List<DamageSectionDetails> findByClaimNoAndRepairReplace(String claim, String string);
+
+	List<DamageSectionDetails> findByClaimNoInAndGarageLoginId(List<String> claimNumbers, String garageId);
 }

@@ -24,7 +24,11 @@ public class GarageWorkOrder {
     @Id
     @Column(name = "claim_no")
     private String claimNo;
-
+    
+    @Id
+    @Column(name = "quotation_no")
+    private String quotationNo;
+    
     @Column(name = "work_order_no")
     private String workOrderNo;
 
@@ -60,9 +64,8 @@ public class GarageWorkOrder {
 
     @Column(name = "repair_type")
     private String repairType;
-
-    @Column(name = "quotation_no")
-    private String quotationNo;
+    
+    
     
    // @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "delivery_date")

@@ -17,6 +17,9 @@ public class DocumentUploadDetailsReqRes {
 	@JsonProperty("ClaimNo")
 	private String claimNo;
 	
+	@JsonProperty("UserType")
+	private String userType;
+	
 	@JsonProperty("DocumentRef")
 	private String documentRef;
 	

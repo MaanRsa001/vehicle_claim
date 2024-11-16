@@ -14,6 +14,7 @@ public class InsuredVehicleInfoId implements Serializable {
     private Integer companyId;
     private String policyNo;
     private String claimNo;
+    private String garageId;
 
     private static final long serialVersionUID = 1L;
 }

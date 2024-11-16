@@ -7,6 +7,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.maan.veh.claim.response.CommonRes;
+import com.maan.veh.claim.response.CommonResponse;
 
 public interface StorageService {
 
@@ -24,6 +25,6 @@ public interface StorageService {
 
 	CommonRes listUploadedFiles(GetDocListReq req);
 
-	CommonRes deleteFile(String claimNo, String documentRef);
+	CommonResponse deleteFile(String claimNo, String documentRef, String loginId);
 
 }

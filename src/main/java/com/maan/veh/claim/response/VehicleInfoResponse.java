@@ -58,4 +58,7 @@ public class VehicleInfoResponse {
     
     @JsonProperty("DealerLogin")
     private String dealerLogin;
+    
+    @JsonProperty("GarageLoginId")
+    private String garageLoginId;
 }

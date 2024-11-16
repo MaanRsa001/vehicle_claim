@@ -97,5 +97,8 @@ public class GarageWorkOrderResponse {
     
     @JsonProperty("QuoteStatus")
     private String quoteStatus;
+    
+    @JsonProperty("DealerYN")
+    private String dealerYn;
 }
 

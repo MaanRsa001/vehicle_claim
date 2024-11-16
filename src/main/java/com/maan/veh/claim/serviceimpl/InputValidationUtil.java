@@ -177,7 +177,7 @@ public class InputValidationUtil {
 	    
 	    // Status check block
 	    try {
-	        Optional<GarageWorkOrder> optional = garageWorkOrderRepository.findByClaimNo(req.getClaimNo());
+	        Optional<GarageWorkOrder> optional = garageWorkOrderRepository.findByClaimNoAndGarageId(req.getClaimNo(),req.getGarageId());
 	        
 	        if (optional.isPresent()) {
 	            String quoteStatus = optional.get().getQuoteStatus();
@@ -1391,7 +1391,7 @@ List<ErrorList> errors = new ArrayList<>();
 	    }
 
 	    if (StringUtils.isBlank(req.getDocumentRef())) {
-	        list.add(new ErrorList("100", "DocumentRef", "Document reference cannot be blank"));
+	       // list.add(new ErrorList("100", "DocumentRef", "Document reference cannot be blank"));
 	    }
 
 	    if (StringUtils.isBlank(req.getDocTypeId())) {
@@ -1403,7 +1403,7 @@ List<ErrorList> errors = new ArrayList<>();
 	    }
 
 	    if (StringUtils.isBlank(req.getFilePathName())) {
-	        list.add(new ErrorList("100", "FilePathName", "File path name cannot be blank"));
+	       // list.add(new ErrorList("100", "FilePathName", "File path name cannot be blank"));
 	    }
 
 	    if (StringUtils.isBlank(req.getFileName())) {

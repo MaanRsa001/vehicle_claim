@@ -11,6 +11,9 @@ public class GarageWorkOrderRequest {
 
     @JsonProperty("CreatedBy")
     private String createdBy;
+    
+    @JsonProperty("GarageLoginId")
+    private String garageLoginId;
 
 }
 

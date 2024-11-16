@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maan.veh.claim.response.CommonRes;
+import com.maan.veh.claim.response.CommonResponse;
 
 @RestController
 @RequestMapping("/document")
@@ -40,9 +41,9 @@ public class FileUploadController {
 	}
 	
 	@PostMapping("/delete")
-	public ResponseEntity<CommonRes> deleteFile(@RequestBody GetDocListReq req) {
-		CommonRes res= new CommonRes();
-		res = storageService.deleteFile(req.getClaimNo(),req.getDocumentRef());
+	public ResponseEntity<CommonResponse> deleteFile(@RequestBody GetDocListReq req) {
+		CommonResponse res= new CommonResponse();
+		res = storageService.deleteFile(req.getClaimNo(),req.getDocumentRef(),req.getLoginId());
 
 		return ResponseEntity.ok(res);
 	}

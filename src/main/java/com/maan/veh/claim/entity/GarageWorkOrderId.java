@@ -15,5 +15,6 @@ public class GarageWorkOrderId implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private String claimNo;
+	private String claimNo;    
+	private String quotationNo;
 }

@@ -19,4 +19,6 @@ public class DamageSectionDetailsId implements Serializable {
 	private String claimNo;
 
     private int damageSno;
+    
+    private String quotationNo;
 }

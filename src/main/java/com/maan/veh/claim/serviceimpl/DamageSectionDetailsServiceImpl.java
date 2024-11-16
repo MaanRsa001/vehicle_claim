@@ -563,7 +563,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            res.setUnitPrice(data.getDealerPrice() != null ? data.getDealerPrice().toString() : "");
 	            res.setDealerLoginId(data.getDealerLoginId());
 	            res.setStatus(data.getStatus());
-	            
+	            res.setGarageLoginId(data.getGarageLoginId());
 	            groupedDamageDetails.add(res); 
 	        }
 	        
