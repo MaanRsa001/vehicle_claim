@@ -1476,11 +1476,64 @@ List<ErrorList> errors = new ArrayList<>();
 	    validateDecimalField(req.getVatAmount(), "VatAmount", errors);
 	    validateDecimalField(req.getTotalWithVAT(), "TotalWithVAT", errors);
 	    validateDecimalField(req.getSalvageDeduction(),"SalvageDeduction", errors);
+	    
+	    // Additional validation rules
+	    try {
+	        BigDecimal sparePartDepreciation = toBigDecimal(req.getSparePartDepreciation());
+	        BigDecimal discountOnSpareParts = toBigDecimal(req.getDiscountOnSpareParts());
+	        BigDecimal replacementCost = toBigDecimal(req.getReplacementCost());
+
+	        if (sparePartDepreciation.add(discountOnSpareParts).compareTo(replacementCost) > 0) {
+	            errors.add(new ErrorList("102", "SparePartDepreciation & DiscountOnSpareParts",
+	                "SparePartDepreciation + DiscountOnSpareParts should not be greater than ReplacementCost"));
+	        }
+
+	        BigDecimal repairLabourDiscountAmount = toBigDecimal(req.getRepairLabourDiscountAmount());
+	        BigDecimal repairLabour = toBigDecimal(req.getRepairLabour());
+
+	        if (repairLabourDiscountAmount.compareTo(repairLabour) > 0) {
+	            errors.add(new ErrorList("103", "RepairLabourDiscountAmount",
+	                "RepairLabourDiscountAmount should not be greater than RepairLabour"));
+	        }
+
+	        BigDecimal replacementCostDeductible = toBigDecimal(req.getReplacementCostDeductible());
+	        BigDecimal repairLabourDeductible = toBigDecimal(req.getRepairLabourDeductible());
+	        BigDecimal unknownAccidentDeduction = toBigDecimal(req.getUnknownAccidentDeduction());
+	        BigDecimal salvageDeduction = toBigDecimal(req.getSalvageDeduction());
+	        BigDecimal totalAmountReplacement = toBigDecimal(req.getTotalAmountReplacement());
+	        BigDecimal totalAmountRepairLabour = toBigDecimal(req.getTotalAmountRepairLabour());
+
+	        BigDecimal totalDeductions = replacementCostDeductible.add(repairLabourDeductible)
+	            .add(unknownAccidentDeduction).add(salvageDeduction);
+
+	        BigDecimal totalLabourReplacement = totalAmountReplacement.add(totalAmountRepairLabour);
+
+	        if (totalDeductions.compareTo(totalLabourReplacement) > 0) {
+	            errors.add(new ErrorList("104", "Deductions",
+	                "ReplacementCostDeductible + RepairLabourDeductible + UnknownAccidentDeduction + SalvageDeduction " +
+	                "should not be greater than TotalAmountReplacement + TotalAmountRepairLabour"));
+	        }
+
+	    } catch (NumberFormatException e) {
+	        errors.add(new ErrorList("105", "ValidationError", "Invalid number format in request fields"));
+	    }
 
 	    return errors;
 	}
 
-    private void validateDecimalField(String value, String fieldName, List<ErrorList> errors) {
+	private BigDecimal toBigDecimal(String value) {
+		if (StringUtils.isBlank(value)) {
+			return BigDecimal.ZERO; // Default to zero if value is blank or null
+		}
+		try {
+			return new BigDecimal(value); // Attempt to parse the string
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("Invalid decimal value: " + value, e);
+		}
+	}
+
+
+	private void validateDecimalField(String value, String fieldName, List<ErrorList> errors) {
         if (StringUtils.isBlank(value)) {
             // Field is blank, so we add a blank validation error
             errors.add(new ErrorList("100", fieldName, fieldName + " cannot be blank"));
@@ -1491,6 +1544,8 @@ List<ErrorList> errors = new ArrayList<>();
                 errors.add(new ErrorList("101", fieldName, fieldName + " must be a valid decimal number"));
             }
         }
+        
+     
     }
 
 	
