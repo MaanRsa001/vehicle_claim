@@ -680,6 +680,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            spareParts.setVatRate(parseBigDecimal(req.getVatRate()));
 	            spareParts.setVatAmount(parseBigDecimal(req.getVatAmount()));
 	            spareParts.setTotalWithVAT(parseBigDecimal(req.getTotalWithVAT()));
+	            spareParts.setSalvageDeduction(parseBigDecimal(req.getSalvageDeduction()));
 	            
 	            // Save the updated spare parts details
 	            sparePartsDetailsRepo.save(spareParts);
@@ -754,18 +755,20 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	                ? spareParts.getVatRate().toString() : "0.00");
 	            sparePartsResponse.setVatAmount(spareParts.getVatAmount().toString());
 	            sparePartsResponse.setTotalWithVAT(spareParts.getTotalWithVAT().toString());
+	            sparePartsResponse.setSalvageDeduction(spareParts.getSalvageDeduction().toString());
 	            
 	            // Set the response with the mapped data
 	            response.setResponse(sparePartsResponse);
 	            response.setMessage("Success");
 	            response.setErrors(Collections.emptyList());
 	            response.setIsError(false);
-	        } else {
-	            // If no record found, set appropriate error message
-	            response.setMessage("Failed: No record found for claim number " + claimNo);
-	            response.setErrors(Collections.singletonList(new ErrorList("102", "ClaimNumber", "No data found for claim number " + claimNo)));
-	            response.setIsError(true);
-	        }
+	        } 
+//	        else {
+//	            // If no record found, set appropriate error message
+//	            response.setMessage("Failed: No record found for claim number " + claimNo);
+//	            response.setErrors(Collections.singletonList(new ErrorList("102", "ClaimNumber", "No data found for claim number " + claimNo)));
+//	            response.setIsError(true);
+//	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        response.setMessage("Failed: An error occurred while retrieving spare parts details");

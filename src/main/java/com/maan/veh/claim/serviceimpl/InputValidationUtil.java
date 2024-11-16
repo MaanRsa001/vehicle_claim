@@ -1475,6 +1475,7 @@ List<ErrorList> errors = new ArrayList<>();
 	    validateDecimalField(req.getVatRate(), "VatRate", errors);
 	    validateDecimalField(req.getVatAmount(), "VatAmount", errors);
 	    validateDecimalField(req.getTotalWithVAT(), "TotalWithVAT", errors);
+	    validateDecimalField(req.getSalvageDeduction(),"SalvageDeduction", errors);
 
 	    return errors;
 	}

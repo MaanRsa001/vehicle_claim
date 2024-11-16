@@ -63,6 +63,9 @@ public class VcSparePartsDetailsRequest {
 
     @JsonProperty("TotalWithVAT")
     private String totalWithVAT;
+    
+    @JsonProperty("SalvageDeduction")
+    private String salvageDeduction;
 
 }
 

@@ -66,6 +66,9 @@ public class VcSparePartsDetails {
 
     @Column(name = "total_with_vat", precision = 10, scale = 2)
     private BigDecimal totalWithVAT = BigDecimal.ZERO;
+    
+    @Column(name = "salvage_deduction", precision = 10, scale = 2)
+    private BigDecimal salvageDeduction = BigDecimal.ZERO;
 
 }
 
