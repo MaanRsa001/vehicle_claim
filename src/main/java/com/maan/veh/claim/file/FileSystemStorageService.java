@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -36,24 +37,15 @@ import com.maan.veh.claim.serviceimpl.InputValidationUtil;
 
 @Service
 public class FileSystemStorageService implements StorageService {
-
-	private final Path rootLocation;
+	
+	@Value("${common.path}")
+	private Path rootLocation;
 	
 	@Autowired
 	private VcDocumentUploadDetailsRepository documentUploadDetailsRepo;
 	
 	@Autowired
     private InputValidationUtil validation;
-
-	@Autowired
-	public FileSystemStorageService(StorageProperties properties) {
-        
-        if(properties.getLocation().trim().length() == 0){
-            throw new StorageException("File upload location can not be Empty."); 
-        }
-
-		this.rootLocation = Paths.get(properties.getLocation());
-	}
 
 	@Override
 	public CommonRes store(MultipartFile file, DocumentUploadDetailsReqRes req) {

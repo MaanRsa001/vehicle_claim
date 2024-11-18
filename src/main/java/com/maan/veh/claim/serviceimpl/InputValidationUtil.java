@@ -137,27 +137,22 @@ public class InputValidationUtil {
 	    if (StringUtils.isBlank(req.getQuoteStatus())) {
 	        list.add(new ErrorList("100", "Status", "status cannot be blank"));
 	    }
+	    
+	    if (StringUtils.isBlank(req.getRemarks())) {
+	        list.add(new ErrorList("100", "Remarks", "remarks cannot be blank"));
+	    }
 
-	    Date workOrderDate = null;
-	    Date deliveryDate = null;
+	    Date workOrderDate = req.getWorkOrderDate();
+	    Date deliveryDate = req.getDeliveryDate();
 
 	    // Parse and validate workOrderDate
-//	    try {
-//	        if (!StringUtils.isBlank(req.getWorkOrderDate())) {
-//	            workOrderDate = DD_MM_YYYY.parse(req.getWorkOrderDate());
-//	        }
-//	    } catch (ParseException e) {
-//	        list.add(new ErrorList("100", "WorkOrderDate", "Work order date is invalid or not in the correct format (dd/MM/yyyy)"));
-//	    }
-
-	    // Parse and validate deliveryDate
-//	    try {
-//	        if (!StringUtils.isBlank(req.getDeliveryDate())) {
-//	            deliveryDate = DD_MM_YYYY.parse(req.getDeliveryDate());
-//	        }
-//	    } catch (ParseException e) {
-//	        list.add(new ErrorList("100", "DeliveryDate", "Delivery Date is invalid or not in the correct format (dd/MM/yyyy)"));
-//	    }
+	    if (req.getWorkOrderDate() == null) {
+	    	list.add(new ErrorList("100", "WorkOrderDate", "Work order date is invalid or not in the correct format (dd/MM/yyyy)"));
+	    }
+	    if (req.getDeliveryDate() == null) {
+	    	 list.add(new ErrorList("100", "DeliveryDate", "Delivery Date is invalid or not in the correct format (dd/MM/yyyy)"));
+	    }
+	   
 
 	    // Validate deliveryDate is not before workOrderDate
 	    if (workOrderDate != null && deliveryDate != null) {
@@ -351,7 +346,7 @@ public class InputValidationUtil {
 			}
 			
 			if (StringUtils.isBlank(req.getReplacementCharge())) {
-				list.add(new ErrorList("111", "ReplacementCharge", "Replacement Charge cannot be blank in line number : "+line));
+				list.add(new ErrorList("111", "LabourCharge", "Labour Charge cannot be blank in line number : "+line));
 			}
 			
 			
@@ -1547,6 +1542,157 @@ List<ErrorList> errors = new ArrayList<>();
         
      
     }
+
+	public List<ErrorList> validateAssignWorkOrder(GarageWorkOrderSaveReq req) {
+		List<ErrorList> list = new ArrayList<>();
+
+		// Existing validations
+		if (StringUtils.isBlank(req.getClaimNo())) {
+		    list.add(new ErrorList("100", "Claim number", "Claim number cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getWorkOrderNo())) {
+		    list.add(new ErrorList("100", "WorkOrderNo", "Work order number cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getWorkOrderType())) {
+		    list.add(new ErrorList("100", "WorkOrderType", "Work order type cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getSettlementType())) {
+		    list.add(new ErrorList("100", "SettlementType", "Settlement type cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getSettlementTo())) {
+		    list.add(new ErrorList("100", "SettlementTo", "Settlement to cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getGarageName())) {
+		    list.add(new ErrorList("100", "GarageName", "Garage name cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getGarageId())) {
+		    list.add(new ErrorList("100", "GarageId", "Garage ID cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getLocation())) {
+		    list.add(new ErrorList("100", "Location", "Location cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getRepairType())) {
+		    list.add(new ErrorList("100", "RepairType", "Repair type cannot be blank"));
+		}
+
+		if (StringUtils.isNotBlank(req.getSparepartsDealerId())) {
+		    if (StringUtils.isBlank(req.getQuotationNo())) {
+		        list.add(new ErrorList("100", "QuotationNo", "Quotation number cannot be blank"));
+		    }
+		}
+
+		if (StringUtils.isBlank(req.getLossType())) {
+		   // list.add(new ErrorList("100", "LossType", "Loss type cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getCreatedBy())) {
+		    list.add(new ErrorList("100", "CreatedBy", "Created by cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getUpdatedBy())) {
+		    list.add(new ErrorList("100", "UpdatedBy", "Updated by cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getQuoteStatus())) {
+		    list.add(new ErrorList("100", "QuoteStatus", "Quote status cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getRemarks())) {
+		    list.add(new ErrorList("100", "Remarks", "Remarks cannot be blank"));
+		}
+
+		if (StringUtils.isBlank(req.getUserType())) {
+		    list.add(new ErrorList("100", "UserType", "User type cannot be blank"));
+		}
+
+		// Date validations
+		Date workOrderDate = req.getWorkOrderDate();
+		Date deliveryDate = req.getDeliveryDate();
+
+		if (workOrderDate == null) {
+		    list.add(new ErrorList("100", "WorkOrderDate", "Work order date is invalid or not in the correct format (dd/MM/yyyy)"));
+		}
+		if (deliveryDate == null) {
+		    list.add(new ErrorList("100", "DeliveryDate", "Delivery Date is invalid or not in the correct format (dd/MM/yyyy)"));
+		}
+		if (workOrderDate != null && deliveryDate != null && deliveryDate.before(workOrderDate)) {
+		    list.add(new ErrorList("101", "DeliveryDate", "Delivery date must not be less than work order date"));
+		}
+
+		// TotalLoss validation
+		try {
+		    if (!StringUtils.isBlank(req.getTotalLoss())) {
+		        new BigDecimal(req.getTotalLoss());
+		    }
+		} catch (NumberFormatException e) {
+		    list.add(new ErrorList("100", "TotalLoss", "Total loss must be a valid number"));
+		}
+
+		// JointOrderYn and SubrogationYn validations
+		if (StringUtils.isBlank(req.getJointOrderYn())) {
+		    list.add(new ErrorList("100", "JointOrderYn", "Joint order indicator cannot be blank"));
+		}
+		if (StringUtils.isBlank(req.getSubrogationYn())) {
+		    list.add(new ErrorList("100", "SubrogationYn", "Subrogation indicator cannot be blank"));
+		}
+
+	    
+	    // Status check block
+	    try {
+	        Optional<GarageWorkOrder> optional = garageWorkOrderRepository.findByClaimNoAndGarageId(req.getClaimNo(),req.getGarageId());
+	        
+	        if (optional.isPresent()) {
+	            String quoteStatus = optional.get().getQuoteStatus();
+	            
+	            // Dynamically retrieve flowList based on usertype and quoteStatus
+	            List<VcFlowMaster> flowList = flowMasterRepo.findByStatusId(quoteStatus);
+	            
+	            // Extract the list of valid status IDs dynamically
+	            Set<String> validStatusIds = flowList.stream()
+	                                                 .map(VcFlowMaster::getSubStatus)
+	                                                 .collect(Collectors.toSet());
+	            
+	            // Check if the requested quote status is valid
+	            if (!validStatusIds.contains(req.getQuoteStatus())) {
+	            	List<VcFlowMaster> flowListStatus = flowMasterRepo.findByStatusId(req.getQuoteStatus());
+	            	String stausDesc = (flowListStatus!=null && flowListStatus.size()>0) ? flowListStatus.get(0).getStatusDescription() : "Current Status";
+	                list.add(new ErrorList("101", "Status", 
+	                        String.format("The Status cannot be %s", stausDesc)));
+	            }
+	        }else {
+                String quoteStatus = "PFG";
+	            
+	            // Dynamically retrieve flowList based on usertype and quoteStatus
+	            List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndStatusId("Garage", quoteStatus);
+	            
+	            // Extract the list of valid status IDs dynamically
+	            Set<String> validStatusIds = flowList.stream()
+	                                                 .map(VcFlowMaster::getSubStatus)
+	                                                 .collect(Collectors.toSet());
+	            
+	            // Check if the requested quote status is valid
+	            if (!validStatusIds.contains(req.getQuoteStatus())) {
+	            	List<VcFlowMaster> flowListStatus = flowMasterRepo.findByStatusId(req.getQuoteStatus());
+	            	String stausDesc = (flowListStatus!=null && flowListStatus.size()>0) ? flowListStatus.get(0).getStatusDescription() : "Current Status";
+	                list.add(new ErrorList("101", "Status", 
+	                        String.format("The Status cannot be %s", stausDesc)));
+	            }
+	        }
+	    } catch (Exception ex) {
+	        //log.error("Exception during status check: {}", ex.getMessage(), ex);
+	    }
+
+
+	    return list;
+	}
 
 	
 }

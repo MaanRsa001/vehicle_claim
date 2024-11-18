@@ -375,7 +375,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 		CommonResponse response = new CommonResponse();
         try {
             // Step 1: Validate the request
-            List<ErrorList> errors = validation.validateWorkOrder(req);
+            List<ErrorList> errors = validation.validateAssignWorkOrder(req);
             if (!errors.isEmpty()) {
                 // Return early if there are validation errors
                 response.setErrors(errors);
