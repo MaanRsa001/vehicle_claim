@@ -12,6 +12,12 @@ public class VcSparePartsDetailsRequest {
 	
     @JsonProperty("ClaimNo")
     private String claimNo;
+    
+    @JsonProperty("QuotationNo")
+    private String quotationNo;
+    
+    @JsonProperty("GarageId")
+    private String garageId;
 
     @JsonProperty("ReplacementCost")
     private String replacementCost;

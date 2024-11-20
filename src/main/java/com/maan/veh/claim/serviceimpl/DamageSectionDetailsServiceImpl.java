@@ -656,13 +656,15 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	        List<ErrorList> errors = validation.validateSaveSpareParts(req);
 	        
 	        if (errors.isEmpty()) {
-	            VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumber(req.getClaimNo());
+	            VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumberAndQuotationNo(req.getClaimNo(),req.getQuotationNo());
 	            if (spareParts == null) {
 	                spareParts = new VcSparePartsDetails();
 	            }
 	            
 	            // Mapping fields from request to entity, with necessary type conversions
 	            spareParts.setClaimNumber(req.getClaimNo());
+	            spareParts.setQuotationNo(req.getQuotationNo());
+	            spareParts.setGarageId(req.getGarageId());
 	            spareParts.setReplacementCost(parseBigDecimal(req.getReplacementCost()));
 	            spareParts.setReplacementCostDeductible(parseBigDecimal(req.getReplacementCostDeductible()));
 	            spareParts.setSparePartDepreciation(parseBigDecimal(req.getSparePartDepreciation()));
@@ -727,13 +729,15 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	        String claimNo = req.getClaimNo();
 	        
 	        // Retrieve spare parts details from the database using claim number
-	        VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumber(claimNo);
+	        VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumberAndQuotationNo(claimNo,req.getQuotationNo());
 	        
 	        // Check if record exists for the provided claim number
 	        if (spareParts != null) {
 	            // Map entity data to VcSparePartsDetailsRequest
 	            VcSparePartsDetailsRequest sparePartsResponse = new VcSparePartsDetailsRequest();
 	            sparePartsResponse.setClaimNo(spareParts.getClaimNumber());
+	            sparePartsResponse.setQuotationNo(spareParts.getQuotationNo());
+	            sparePartsResponse.setGarageId(spareParts.getGarageId());
 	            sparePartsResponse.setReplacementCost(spareParts.getReplacementCost().toString());
 	            sparePartsResponse.setReplacementCostDeductible(spareParts.getReplacementCostDeductible().toString());
 	            sparePartsResponse.setSparePartDepreciation(spareParts.getSparePartDepreciation().toString());

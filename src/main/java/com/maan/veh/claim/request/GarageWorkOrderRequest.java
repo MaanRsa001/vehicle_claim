@@ -14,6 +14,9 @@ public class GarageWorkOrderRequest {
     
     @JsonProperty("GarageLoginId")
     private String garageLoginId;
+    
+    @JsonProperty("QuotationNo")
+    private String quotationNo;
 
 }
 

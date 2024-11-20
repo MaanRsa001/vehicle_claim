@@ -10,11 +10,19 @@ import java.math.BigDecimal;
 @Data
 @Entity
 @Table(name = "vc_spare_parts_details")
+@IdClass(VcSparePartsDetailsId.class)
 public class VcSparePartsDetails {
 
     @Id
     @Column(name = "claim_number", nullable = false, length = 255)
     private String claimNumber;
+    
+    @Id
+    @Column(name = "quotation_no", nullable = false)
+    private String quotationNo;
+    
+    @Column(name = "garage_id", nullable = false)
+    private String garageId;
 
     @Column(name = "replacement_cost", precision = 10, scale = 2)
     private BigDecimal replacementCost = BigDecimal.ZERO;

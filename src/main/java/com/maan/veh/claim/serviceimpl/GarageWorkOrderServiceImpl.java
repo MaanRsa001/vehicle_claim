@@ -17,14 +17,19 @@ import org.springframework.stereotype.Service;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
+import com.maan.veh.claim.entity.SparePartsSaveDetails;
+import com.maan.veh.claim.entity.VcSparePartsDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
+import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
+import com.maan.veh.claim.repository.VcSparePartsDetailsRepository;
 import com.maan.veh.claim.request.GarageWorkOrderRequest;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GarageWorkOrderResponse;
 import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
+import com.maan.veh.claim.response.GetAllQuoteResponse;
 import com.maan.veh.claim.service.GarageWorkOrderService;
 
 @Service
@@ -43,6 +48,12 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
     
     @Autowired
 	private DamageSectionDetailsRepository damageRepository;
+    
+    @Autowired
+	private VcSparePartsDetailsRepository sparePartsDetailsRepo;
+    
+    @Autowired
+    private SparePartsSaveDetailsRepository SparePartsSaveDetailsRepo;
 
     @Override
     public CommonResponse getGarageWorkOrders(GarageWorkOrderRequest req) {
@@ -491,5 +502,159 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
         }
 
         return response;
+	}
+
+	@Override
+	public CommonResponse getAllQuoteByClaimNo(GarageWorkOrderRequest req) {
+		CommonResponse comResponse = new CommonResponse(); 
+        try {
+			List<GarageWorkOrder> data = garageWorkOrderRepository.findByClaimNo(req.getClaimNo());
+			
+			if(data.size()>0) {
+		    	List<GetAllQuoteResponse> res = new ArrayList<>();
+				for(GarageWorkOrder workOrder : data ) {
+					 GetAllQuoteResponse response = new GetAllQuoteResponse();
+			         response.setClaimNo(workOrder.getClaimNo());
+			         response.setWorkOrderNo(workOrder.getWorkOrderNo());
+			         response.setWorkOrderType(workOrder.getWorkOrderType());
+			         response.setWorkOrderTypeDesc(workOrder.getWorkOrderTypeDesc());
+			         response.setWorkOrderDate(workOrder.getWorkOrderDate());
+			         response.setSettlementType(workOrder.getSettlementType());
+			         response.setSettlementTypeDesc(workOrder.getSettlementTypeDesc());
+			         response.setSettlementTo(workOrder.getSettlementTo());
+			         response.setSettlementToDesc(workOrder.getSettlementToDesc());
+			         response.setGarageName(workOrder.getGarageName());
+			         response.setGarageId(workOrder.getGarageId().toString());
+			         response.setLocation(workOrder.getLocation());
+			         response.setRepairType(workOrder.getRepairType());
+			         response.setQuotationNo(workOrder.getQuotationNo());
+			         response.setDeliveryDate(workOrder.getDeliveryDate());
+			         response.setJointOrderYn(workOrder.getJointOrderYn());
+			         response.setSubrogationYn(workOrder.getSubrogationYn());
+			         response.setTotalLoss(workOrder.getTotalLoss().toString());
+			         response.setLossType(workOrder.getLossType());
+			         response.setRemarks(workOrder.getRemarks());
+			         response.setSparepartsDealerId(Optional.ofNullable(workOrder.getSparepartsDealerId()).map(String ::valueOf).orElse(""));
+			         response.setQuoteStatus(workOrder.getQuoteStatus());			         
+			         
+			         VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumberAndQuotationNo(workOrder.getClaimNo(),workOrder.getQuotationNo());
+			         
+			         if(spareParts != null) {
+			        	 response.setReplacementCost(spareParts.getReplacementCost().toString());
+				         response.setReplacementCostDeductible(spareParts.getReplacementCostDeductible().toString());
+				         response.setSparePartDepreciation(spareParts.getSparePartDepreciation().toString());
+				         response.setDiscountOnSpareParts(spareParts.getDiscountOnSpareParts().toString());
+				         response.setTotalAmountReplacement(spareParts.getTotalAmountReplacement().toString());
+				         response.setRepairLabour(spareParts.getRepairLabour().toString());
+				         response.setRepairLabourDeductible(spareParts.getRepairLabourDeductible().toString());
+				         response.setRepairLabourDiscountAmount(spareParts.getRepairLabourDiscountAmount().toString());
+				         response.setTotalAmountRepairLabour(spareParts.getTotalAmountRepairLabour().toString());
+				         response.setNetAmount(spareParts.getNetAmount().toString());
+				         response.setUnknownAccidentDeduction(spareParts.getUnknownAccidentDeduction() != null 
+				                ? spareParts.getUnknownAccidentDeduction().toString() : "0.00");
+				         response.setAmountToBeRecovered(spareParts.getAmountToBeRecovered() != null 
+				                ? spareParts.getAmountToBeRecovered().toString() : "0.00");
+				         response.setTotalAfterDeductions(spareParts.getTotalAfterDeductions().toString());
+				         response.setVatRatePer(spareParts.getVatRatePer() != null 
+				                ? spareParts.getVatRatePer().toString() : "0.00");
+				         response.setVatRate(spareParts.getVatRate() != null 
+				                ? spareParts.getVatRate().toString() : "0.00");
+				         response.setVatAmount(spareParts.getVatAmount().toString());
+				         response.setTotalWithVAT(spareParts.getTotalWithVAT().toString());
+				         response.setSalvageDeduction(spareParts.getSalvageDeduction().toString()); 
+			         }
+			         
+			         
+			         res.add(response);
+				}
+				
+				comResponse.setErrors(Collections.emptyList());
+				comResponse.setMessage("Success");
+				comResponse.setResponse(res);
+			
+			}else {
+				
+				comResponse.setErrors(Collections.emptyList());
+				comResponse.setMessage("Failed");
+				comResponse.setResponse(Collections.emptyList());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+                   
+         return comResponse;
+	}
+
+	@Override
+	public CommonResponse surveyorQuoteSave(GarageWorkOrderRequest req) {
+		CommonResponse comResponse = new CommonResponse(); 
+        try {
+        	SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNo(req.getClaimNo());
+        	if(spareSave == null) {
+        		spareSave = new SparePartsSaveDetails();
+        	}
+        	
+			GarageWorkOrder workOrder = garageWorkOrderRepository.findByClaimNoAndQuotationNo(req.getClaimNo(),req.getQuotationNo());
+			
+			if(workOrder != null) {
+				spareSave.setClaimNo(workOrder.getClaimNo());
+				spareSave.setWorkOrderNo(workOrder.getWorkOrderNo());
+				spareSave.setWorkOrderType(workOrder.getWorkOrderType());
+				spareSave.setWorkOrderDate(workOrder.getWorkOrderDate());
+				spareSave.setAccountSettlementType(workOrder.getSettlementType());
+				spareSave.setAccountSettlementName(workOrder.getSettlementTo());
+				spareSave.setGarageQuotationNo(workOrder.getQuotationNo());
+				spareSave.setGarageCode(workOrder.getGarageId().toString());
+				spareSave.setDeliveredTo(workOrder.getGarageName());
+				spareSave.setQuotationNo(workOrder.getQuotationNo());
+				spareSave.setDeliveryDate(workOrder.getDeliveryDate());
+				spareSave.setJointOrder(workOrder.getJointOrderYn());
+				spareSave.setSubrogation(workOrder.getSubrogationYn());
+				spareSave.setTotalLoss(workOrder.getTotalLoss());
+				spareSave.setTotalLossType(workOrder.getLossType());
+				spareSave.setRemarks(workOrder.getRemarks());
+				spareSave.setSparePartsDealer(Optional.ofNullable(workOrder.getSparepartsDealerId()).map(String ::valueOf).orElse(""));		         
+			         
+			         VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumberAndQuotationNo(workOrder.getClaimNo(),workOrder.getQuotationNo());
+			         
+			         if(spareParts != null) {
+			        	 spareSave.setReplacementCost(spareParts.getReplacementCost());
+			        	 spareSave.setReplacementCostDeductible(spareParts.getReplacementCostDeductible());
+			        	 spareSave.setSparePartDepreciation(spareParts.getSparePartDepreciation());
+			        	 spareSave.setDiscountOnSpareParts(spareParts.getDiscountOnSpareParts());
+			        	 spareSave.setTotalAmountReplacement(spareParts.getTotalAmountReplacement());
+			        	 spareSave.setRepairLabour(spareParts.getRepairLabour());
+			        	 spareSave.setRepairLabourDeductible(spareParts.getRepairLabourDeductible());
+			        	 spareSave.setRepairLabourDiscountAmount(spareParts.getRepairLabourDiscountAmount());
+			        	 spareSave.setTotalAmountRepairLabour(spareParts.getTotalAmountRepairLabour());
+			        	 spareSave.setNetAmount(spareParts.getNetAmount());
+			        	 spareSave.setUnknownAccidentDeduction(spareParts.getUnknownAccidentDeduction());
+			        	 spareSave.setAmountToBeRecovered(spareParts.getAmountToBeRecovered());
+			        	 spareSave.setTotalAfterDeductions(spareParts.getTotalAfterDeductions());
+			        	 spareSave.setVatRatePercentage(spareParts.getVatRatePer());
+			        	 spareSave.setVatRate(spareParts.getVatRate());
+			        	 spareSave.setVatAmount(spareParts.getVatAmount());
+			        	 spareSave.setTotalWithVat(spareParts.getTotalWithVAT());
+			  
+			         }
+			         
+			         
+			         SparePartsSaveDetailsRepo.save(spareSave);	
+				
+				comResponse.setErrors(Collections.emptyList());
+				comResponse.setMessage("Success");
+				comResponse.setResponse(Collections.emptyList());
+			
+			}else {
+				
+				comResponse.setErrors(Collections.emptyList());
+				comResponse.setMessage("Failed");
+				comResponse.setResponse(Collections.emptyList());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+                   
+         return comResponse;
 	}
 }

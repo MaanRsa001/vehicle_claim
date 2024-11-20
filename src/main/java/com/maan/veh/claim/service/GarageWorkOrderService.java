@@ -16,5 +16,9 @@ public interface GarageWorkOrderService {
 
 	CommonResponse assignWorkOrder(GarageWorkOrderSaveReq claim);
 
+	CommonResponse getAllQuoteByClaimNo(GarageWorkOrderRequest request);
+
+	CommonResponse surveyorQuoteSave(GarageWorkOrderRequest request);
+
 
 }

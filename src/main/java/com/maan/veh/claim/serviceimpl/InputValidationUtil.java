@@ -1451,6 +1451,12 @@ List<ErrorList> errors = new ArrayList<>();
 	    if (StringUtils.isBlank(req.getClaimNo())) {
 	        errors.add(new ErrorList("100", "ClaimNumber", "Claim number cannot be blank"));
 	    }
+	    if (StringUtils.isBlank(req.getQuotationNo())) {
+	        errors.add(new ErrorList("100", "QuotationNumber", "Quotation number cannot be blank"));
+	    }
+	    if (StringUtils.isBlank(req.getGarageId())) {
+	        errors.add(new ErrorList("100", "GarageId", "GarageId cannot be blank"));
+	    }
 
 	    // Optional fields that must be valid numbers if provided
 	    validateDecimalField(req.getReplacementCost(), "ReplacementCost", errors);

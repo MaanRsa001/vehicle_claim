@@ -12,4 +12,7 @@ public class SaveSparePartsDTO {
 	
 	@JsonProperty("WorkOrderNo")
     private String workOrderNo;
+	
+	@JsonProperty("QuotationNo")
+    private String quotationNo;
 }

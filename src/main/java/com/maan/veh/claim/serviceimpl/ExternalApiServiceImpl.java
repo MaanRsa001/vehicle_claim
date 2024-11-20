@@ -45,6 +45,7 @@ import com.maan.veh.claim.entity.ClaimIntimationDetails;
 import com.maan.veh.claim.entity.ClaimIntimationDetailsId;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
+import com.maan.veh.claim.entity.SparePartsSaveDetails;
 import com.maan.veh.claim.external.ErrorDetail;
 import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.external.ExternalApiResponse;
@@ -52,6 +53,7 @@ import com.maan.veh.claim.repository.ApiTransactionLogRepository;
 import com.maan.veh.claim.repository.ClaimIntimationDetailsRepository;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
+import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
 import com.maan.veh.claim.request.ClaimIntimationRequestMetaData;
 import com.maan.veh.claim.request.ClaimIntimationThirdPartyInfo;
@@ -119,6 +121,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     
     @Autowired
     private InputValidationUtil validation;
+    
+    @Autowired
+    private SparePartsSaveDetailsRepository SparePartsSaveDetailsRepo;
 
     @Override
     public CommonResponse createFnol(SaveClaimRequest requestPayload) {
@@ -1026,9 +1031,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	    try {
 	        // Retrieve data from repositories
-	    	GarageWorkOrder workOrder = garageWorkOrderRepo.findByClaimNoAndQuotationNo(request.getClaimNo(),request.getWorkOrderNo());
-	        List<DamageSectionDetails> damageDetails = damageSectionDetailsRepo.findByClaimNo(request.getClaimNo());
-	        
+	    	GarageWorkOrder workOrder = garageWorkOrderRepo.findByClaimNoAndQuotationNo(request.getClaimNo(),request.getQuotationNo());
+	        List<DamageSectionDetails> damageDetails = damageSectionDetailsRepo.findByClaimNoAndQuotationNo(request.getClaimNo(),request.getQuotationNo());
+	        SparePartsSaveDetails partsSaveDetails = SparePartsSaveDetailsRepo.findByClaimNo(request.getClaimNo());
 	        if (workOrder == null || damageDetails.isEmpty()) {
 	            response.setMessage("No data found for the provided claim or work order number");
 	            response.setIsError(true);
@@ -1037,8 +1042,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        }
 
 	        // Map entities to request DTO
-	        SaveSparePartsRequest dto = mapToSaveSparePartsRequest(workOrder, damageDetails);
-
+	        //SaveSparePartsRequest dto = mapToSaveSparePartsRequest(workOrder, damageDetails);
+	        SaveSparePartsRequest dto = mapToSaveSparePartsRequestV1(partsSaveDetails, damageDetails);
+	        
 	        // Authenticate and retrieve JWT token
 	        String jwtToken = authenticateUserCall();
 
@@ -1091,8 +1097,6 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	            response.setIsError(false);
 	            response.setResponse(externalApiResponse);
 	        }
-	        
-	      
 
 	    } catch (Exception e) {
 	        log.setStatus("FAILURE");
@@ -1108,6 +1112,80 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    return response;
 	}
 	
+	private SaveSparePartsRequest mapToSaveSparePartsRequestV1(SparePartsSaveDetails partsSaveDetails,
+			List<DamageSectionDetails> damageDetails) {
+		SaveSparePartsRequest request = new SaveSparePartsRequest();
+
+	    try {
+	    	SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	    	
+			// Map fields from GarageWorkOrder to SaveSparePartsRequest
+			request.setWorkOrderType(partsSaveDetails.getWorkOrderType());
+			request.setWorkOrderNo(partsSaveDetails.getWorkOrderNo());
+			request.setWorkOrderDate(isoDateFormat.format(partsSaveDetails.getWorkOrderDate())); 
+			request.setAccForSettlementType(partsSaveDetails.getAccountSettlementType());
+			request.setAccForSettlement(partsSaveDetails.getAccountSettlementName());
+			request.setSparePartsDealer(partsSaveDetails.getSparePartsDealer());
+			request.setGarageCode(partsSaveDetails.getGarageCode());
+			request.setGarageQuotationNo(partsSaveDetails.getQuotationNo());
+			request.setDeliveryDate(isoDateFormat.format(partsSaveDetails.getDeliveryDate()));
+			request.setDeliveredTo(partsSaveDetails.getDeliveredTo());
+			request.setSubrogation("Y".equalsIgnoreCase(partsSaveDetails.getSubrogation()));
+			request.setJointOrder("Y".equalsIgnoreCase(partsSaveDetails.getJointOrder()));
+			request.setTotalLoss(partsSaveDetails.getTotalLoss().toString());
+			request.setTotalLossType(partsSaveDetails.getTotalLossType());
+			request.setRemarks(partsSaveDetails.getRemarks());
+			
+			request.setReplacementCost(partsSaveDetails.getReplacementCost().toString());
+			request.setReplacementCostDeductible(partsSaveDetails.getReplacementCostDeductible().toString());
+			request.setSparePartDepreciation(partsSaveDetails.getSparePartDepreciation().toString());
+			request.setDiscountonSpareParts(partsSaveDetails.getDiscountOnSpareParts().toString());
+			request.setTotalAmountReplacement(partsSaveDetails.getTotalAmountReplacement().toString());
+			request.setRepairLabour(partsSaveDetails.getRepairLabour().toString());
+			request.setRepairLabourDeductible(partsSaveDetails.getRepairLabourDeductible().toString());
+			request.setRepairLabourDiscountAmount(partsSaveDetails.getRepairLabourDiscountAmount().toString());
+			request.setTotalAmountRepairLabour(partsSaveDetails.getTotalAmountRepairLabour().toString());
+			request.setNetAmount(partsSaveDetails.getNetAmount().toString());
+			request.setUnkownAccidentDeduction(partsSaveDetails.getUnknownAccidentDeduction().toString());
+			request.setAmounttobeRecovered(partsSaveDetails.getAmountToBeRecovered().toString());
+			request.setTotalafterDeductions(partsSaveDetails.getTotalAfterDeductions().toString());
+			request.setVatRatePer(partsSaveDetails.getVatRatePercentage().toString());
+			request.setVatRate(partsSaveDetails.getVatRate().toString());
+			request.setVatAmount(partsSaveDetails.getVatAmount().toString());
+			request.setTotalWithVAT(partsSaveDetails.getTotalWithVat().toString());
+
+			// Map DamageSectionDetails list to vehicleDamageDetails
+			List<VehicleDamageDetailRequest> vehicleDamageDetails = damageDetails.stream().map(detail -> {
+			    VehicleDamageDetailRequest damageRequest = new VehicleDamageDetailRequest();
+			    damageRequest.setDamageDirection(detail.getDamageDirection());
+			    damageRequest.setPartyType(detail.getDamagePart());
+			    damageRequest.setReplaceOrRepair(detail.getRepairReplace());
+			    damageRequest.setNoUnits(detail.getNoOfParts());
+			    damageRequest.setUnitPrice(detail.getGaragePrice());
+			    damageRequest.setReplacementCharge(detail.getReplaceCost());
+			    damageRequest.setTotal(detail.getTotPrice());
+			    return damageRequest;
+			}).collect(Collectors.toList());
+			request.setVehicleDamageDetails(vehicleDamageDetails);
+
+			// Populate metadata (assumed to be populated elsewhere in your code)
+			SaveSparePartsRequestMetaData metaData = new SaveSparePartsRequestMetaData();
+			metaData.setRequestOrigin("API"); 
+			metaData.setCurrentBranch("2222");
+			metaData.setOriginBranch("2222");
+			metaData.setUserName("09988877772");
+			//metaData.setIpAddress(workOrder.getIpAddress());
+			metaData.setRequestGeneratedDateTime(isoDateFormat.format(new Date()));
+			//metaData.setConsumerTrackingID(UUID.randomUUID().toString()); // example, replace as necessary
+			request.setRequestMetaData(metaData);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	    return request;
+	}
+
+
 	private SaveSparePartsRequest mapToSaveSparePartsRequest(GarageWorkOrder workOrder, List<DamageSectionDetails> damageDetails) {
 	    SaveSparePartsRequest request = new SaveSparePartsRequest();
 

@@ -71,4 +71,16 @@ public class GarageWorkOrderController {
         CommonResponse response = service.getGarageWorkOrdersByClaimNo(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    
+    @PostMapping("/surveyor/getAllQuote")
+    public ResponseEntity<CommonResponse> surveyorViewGetAllQuoteByClaimNo(@RequestBody GarageWorkOrderRequest request) {
+        CommonResponse response = service.getAllQuoteByClaimNo(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
+    @PostMapping("/surveyor/quoteSave")
+    public ResponseEntity<CommonResponse> surveyorQuoteSave(@RequestBody GarageWorkOrderRequest request) {
+        CommonResponse response = service.surveyorQuoteSave(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
