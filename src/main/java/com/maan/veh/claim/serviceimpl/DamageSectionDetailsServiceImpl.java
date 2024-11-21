@@ -334,6 +334,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 						details.setNoOfParts(Integer.valueOf(req.getNoOfUnits()));
 						details.setReplaceCost(new BigDecimal(req.getReplacementCharge()));
 						details.setGaragePrice(new BigDecimal(req.getReplacementCharge()));
+						details.setGarageDealer("Garage");
 					}
 					
 					

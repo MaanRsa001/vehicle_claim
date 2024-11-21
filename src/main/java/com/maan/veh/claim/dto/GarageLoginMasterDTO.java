@@ -18,11 +18,11 @@ import lombok.ToString;
 @ToString
 public class GarageLoginMasterDTO {
 	
-	@JsonProperty("Garagename")
-	private String garageName;
+	@JsonProperty("Loginname")
+	private String loginName;
 
-	@JsonProperty("Garageid")
-	private String garageId;
+	@JsonProperty("LoginId")
+	private String loginId;
 	
 	@JsonProperty("CompanyId")
 	private String companyId;
@@ -75,5 +75,43 @@ public class GarageLoginMasterDTO {
 	
 	@JsonProperty("CreatedBy")
 	private String createdBy;
+	
+	@JsonProperty("OaCode")
+	private String oaCode;
+
+	@JsonProperty("EntryDate")
+	@JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+	private Date entryDate;
+
+	@JsonProperty("UpdatedBy")
+	private String updatedBy;
+
+	@JsonProperty("UpdatedDate")
+	@JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+	private Date updatedDate;
+
+	@JsonProperty("CompanyName")
+	private String companyName;
+
+	@JsonProperty("CityCode")
+	private Integer cityCode;
+
+	@JsonProperty("StateCode")
+	private Integer stateCode;
+
+	@JsonProperty("CountryCode")
+	private String countryCode;
+
+	@JsonProperty("Pobox")
+	private String pobox;
+
+	@JsonProperty("CountryName")
+	private String countryName;
+
+	@JsonProperty("MobileCode")
+	private String mobileCode;
+
+	@JsonProperty("MobileCodeDesc")
+	private String mobileCodeDesc;
 	
 }

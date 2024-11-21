@@ -77,7 +77,7 @@ private static final long serialVersionUID = 1L;
     @Column(name="COMPANY_ID", length=20)
     private String     companyId ;
 
-    @Column(name="AGENCY_CODE", nullable=false, length=10)
+    @Column(name="AGENCY_CODE", length=10)
     private String     agencyCode ;
 
     @Column(name="BRANCH_CODE", length=20)

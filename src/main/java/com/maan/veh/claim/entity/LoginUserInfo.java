@@ -56,9 +56,8 @@ private static final long serialVersionUID = 1L;
     @Column(name="LOGIN_ID", nullable=false, length=50)
     private String     loginId ;
 
-    @Id
-    @Column(name="OA_CODE", nullable=false)
-    private String    oaCode ;
+    @Column(name="OA_CODE")
+    private Integer    oaCode ;
 
     //--- ENTITY DATA FIELDS 
     @Column(name="AGENCY_CODE", length=20)
@@ -169,6 +168,9 @@ private static final long serialVersionUID = 1L;
     
     @Column(name="CORE_APP_CODE", length=100)
     private String    coreAppCode;
+    
+    @Column(name="COMPANY_ID", length=100)
+    private String    companyId;
     
   
     //--- ENTITY LINKS ( RELATIONSHIP )

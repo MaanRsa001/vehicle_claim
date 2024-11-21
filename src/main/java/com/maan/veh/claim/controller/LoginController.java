@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.maan.veh.claim.dto.GarageLoginMasterDTO;
+import com.maan.veh.claim.request.GetAllLoginRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.ErrorList;
@@ -53,7 +54,25 @@ public class LoginController {
 	
 	@PostMapping("/create/garage")
 	public CommonResponse createGarageLogin(@RequestBody GarageLoginMasterDTO req) {
-			return service.createGarageLogin(req);		
+			return service.createLogin(req);		
+				
+	}
+	
+	@PostMapping("/create/surveyor")
+	public CommonResponse createSurveyorLogin(@RequestBody GarageLoginMasterDTO req) {
+			return service.createLogin(req);		
+				
+	}
+	
+	@PostMapping("/create/dealer")
+	public CommonResponse createDealerLogin(@RequestBody GarageLoginMasterDTO req) {
+			return service.createLogin(req);		
+				
+	}
+	
+	@PostMapping("/getAll/login")
+	public CommonResponse getAllLogin(@RequestBody GetAllLoginRequest req) {
+			return service.getAllLogin(req);		
 				
 	}
 	

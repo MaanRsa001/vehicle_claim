@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -445,9 +446,21 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	    try {
 	        
 	    	List<SurveyorViewResponse> vehList = new ArrayList<>();
-	        
+
 	        // Fetch damage section details based on Status
 	        List<DamageSectionDetails> details = damageRepository.findByGarageLoginIdAndGarageDealerIsNotNull(request.getGarageId());
+	        
+//	        // Also collecting the workorder which is asigned directly to garage without going to surveyor
+//	    	List<GarageWorkOrder> workList = garageWorkOrderRepository.findByGarageId(request.getGarageId());
+//	    	if(workList != null) {
+//	    		workList = workList.stream().filter(work -> "WA".equalsIgnoreCase(work.getQuoteStatus())).collect(Collectors.toList());
+//	    	}
+//	    	
+//	        for(GarageWorkOrder work : workList) {
+//	    		List<DamageSectionDetails> completedDetails = damageRepository.findByClaimNoAndQuotationNo(work.getClaimNo(), work.getQuotationNo());
+//	    		details.addAll(completedDetails);
+//	    	}
+	        
 	        if(details != null) {
 	        	
 	        for(DamageSectionDetails damage : details) {

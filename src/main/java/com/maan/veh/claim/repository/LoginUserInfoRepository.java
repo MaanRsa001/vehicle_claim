@@ -12,6 +12,8 @@
 
 package com.maan.veh.claim.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -30,5 +32,7 @@ import com.maan.veh.claim.entity.LoginUserInfoId;
 public interface LoginUserInfoRepository  extends JpaRepository<LoginUserInfo,LoginUserInfoId > , JpaSpecificationExecutor<LoginUserInfo> {
 
 	LoginUserInfo findByLoginId(String loginId);
+
+	List<LoginUserInfo> findByCompanyId(String companyId);
 
 }

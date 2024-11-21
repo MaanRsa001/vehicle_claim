@@ -1,6 +1,7 @@
 package com.maan.veh.claim.service;
 
 import com.maan.veh.claim.dto.GarageLoginMasterDTO;
+import com.maan.veh.claim.request.GetAllLoginRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.response.CommonResponse;
 
@@ -10,6 +11,8 @@ public interface LoginService {
 
 	CommonResponse logout(LoginRequest req);
 
-	CommonResponse createGarageLogin(GarageLoginMasterDTO req);
+	CommonResponse createLogin(GarageLoginMasterDTO req);
+
+	CommonResponse getAllLogin(GetAllLoginRequest req);
 
 }

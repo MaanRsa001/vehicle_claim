@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -84,7 +85,6 @@ public class InputValidationUtil {
 		}
 		
 		return list;
-		// TODO Auto-generated method stub
 		
 	}
 	
@@ -1297,16 +1297,19 @@ List<ErrorList> errors = new ArrayList<>();
 	    return list;
 	}
 
-	public List<ErrorList> validateGarageLogin(GarageLoginMasterDTO req) {
+	public List<ErrorList> validateLogin(GarageLoginMasterDTO req) {
 	    List<ErrorList> list = new ArrayList<>();
 
 	    // Validate mandatory fields
-	    if (StringUtils.isBlank(req.getGarageName())) {
-	        list.add(new ErrorList("100", "Garagename", "Garage name cannot be blank"));
+	    if (StringUtils.isBlank(req.getUserType())) {
+	        list.add(new ErrorList("100", "UserType", "User Type cannot be blank"));
 	    }
+	    if (StringUtils.isBlank(req.getLoginName())) {
+		        list.add(new ErrorList("100", "Loginname", "Login name cannot be blank"));
+		}
 
-	    if (StringUtils.isBlank(req.getGarageId())) {
-	        list.add(new ErrorList("100", "Garageid", "Garage ID cannot be blank"));
+	    if (StringUtils.isBlank(req.getLoginId())) {
+	        list.add(new ErrorList("100", "Loginid", "Login ID cannot be blank"));
 	    }
 
 	    if (StringUtils.isBlank(req.getCompanyId())) {
@@ -1370,9 +1373,48 @@ List<ErrorList> errors = new ArrayList<>();
 	    }
 
 	    // Additional rule: effectiveDate should not be before entryDate
-	    if (req.getEffectiveDate() != null && req.getEffectiveDate().before(new Date())) {
-	        list.add(new ErrorList("101", "Effectivedate", "Effective date cannot be before entry date"));
+	    if (req.getEffectiveDate() != null) {
+	        Date today = new Date();
+	        // Remove time component by setting hours, minutes, seconds, and milliseconds to zero.
+	        Calendar calendar = Calendar.getInstance();
+
+	        // Process the request's effective date.
+	        calendar.setTime(req.getEffectiveDate());
+	        calendar.set(Calendar.HOUR_OF_DAY, 0);
+	        calendar.set(Calendar.MINUTE, 0);
+	        calendar.set(Calendar.SECOND, 0);
+	        calendar.set(Calendar.MILLISECOND, 0);
+	        Date effectiveDateOnly = calendar.getTime();
+
+	        // Process today's date.
+	        calendar.setTime(today);
+	        calendar.set(Calendar.HOUR_OF_DAY, 0);
+	        calendar.set(Calendar.MINUTE, 0);
+	        calendar.set(Calendar.SECOND, 0);
+	        calendar.set(Calendar.MILLISECOND, 0);
+	        Date todayOnly = calendar.getTime();
+
+	        // Validate the effective date against today's date.
+	        if (effectiveDateOnly.before(todayOnly)) {
+	            list.add(new ErrorList("101", "Effectivedate", "Effective date cannot be before entry date"));
+	        }
 	    }
+	    
+	    // New validation for duplicate loginId and coreAppCode when oaCode is provided
+	    if (StringUtils.isBlank(req.getOaCode())) {
+	        // Check for duplicate loginId
+	        LoginMaster existingLogin = loginRepo.findByLoginId(req.getLoginId());
+	        if (existingLogin != null) {
+	            list.add(new ErrorList("102", "LoginId", "Login ID already exists"));
+	        }
+
+	        // Check for duplicate coreAppCode
+	        LoginMaster existingCoreAppCode = loginRepo.findByCoreAppCode(req.getCoreAppCode());
+	        if (existingCoreAppCode != null) {
+	            list.add(new ErrorList("102", "CoreAppCode", "Core App Code already exists"));
+	        }
+	    }
+
 
 	    return list;
 	}

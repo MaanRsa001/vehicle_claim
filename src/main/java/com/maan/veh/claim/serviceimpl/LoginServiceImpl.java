@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -40,6 +41,7 @@ import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.LoginUserInfoRepository;
 import com.maan.veh.claim.repository.MenuMasterRepository;
 import com.maan.veh.claim.repository.SessionMasterRepository;
+import com.maan.veh.claim.request.GetAllLoginRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.ErrorList;
@@ -291,58 +293,192 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	}
 
 	@Override
-	public CommonResponse createGarageLogin(GarageLoginMasterDTO req) {
-		CommonResponse comResponse = new CommonResponse();
+	public CommonResponse createLogin(GarageLoginMasterDTO req) {
+	    CommonResponse comResponse = new CommonResponse();
 	    try {
-	    	List<ErrorList> errors = validation.validateGarageLogin(req);
-			if(errors.size()>0){
-				comResponse.setErrors(errors);
-				comResponse.setIsError(true);
-				comResponse.setMessage("User Not Found");
-				comResponse.setResponse(Collections.EMPTY_LIST);
-				return comResponse;
-			}
-			
-			LoginMaster loginMaster = loginRepo.findByLoginId(req.getGarageId());
-			
-			if(loginMaster!=null && StringUtils.isNotBlank(req.getUserType())) {
-				loginMaster.setCoreAppCode(req.getCoreAppCode());
-				loginMaster.setBranchCode(req.getBranchCode());
-				loginMaster.setUpdatedBy(req.getCreatedBy());
-				loginMaster.setUpdatedDate(new Date());
-				loginMaster.setStatus(req.getStatus());
-				loginRepo.save(loginMaster);
-			}else {
-				LoginMaster loginMasterNew = new LoginMaster();
-				loginMasterNew.setLoginId(req.getGarageId());
-				loginMasterNew.setCoreAppCode(req.getCoreAppCode());
-				loginMasterNew.setUserType("Garage");
-				passwordEnc passEnc = new passwordEnc();
-				String password = passEnc.crypt(req.getPassWord().trim());
-				loginMasterNew.setPassword(password);
-				loginMasterNew.setStatus(req.getStatus());
-				loginMasterNew.setBranchCode(req.getBranchCode());
-				loginMasterNew.setCompanyId(req.getCompanyId());
-				loginMasterNew.setPwdCount("1");
-				loginMasterNew.setLpassDate(new Date());
-				loginMasterNew.setCreatedBy(req.getCreatedBy());
-				loginMasterNew.setEntryDate(new Date());
-			}
-	        
-			Map<String, String> response = new HashMap<>();
-			
+	        // Validate request
+	        List<ErrorList> errors = validation.validateLogin(req);
+	        if (errors.size() > 0) {
+	            comResponse.setErrors(errors);
+	            comResponse.setIsError(true);
+	            comResponse.setMessage("Validation Errors");
+	            comResponse.setResponse(Collections.EMPTY_LIST);
+	            return comResponse;
+	        }
+
+	        // Fetch existing data
+	        LoginMaster loginMaster = loginRepo.findByLoginId(req.getLoginId());
+	        LoginUserInfo userInfo = LoginUserInfoRepo.findByLoginId(req.getLoginId());
+
+	        if (loginMaster != null && userInfo != null && StringUtils.isNotBlank(req.getOaCode())) {
+	            // Update existing LoginMaster
+	            loginMaster.setCoreAppCode(req.getCoreAppCode());
+	            loginMaster.setBranchCode(req.getBranchCode());
+	            loginMaster.setUpdatedBy(req.getCreatedBy());
+	            loginMaster.setUpdatedDate(new Date());
+	            loginMaster.setStatus(req.getStatus());
+	            loginRepo.save(loginMaster);
+
+	            // Update existing LoginUserInfo
+	            userInfo.setUserName(req.getLoginName());
+	            userInfo.setCoreAppCode(req.getCoreAppCode());
+	            userInfo.setCustomerName(req.getContactPersonName());
+	            userInfo.setCountryName(req.getCountryName());
+	            userInfo.setAddress1(req.getAddress());
+	            userInfo.setCityName(req.getCityName());
+	            userInfo.setStateName(req.getStateName());
+	            userInfo.setRemarks(req.getRemarks());
+	            userInfo.setUpdatedBy(req.getCreatedBy());
+	            userInfo.setUpdatedDate(new Date());
+	            LoginUserInfoRepo.save(userInfo);
+	        } else {
+	        	 // Generate OA Code
+	            Integer topOaCode = loginRepo.findMaxOaCode(); // Fetch the highest OA code
+	            Integer newOaCode = (topOaCode != null ? topOaCode : 0) + 1;
+	        	
+	            // Create new LoginMaster
+	            LoginMaster loginMasterNew = new LoginMaster();
+	            loginMasterNew.setLoginId(req.getLoginId());
+	            loginMasterNew.setCoreAppCode(req.getCoreAppCode());
+	            loginMasterNew.setUserType(req.getUserType());
+	            passwordEnc passEnc = new passwordEnc();
+	            String password = passEnc.crypt(req.getPassWord().trim());
+	            loginMasterNew.setPassword(password);
+	            loginMasterNew.setStatus(req.getStatus());
+	            loginMasterNew.setBranchCode(req.getBranchCode());
+	            loginMasterNew.setCompanyId(req.getCompanyId());
+	            loginMasterNew.setPwdCount("1");
+	            loginMasterNew.setLpassDate(new Date());
+	            loginMasterNew.setCreatedBy(req.getCreatedBy());
+	            loginMasterNew.setEntryDate(new Date());
+	            loginMasterNew.setOaCode(newOaCode);
+	            loginRepo.save(loginMasterNew);
+
+	            // Create new LoginUserInfo
+	            LoginUserInfo userInfoNew = new LoginUserInfo();
+	            userInfoNew.setLoginId(req.getLoginId());
+	            userInfoNew.setUserName(req.getLoginName());
+	            userInfoNew.setCoreAppCode(req.getCoreAppCode());
+	            userInfoNew.setCustomerName(req.getContactPersonName());
+	            userInfoNew.setCountryName(req.getCountryName());
+	            userInfoNew.setAddress1(req.getAddress());
+	            userInfoNew.setCityName(req.getCityName());
+	            userInfoNew.setStateName(req.getStateName());
+	            userInfoNew.setRemarks(req.getRemarks());
+	            userInfoNew.setCreatedBy(req.getCreatedBy());
+	            userInfoNew.setEntryDate(new Date());
+	            userInfoNew.setCompanyId(req.getCompanyId());
+	            userInfoNew.setOaCode(newOaCode);
+	            LoginUserInfoRepo.save(userInfoNew);
+	        }
+
+	        // Prepare response
+	        Map<String, String> response = new HashMap<>();
+	        response.put("Message", "login created/updated successfully");
 	        comResponse.setMessage("Success");
 	        comResponse.setResponse(response);
 	        comResponse.setErrors(Collections.emptyList());
 	        comResponse.setIsError(false);
 	        return comResponse;
-	        
+
 	    } catch (Exception e) {
-	        log.error("Error validating user", e);
+	        log.error("Error creating/updating login", e);
 	        comResponse.setMessage("Failure");
 	        comResponse.setResponse(Collections.emptyMap());
 	        comResponse.setErrors(Collections.singletonList(e.getMessage()));
 	        comResponse.setIsError(true);
+	        return comResponse;
+	    }
+	}
+
+	@Override
+	public CommonResponse getAllLogin(GetAllLoginRequest req) {
+	    CommonResponse comResponse = new CommonResponse();
+	    try {
+	        // Validate input
+	        if (req.getCompanyId() == null || req.getCompanyId().isEmpty()) {
+	            comResponse.setMessage("Invalid request. Company ID is missing.");
+	            comResponse.setIsError(true);
+	            comResponse.setErrors(Collections.singletonList("Company ID is required."));
+	            return comResponse;
+	        }
+
+	        // Fetch data from LoginUserInfo and LoginMaster repositories
+	        List<LoginUserInfo> userInfoList = LoginUserInfoRepo.findByCompanyId(req.getCompanyId());
+	        List<LoginMaster> loginMasterList = loginRepo.findByCompanyId(req.getCompanyId());
+
+	        // Map LoginMaster data for easy access
+	        Map<String, LoginMaster> loginMasterMap = loginMasterList.stream()
+	                .collect(Collectors.toMap(LoginMaster::getLoginId, lm -> lm));
+
+	        // Check if any data is found
+	        if (userInfoList == null || userInfoList.isEmpty()) {
+	            comResponse.setMessage("No records found for the given Company ID.");
+	            comResponse.setIsError(false);
+	            comResponse.setResponse(Collections.emptyList());
+	            return comResponse;
+	        }
+
+	        // Map the entity list to DTO list
+	        List<GarageLoginMasterDTO> garageLoginList = userInfoList.stream().map(userInfo -> {
+	            GarageLoginMasterDTO dto = new GarageLoginMasterDTO();
+
+	            // Populate data from LoginUserInfo
+	            dto.setLoginId(userInfo.getLoginId());
+	            dto.setCompanyId(userInfo.getCompanyId());
+	            dto.setCoreAppCode(userInfo.getCoreAppCode());
+	            dto.setAddress(userInfo.getAddress1());
+	            dto.setCityName(userInfo.getCityName());
+	            dto.setStatus(userInfo.getStatus());
+	            dto.setBranchCode(userInfo.getBranchCode());
+	            dto.setGarageAddress(userInfo.getAddress1() + ", " + userInfo.getAddress2());
+	            dto.setStateName(userInfo.getStateName());
+	            dto.setContactPersonName(userInfo.getCustomerName());
+	            dto.setMobileNo(userInfo.getUserMobile());
+	            dto.setEmailid(userInfo.getUserMail());
+	            dto.setEffectiveDate(userInfo.getEffectiveDateStart());
+	            dto.setRemarks(userInfo.getRemarks());
+	            dto.setOaCode(userInfo.getOaCode() != null ? userInfo.getOaCode().toString() : "");
+	            dto.setEntryDate(userInfo.getEntryDate());
+	            dto.setUpdatedBy(userInfo.getUpdatedBy());
+	            dto.setUpdatedDate(userInfo.getUpdatedDate());
+	            dto.setCityCode(userInfo.getCityCode());
+	            dto.setStateCode(userInfo.getStateCode());
+	            dto.setCountryCode(userInfo.getCountryCode());
+	            dto.setPobox(userInfo.getPobox());
+	            dto.setCountryName(userInfo.getCountryName());
+	            dto.setMobileCode(userInfo.getMobileCode());
+	            dto.setMobileCodeDesc(userInfo.getMobileCodeDesc());
+
+	            // Merge data from LoginMaster
+	            LoginMaster loginMaster = loginMasterMap.get(userInfo.getLoginId());
+	            if (loginMaster != null) {
+	                dto.setPassWord(loginMaster.getPassword());
+	                dto.setRepassWord(loginMaster.getPassword());
+	                dto.setStatus(loginMaster.getStatus());
+	                dto.setCreatedBy(loginMaster.getCreatedBy());
+	                dto.setEntryDate(loginMaster.getEntryDate());
+	                dto.setUserType(loginMaster.getUserType());
+	                dto.setLoginName(userInfo.getUserName());
+		            
+	            }
+
+	            return dto;
+	        }).collect(Collectors.toList());
+
+	        // Populate the response
+	        comResponse.setMessage("Success");
+	        comResponse.setIsError(false);
+	        comResponse.setResponse(garageLoginList);
+	        comResponse.setErrors(Collections.emptyList());
+	        return comResponse;
+
+	    } catch (Exception e) {
+	        log.error("Error fetching garage login details", e);
+	        comResponse.setMessage("Error fetching garage login details");
+	        comResponse.setIsError(true);
+	        comResponse.setResponse(Collections.emptyList());
+	        comResponse.setErrors(Collections.singletonList(e.getMessage()));
 	        return comResponse;
 	    }
 	}

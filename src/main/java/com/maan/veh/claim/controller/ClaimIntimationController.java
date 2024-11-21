@@ -71,4 +71,10 @@ public class ClaimIntimationController {
         	CommonResponse res = externalApiService.saveSpareParts(requestPayload);
             return ResponseEntity.ok(res);
     }
+    
+    @PostMapping("/getSpareParts")
+    public ResponseEntity<CommonResponse> getSavedSpareParts(@RequestBody SaveSparePartsDTO requestPayload) {
+        	CommonResponse res = externalApiService.getSavedSpareParts(requestPayload);
+            return ResponseEntity.ok(res);
+    }
 }

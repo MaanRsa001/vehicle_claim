@@ -26,4 +26,6 @@ public interface ExternalApiService {
 
 	CommonResponse saveSpareParts(SaveSparePartsDTO requestPayload);
 
+	CommonResponse getSavedSpareParts(SaveSparePartsDTO requestPayload);
+
 }
