@@ -37,4 +37,12 @@ public interface DropDownService {
 	List<DropDownRes> getRepairType();
 
 	List<DropDownRes> geDocumentType();
+
+	List<DropDownRes> getBranch(String companyId);
+
+	List<DropDownRes> getCompany();
+
+	List<DropDownRes> getCountry(String companyIds);
+	
+	List<DropDownRes> getCity(String companyIds);
 }

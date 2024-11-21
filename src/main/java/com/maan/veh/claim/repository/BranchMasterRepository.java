@@ -13,4 +13,6 @@ public interface BranchMasterRepository  extends JpaRepository<BranchMaster,Bran
 
 	List<BranchMaster> findByBranchCode(String branchCode);
 
+	List<BranchMaster> findByCompanyIdAndStatus(String companyId, String string);
+
 }

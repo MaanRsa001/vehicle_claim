@@ -12,6 +12,8 @@
 
 package com.maan.veh.claim.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -30,6 +32,8 @@ import com.maan.veh.claim.entity.InsuranceCompanyMasterId;
 public interface InsuranceCompanyMasterRepository  extends JpaRepository<InsuranceCompanyMaster,InsuranceCompanyMasterId > , JpaSpecificationExecutor<InsuranceCompanyMaster> {
 
 	InsuranceCompanyMaster findByCompanyId(String insuranceId);
+
+	List<InsuranceCompanyMaster> findByStatus(String string);
 
 
 }

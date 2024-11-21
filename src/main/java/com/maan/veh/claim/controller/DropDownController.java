@@ -1,13 +1,16 @@
 package com.maan.veh.claim.controller;
 
 import java.util.List;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.maan.veh.claim.response.CommonRes;
 import com.maan.veh.claim.response.DropDownRes;
@@ -279,7 +282,7 @@ public class DropDownController {
 	}
 	
 	@GetMapping(value = "/documentType")
-	public ResponseEntity<CommonRes> geDocumentType() {
+	public ResponseEntity<CommonRes> getDocumentType() {
 		CommonRes data = new CommonRes();
 
 		List<DropDownRes> res = dropDownService.geDocumentType();
@@ -294,4 +297,96 @@ public class DropDownController {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	@GetMapping(value = "/branch/{companyId}")
+	public ResponseEntity<CommonRes> getBranch(@PathVariable String companyId) {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getBranch(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@GetMapping(value = "/company")
+	public ResponseEntity<CommonRes> getCompany() {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getCompany();
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@GetMapping(value = "/country/{companyId}")
+	public ResponseEntity<CommonRes> getCountry(String companyId) {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getCountry(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@GetMapping(value = "/city/{companyId}")
+	public ResponseEntity<CommonRes> getCity(String companyId) {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getCity(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@GetMapping(value = "/error")
+    public void getError() {
+        // Throw a random 401 Unauthorized exception
+        throwRandomHttpException();
+    }
+
+    private void throwRandomHttpException() {
+        // List of possible exceptions with different HTTP statuses
+        HttpStatus[] httpStatuses = {
+            HttpStatus.UNAUTHORIZED, // 401
+            HttpStatus.BAD_REQUEST, // 400
+            HttpStatus.FORBIDDEN,   // 403
+            HttpStatus.INTERNAL_SERVER_ERROR // 500
+        };
+
+        // Randomly pick an HTTP status
+        Random random = new Random();
+        HttpStatus randomStatus = httpStatuses[random.nextInt(httpStatuses.length)];
+
+        // Throw the exception with the selected status
+        throw new ResponseStatusException(randomStatus, "Random HTTP error occurred: " + randomStatus.getReasonPhrase());
+    }
+
 }

@@ -10,13 +10,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.maan.veh.claim.entity.BranchMaster;
+import com.maan.veh.claim.entity.CityMaster;
 import com.maan.veh.claim.entity.ClaimLossTypeMaster;
+import com.maan.veh.claim.entity.CountryMaster;
+import com.maan.veh.claim.entity.InsuranceCompanyMaster;
 import com.maan.veh.claim.entity.ListItemValue;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.VcDocumentMaster;
 import com.maan.veh.claim.entity.VehicleBodypartsMaster;
-import com.maan.veh.claim.entity.VcDocumentMaster;
+import com.maan.veh.claim.repository.BranchMasterRepository;
+import com.maan.veh.claim.repository.CityMasterRepository;
 import com.maan.veh.claim.repository.ClaimLosstypeMasterRepository;
+import com.maan.veh.claim.repository.CountryMasterRepository;
+import com.maan.veh.claim.repository.InsuranceCompanyMasterRepository;
 import com.maan.veh.claim.repository.ListItemValueRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.VcDocumentMasterRepository;
@@ -54,6 +61,18 @@ public class DropDownServiceImpl implements DropDownService {
     
     @Autowired
     private LoginMasterRepository loginRepo;
+    
+    @Autowired
+    private BranchMasterRepository branchMasterRepo;
+    
+    @Autowired
+    private InsuranceCompanyMasterRepository companyMasterRepo;
+    
+    @Autowired
+    private CountryMasterRepository countryMasterRepo;
+    
+    @Autowired
+    private CityMasterRepository cityMasterRepo;
 
     @Override
     public List<DropDownRes> getDamageDirection() {
@@ -260,6 +279,80 @@ public class DropDownServiceImpl implements DropDownService {
         }
         return resList;
 	}
-
 	
+	@Override
+	public List<DropDownRes> getBranch(String companyId) {
+		List<DropDownRes> resList = new ArrayList<>();
+        try {
+            List<BranchMaster> getList = branchMasterRepo.findByCompanyIdAndStatus(companyId,"Y");
+            for (BranchMaster data : getList) {
+                DropDownRes res = new DropDownRes();
+                res.setCode(data.getBranchCode().toString());
+                res.setCodeDesc(data.getBranchName());
+                resList.add(res);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("Exception is ---> " + e.getMessage());
+            return null;
+        }
+        return resList;
+	}
+
+	@Override
+	public List<DropDownRes> getCompany() {
+		List<DropDownRes> resList = new ArrayList<>();
+        try {
+            List<InsuranceCompanyMaster> getList = companyMasterRepo.findByStatus("Y");
+            for (InsuranceCompanyMaster data : getList) {
+                DropDownRes res = new DropDownRes();
+                res.setCode(data.getCompanyId().toString());
+                res.setCodeDesc(data.getCompanyName());
+                resList.add(res);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("Exception is ---> " + e.getMessage());
+            return null;
+        }
+        return resList;
+	}
+
+	@Override
+	public List<DropDownRes> getCountry(String companyId) {
+		List<DropDownRes> resList = new ArrayList<>();
+        try {
+            List<CountryMaster> getList = countryMasterRepo.findByStatusAndCompanyId("Y",companyId);
+            for (CountryMaster data : getList) {
+                DropDownRes res = new DropDownRes();
+                res.setCode(data.getCountryId().toString());
+                res.setCodeDesc(data.getCountryName());
+                resList.add(res);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("Exception is ---> " + e.getMessage());
+            return null;
+        }
+        return resList;
+	}
+
+	@Override
+	public List<DropDownRes> getCity(String companyId) {
+		List<DropDownRes> resList = new ArrayList<>();
+        try {
+            List<CityMaster> getList = cityMasterRepo.findByStatusAndCompanyId("Y",companyId);
+            for (CityMaster data : getList) {
+                DropDownRes res = new DropDownRes();
+                res.setCode(data.getCityId().toString());
+                res.setCodeDesc(data.getCityName());
+                resList.add(res);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("Exception is ---> " + e.getMessage());
+            return null;
+        }
+        return resList;
+	}
 }
