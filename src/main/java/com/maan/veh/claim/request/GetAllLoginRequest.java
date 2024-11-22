@@ -17,4 +17,7 @@ public class GetAllLoginRequest {
 	
 	@JsonProperty("CompanyId")
 	private String companyId;
+	
+	@JsonProperty("LoginId")
+	private String loginId;
 }

@@ -15,4 +15,6 @@ public interface LoginService {
 
 	CommonResponse getAllLogin(GetAllLoginRequest req);
 
+	CommonResponse getLoginDetails(GetAllLoginRequest req);
+
 }

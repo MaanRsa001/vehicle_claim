@@ -76,4 +76,10 @@ public class LoginController {
 				
 	}
 	
+	@PostMapping("/getLoginDetails")
+	public CommonResponse getLoginDetails(@RequestBody GetAllLoginRequest req) {
+			return service.getLoginDetails(req);		
+				
+	}
+	
 }

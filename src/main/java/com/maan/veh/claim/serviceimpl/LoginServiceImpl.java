@@ -482,5 +482,88 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	        return comResponse;
 	    }
 	}
+
+	@Override
+	public CommonResponse getLoginDetails(GetAllLoginRequest req) {
+		CommonResponse comResponse = new CommonResponse();
+	    try {
+	        // Validate input
+	        if (req.getCompanyId() == null || req.getCompanyId().isEmpty()) {
+	            comResponse.setMessage("Invalid request. Company ID is missing.");
+	            comResponse.setIsError(true);
+	            comResponse.setErrors(Collections.singletonList("Company ID is required."));
+	            return comResponse;
+	        }
+
+	        // Fetch data from LoginUserInfo and LoginMaster repositories
+	        LoginUserInfo userInfo = LoginUserInfoRepo.findByLoginId(req.getLoginId());
+	        LoginMaster loginMaster = loginRepo.findByLoginId(req.getLoginId());
+
+	        // Check if any data is found
+	        if (userInfo == null ) {
+	            comResponse.setMessage("No records found for the given Company ID.");
+	            comResponse.setIsError(false);
+	            comResponse.setResponse(Collections.emptyList());
+	            return comResponse;
+	        }
+
+	        // Map the entity list to DTO list
+	            GarageLoginMasterDTO dto = new GarageLoginMasterDTO();
+
+	            // Populate data from LoginUserInfo
+	            dto.setLoginId(userInfo.getLoginId());
+	            dto.setCompanyId(userInfo.getCompanyId());
+	            dto.setCoreAppCode(userInfo.getCoreAppCode());
+	            dto.setAddress(userInfo.getAddress1());
+	            dto.setCityName(userInfo.getCityName());
+	            dto.setStatus(userInfo.getStatus());
+	            dto.setBranchCode(userInfo.getBranchCode());
+	            dto.setGarageAddress(userInfo.getAddress1() + ", " + userInfo.getAddress2());
+	            dto.setStateName(userInfo.getStateName());
+	            dto.setContactPersonName(userInfo.getCustomerName());
+	            dto.setMobileNo(userInfo.getUserMobile());
+	            dto.setEmailid(userInfo.getUserMail());
+	            dto.setEffectiveDate(userInfo.getEffectiveDateStart());
+	            dto.setRemarks(userInfo.getRemarks());
+	            dto.setOaCode(userInfo.getOaCode() != null ? userInfo.getOaCode().toString() : "");
+	            dto.setEntryDate(userInfo.getEntryDate());
+	            dto.setUpdatedBy(userInfo.getUpdatedBy());
+	            dto.setUpdatedDate(userInfo.getUpdatedDate());
+	            dto.setCityCode(userInfo.getCityCode());
+	            dto.setStateCode(userInfo.getStateCode());
+	            dto.setCountryCode(userInfo.getCountryCode());
+	            dto.setPobox(userInfo.getPobox());
+	            dto.setCountryName(userInfo.getCountryName());
+	            dto.setMobileCode(userInfo.getMobileCode());
+	            dto.setMobileCodeDesc(userInfo.getMobileCodeDesc());
+
+	            // Merge data from LoginMaster
+	            if (loginMaster != null) {
+	                dto.setPassWord(loginMaster.getPassword());
+	                dto.setRepassWord(loginMaster.getPassword());
+	                dto.setStatus(loginMaster.getStatus());
+	                dto.setCreatedBy(loginMaster.getCreatedBy());
+	                dto.setEntryDate(loginMaster.getEntryDate());
+	                dto.setUserType(loginMaster.getUserType());
+	                dto.setLoginName(userInfo.getUserName());
+		            
+	            }
+
+	        // Populate the response
+	        comResponse.setMessage("Success");
+	        comResponse.setIsError(false);
+	        comResponse.setResponse(dto);
+	        comResponse.setErrors(Collections.emptyList());
+	        return comResponse;
+
+	    } catch (Exception e) {
+	        log.error("Error fetching garage login details", e);
+	        comResponse.setMessage("Error fetching garage login details");
+	        comResponse.setIsError(true);
+	        comResponse.setResponse(Collections.emptyList());
+	        comResponse.setErrors(Collections.singletonList(e.getMessage()));
+	        return comResponse;
+	    }
+	}
 	
 }
