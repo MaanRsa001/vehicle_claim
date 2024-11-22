@@ -333,7 +333,7 @@ public class DropDownController {
 	}
 	
 	@GetMapping(value = "/country/{companyId}")
-	public ResponseEntity<CommonRes> getCountry(String companyId) {
+	public ResponseEntity<CommonRes> getCountry(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
 		List<DropDownRes> res = dropDownService.getCountry(companyId);
@@ -350,7 +350,7 @@ public class DropDownController {
 	}
 	
 	@GetMapping(value = "/city/{companyId}")
-	public ResponseEntity<CommonRes> getCity(String companyId) {
+	public ResponseEntity<CommonRes> getCity(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
 		List<DropDownRes> res = dropDownService.getCity(companyId);

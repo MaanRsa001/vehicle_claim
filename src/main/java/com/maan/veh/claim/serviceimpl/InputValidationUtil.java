@@ -1351,7 +1351,7 @@ List<ErrorList> errors = new ArrayList<>();
 	    }
 
 	    if (StringUtils.isBlank(req.getStateName())) {
-	        list.add(new ErrorList("100", "Statename", "State name cannot be blank"));
+	        //list.add(new ErrorList("100", "Statename", "State name cannot be blank"));
 	    }
 
 	    if (StringUtils.isBlank(req.getContactPersonName())) {
