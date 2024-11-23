@@ -71,7 +71,7 @@ private static final long serialVersionUID = 1L;
 
 
     //--- ENTITY DATA FIELDS 
-    @Column(name="PASSWORD", length=100)
+    @Column(name="PASSWORD")
     private String     password ;
 
     @Column(name="COMPANY_ID", length=20)
@@ -86,17 +86,17 @@ private static final long serialVersionUID = 1L;
     @Column(name="OA_CODE", length=10)
     private Integer     oaCode ;
 
-    @Column(name="LPASS1", length=50)
+    @Column(name="LPASS1")
     private String     lpass1 ;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="LPASS_DATE")
     private Date       lpassDate ;
 
-    @Column(name="LPASS2", length=50)
+    @Column(name="LPASS2")
     private String     lpass2 ;
 
-    @Column(name="LPASS3", length=50)
+    @Column(name="LPASS3")
     private String     lpass3 ;
 
     @Column(name="CREATED_BY", length=20)
@@ -112,15 +112,23 @@ private static final long serialVersionUID = 1L;
     @Column(name="UPDATED_DATE")
     private Date       updatedDate ;
 
-    @Column(name="LPASS4", length=20)
+    @Column(name="LPASS4")
     private String     lpass4 ;
 
-    @Column(name="LPASS5", length=20)
+    @Column(name="LPASS5")
     private String     lpass5 ;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="ENTRY_DATE")
     private Date       entryDate ;
+    
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="EFFECTIVE_DATE_START")
+    private Date    effectiveDateStart ;
+    
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="EFFECTIVE_DATE_END")
+    private Date    effectiveDateEnd ;
 
     @Column(name="PWD_COUNT", length=10)
     private String     pwdCount ;

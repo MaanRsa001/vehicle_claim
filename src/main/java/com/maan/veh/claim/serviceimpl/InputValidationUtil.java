@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -15,16 +16,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.maan.veh.claim.auth.passwordEnc;
 import com.maan.veh.claim.dto.GarageLoginMasterDTO;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.LoginMaster;
+import com.maan.veh.claim.entity.LoginUserInfo;
+import com.maan.veh.claim.entity.SessionMaster;
 import com.maan.veh.claim.entity.VcFlowMaster;
+import com.maan.veh.claim.error.Error;
 import com.maan.veh.claim.file.DocumentUploadDetailsReqRes;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
+import com.maan.veh.claim.repository.LoginUserInfoRepository;
+import com.maan.veh.claim.repository.SessionMasterRepository;
 import com.maan.veh.claim.repository.VcFlowMasterRepository;
+import com.maan.veh.claim.request.ChangePasswordReq;
 import com.maan.veh.claim.request.ClaimDetailsSaveRequest;
 import com.maan.veh.claim.request.ClaimIntimationAttachmentDetails;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
@@ -46,6 +54,14 @@ import com.maan.veh.claim.request.VcSparePartsDetailsRequest;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GarageWorkOrderSaveReq;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
 @Component
 public class InputValidationUtil {
 	
@@ -58,10 +74,25 @@ public class InputValidationUtil {
 	@Autowired
     private VcFlowMasterRepository flowMasterRepo;
 	
+	@Autowired
+	private SessionMasterRepository sessionRep;
+	
+	@Autowired
+	private LoginUserInfoRepository loginUserRepo ;
+	
 	private static SimpleDateFormat DD_MM_YYYY = new SimpleDateFormat("dd/MM/yyyy");
+	
+	@PersistenceContext
+	private EntityManager em;
+	
+	private int LOCK_CNT=3;
 	
 	
 	public List<ErrorList> isValidUser(LoginRequest req) {
+		
+		List<LoginMaster> data  = new ArrayList<LoginMaster>();
+		List<SessionMaster> sessionlist = new ArrayList<SessionMaster>();
+		
 		List<ErrorList> list = new ArrayList<ErrorList>();
 		if(StringUtils.isBlank(req.getLoginId()))
 			list.add(new ErrorList("100","LoginId","Please enter loginId"));	
@@ -69,23 +100,119 @@ public class InputValidationUtil {
 		if(StringUtils.isBlank(req.getPassword()))
 			list.add(new ErrorList("100","LoginId","Please enter password"));
 		
-		if(StringUtils.isNotBlank(req.getLoginId()) && StringUtils.isNotBlank(req.getPassword())) {
-			String loginId = req.getLoginId();
-			String password =new passwordEnc().crypt(req.getPassword().trim());
-			LoginMaster lmaster =loginRepo.findByLoginIdIgnoreCaseAndPassword(loginId, password);
-			if(lmaster==null){
-				list.add(new ErrorList("100","LoginId","Please enter valid username/password"));
-			}else {
-				LoginMaster data =loginRepo.findByLoginIdIgnoreCaseAndPasswordAndStatus(loginId, password, "Y");
-				if(data==null)
-					list.add(new ErrorList("100","LoginId","Your account has been locked due to invalid password attempts."));
-
-			}
+		if (StringUtils.isNotBlank(req.getLoginId()) && StringUtils.isNotBlank(req.getPassword())) {
+			LoginMaster loginData = loginRepo.findByLoginId(req.getLoginId());
+			sessionlist = sessionRep.findByLoginIdOrderByEntryDateDesc(req.getLoginId());
 			
+			if (loginData != null  ) {
+				if (! loginData.getStatus().equalsIgnoreCase("Y") ) {
+					list.add(new ErrorList("100","LoginId","This Login Id is Deactivated"));
+				} else {
+					//LoginMaster loginData1 = loginRepo.findByLoginId(req.getLoginId());
+					
+					if (loginData !=null && loginData.getEffectiveDateStart().after(new Date())) {
+						list.add(new ErrorList("", "UserId", "Your  Login Id Date is not started"));
+					} 
+					if(list.size()<=0) {
+						data = isvalidUserOrNot(req);
+						if (CollectionUtils.isEmpty(data) ) {
+							String loginPasswordCnt=StringUtils.isBlank(loginData.getPwdCount())?"0":loginData.getPwdCount();
+
+							if(Integer.parseInt(loginPasswordCnt)>=LOCK_CNT) {
+								loginData.setPwdCount(String.valueOf(Integer.parseInt(loginPasswordCnt)+1));
+								loginData.setStatus("T");
+								loginRepo.save(loginData);
+								list.add(new ErrorList("", "User", "Your Accout is Locked.due to "+LOCK_CNT+" failed attempt." ));
+							} else {
+								loginData.setPwdCount(String.valueOf(Integer.parseInt(loginPasswordCnt)+1));
+								loginRepo.save(loginData);
+								list.add(new ErrorList("", "User", "Please enter valid Password"+((Integer.parseInt(loginPasswordCnt)==LOCK_CNT-1)?",Your Accout will be Lock.for one more Invalid attempt.":"" )));
+							}
+								
+						}else if(isExpired(data.get(0).getLpassDate())) {
+							list.add(new ErrorList("", "User", "Password Expired Please Change Your Password"));
+						}
+
+					}
+				}
+				
+			}
+		}
+		if(req.getReLoginKey()!=null && req.getReLoginKey().equalsIgnoreCase("Y") &&  sessionlist.size()>0 ) {
+			SessionMaster updatelogout = sessionlist.get(0);
+				updatelogout.setLogoutDate(new Date());
+				updatelogout.setStatus("DE-ACTIVE");
+				sessionRep.save(updatelogout);
+		}else if(sessionlist.size()!=0) {
+				Calendar cal = new GregorianCalendar();
+				cal.setTime(sessionlist.get(0).getStartTime());
+				cal.set(Calendar.MINUTE, +45);
+				Date after45Minutes = cal.getTime();
+				Date today = new Date();
+				if(sessionlist.get(0).getStartTime()!=null && after45Minutes.before(today) ) {
+					SessionMaster updatelogout = sessionlist.get(0);
+					updatelogout.setLogoutDate(new Date());
+					updatelogout.setStatus("DE-ACTIVE");
+					sessionRep.save(updatelogout);
+					
+				}else if(sessionlist.get(0).getLogoutDate()==null && list.size()<=0) {
+
+					list.add(new ErrorList("", "SessionError", "You already have an active logged in session on another device or window Do you want to start new session and terminate that session?"));
+					list.add(new ErrorList("", "SessionError", "User :" + sessionlist.get(0).getUserName() + " : logged in at " +sessionlist.get(0).getEntryDate().toString()));
+				}
 		}
 		
 		return list;
 		
+	}
+	
+	private boolean isExpired(Date date) {
+
+		Date d = date;
+		Date d1 = new Date();
+
+		// not expired
+		if (d1.compareTo(d) < 0) {
+			return false;
+		} 
+		// both date are same
+		else if (d.compareTo(d1) == 0) {
+			if (d.getTime() < d1.getTime()) {// not expired
+				return false;
+			} else if (d.getTime() == d1.getTime()) {// expired
+				return true;
+			} else {// expired
+				return true;
+			}			
+		} 
+		// expired
+		else {
+			return true;
+		}
+	}
+	
+	private List<LoginMaster> isvalidUserOrNot(LoginRequest req) {
+		List<LoginMaster> data = new ArrayList<LoginMaster>();
+		try {
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<LoginMaster> query = cb.createQuery(LoginMaster.class);
+
+			Root<LoginMaster> login = query.from(LoginMaster.class);
+
+			String password =new passwordEnc().crypt(req.getPassword().trim());
+
+			Predicate p1 = cb.equal(login.get("loginId"), req.getLoginId());
+			Predicate p3 = cb.or(cb.equal(login.get("password"), password),cb.equal(login.get("password"), req.getPassword().trim()));
+			Predicate p2 = cb.equal(login.get("status"), "Y");
+			query.select(login).where(p1, p2, p3);
+
+			TypedQuery<LoginMaster> result = em.createQuery(query);
+			data = result.getResultList();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return data;
 	}
 	
 	public List<ErrorList> validateWorkOrder(GarageWorkOrderSaveReq req) {
@@ -1324,23 +1451,28 @@ List<ErrorList> errors = new ArrayList<>();
 	        list.add(new ErrorList("100", "Address", "Address cannot be blank"));
 	    }
 
-	    if (StringUtils.isBlank(req.getCityName())) {
-	        list.add(new ErrorList("100", "CityName", "City name cannot be blank"));
+	    if (StringUtils.isBlank(req.getCityCode())) {
+	        list.add(new ErrorList("100", "City", "City cannot be blank"));
 	    }
 
 	    if (StringUtils.isBlank(req.getStatus())) {
 	        list.add(new ErrorList("100", "Status", "Status cannot be blank"));
 	    }
+	    
+	    if (StringUtils.isBlank(req.getChangePassYN())) {
+	        list.add(new ErrorList("100", "PassWord Change", "PassWord Change cannot be blank"));
+	    }else if("Y".equalsIgnoreCase(req.getChangePassYN())){
+	    	if (StringUtils.isBlank(req.getPassWord())) {
+		        list.add(new ErrorList("100", "PassWord", "Password cannot be blank"));
+		    }
 
-	    if (StringUtils.isBlank(req.getPassWord())) {
-	        list.add(new ErrorList("100", "PassWord", "Password cannot be blank"));
+		    if (StringUtils.isBlank(req.getRepassWord())) {
+		        list.add(new ErrorList("100", "RePassWord", "Re-entered password cannot be blank"));
+		    } else if (!req.getPassWord().equals(req.getRepassWord())) {
+		        list.add(new ErrorList("101", "RePassWord", "Passwords do not match"));
+		    }
 	    }
-
-	    if (StringUtils.isBlank(req.getRepassWord())) {
-	        list.add(new ErrorList("100", "RePassWord", "Re-entered password cannot be blank"));
-	    } else if (!req.getPassWord().equals(req.getRepassWord())) {
-	        list.add(new ErrorList("101", "RePassWord", "Passwords do not match"));
-	    }
+	    
 
 	    if (StringUtils.isBlank(req.getBranchCode())) {
 	        list.add(new ErrorList("100", "BranchCode", "Branch code cannot be blank"));
@@ -1350,8 +1482,8 @@ List<ErrorList> errors = new ArrayList<>();
 	        list.add(new ErrorList("100", "Garageaddress", "Garage address cannot be blank"));
 	    }
 
-	    if (StringUtils.isBlank(req.getStateName())) {
-	        //list.add(new ErrorList("100", "Statename", "State name cannot be blank"));
+	    if (StringUtils.isBlank(req.getCountryCode())) {
+	        list.add(new ErrorList("100", "Country", "Country cannot be blank"));
 	    }
 
 	    if (StringUtils.isBlank(req.getContactPersonName())) {
@@ -1409,8 +1541,8 @@ List<ErrorList> errors = new ArrayList<>();
 	        }
 
 	        // Check for duplicate coreAppCode
-	        LoginMaster existingCoreAppCode = loginRepo.findByCoreAppCode(req.getCoreAppCode());
-	        if (existingCoreAppCode != null) {
+	        List<LoginMaster> existingCoreAppCode = loginRepo.findByCoreAppCode(req.getCoreAppCode());
+	        if (existingCoreAppCode != null && existingCoreAppCode.size()>0) {
 	            list.add(new ErrorList("102", "CoreAppCode", "Core App Code already exists"));
 	        }
 	    }
@@ -1740,6 +1872,82 @@ List<ErrorList> errors = new ArrayList<>();
 
 
 	    return list;
+	}
+
+	public List<Error> LoginChangePasswordValidation(ChangePasswordReq req) {
+		List<Error> list = new ArrayList<Error>();
+
+		if (StringUtils.isBlank(req.getLoginId())) {
+			list.add(new Error("", "Login Id", "Please Enter Login Id"));
+		} else {
+			passwordEnc passEnc = new passwordEnc();
+			String epass = passEnc.crypt(req.getOldpassword().trim());
+			LoginMaster model = loginRepo.findByLoginIdIgnoreCaseAndPassword(req.getLoginId(), epass);
+			if (model != null) {
+				if (req.getNewPassword() == null || StringUtils.isBlank(req.getNewPassword())) {
+					list.add(new Error("", "New Password", "Please Enter New Password"));
+				}
+
+				else {
+					epass = passEnc.crypt(req.getNewPassword().trim());
+				}
+
+				if (StringUtils.isNotBlank(req.getType()) && req.getType().equalsIgnoreCase("ForgotPassword")) {
+					if (req.getOldpassword() == null || StringUtils.isBlank(req.getOldpassword())) {
+						list.add(new Error("", "Old password", "Please enter Temporary Password"));
+					} else if (model.getPassword().equalsIgnoreCase(epass)) {
+						list.add(new Error("", "ChangePassword",
+								"Temporary Password  and Newpassword should not match"));
+					}
+				} else {
+					if (req.getOldpassword() == null || StringUtils.isBlank(req.getOldpassword())) {
+						list.add(new Error("", "Old password", "Please enter Old Password"));
+					} else if (model.getPassword().equalsIgnoreCase(epass)) {
+						list.add(new Error("", "ChangePassword", "Old Password  and New Password should not match"));
+					}
+
+					else if ((model.getLpass1() != null && model.getLpass1().equals(epass))
+							|| (model.getLpass2() != null && model.getLpass2().equals(epass))
+							|| (model.getLpass3() != null && model.getLpass3().equals(epass))
+							|| (model.getLpass4() != null && model.getLpass4().equals(epass))
+							|| (model.getLpass5() != null && model.getLpass5().equals(epass))) {
+						list.add(new Error("", "ChangePassword", "Newpassword should not be last 5 Password"));
+					}
+				}
+			}
+
+			else {
+				list.add(new Error("", "ChangePassword", "You are not authorized user..!"));
+			}
+
+		}
+
+		return list;
+	}
+
+	public List<Error> forgetPwdValidation(ChangePasswordReq req) {
+		List<Error> list = new ArrayList<Error>();
+
+		if (StringUtils.isBlank(req.getLoginId())) {
+			list.add(new Error("", "Login Id", "Please Enter Login Id"));
+		} else {
+			LoginMaster model = loginRepo.findByLoginId(req.getLoginId());
+			if (model == null) {
+				list.add(new Error("", "ForgotPassword", "You are not authorized user..!"));
+
+			} else if (StringUtils.isBlank(req.getEmailId())) {
+				list.add(new Error("", "EmailId", "Please Enter Email Id"));
+			} else {
+				LoginUserInfo userInfo = loginUserRepo.findByLoginId(req.getLoginId());
+				if (userInfo != null && userInfo.getUserMail() != null
+						&& !userInfo.getUserMail().equalsIgnoreCase(req.getEmailId())) {
+					list.add(new Error("", "Login Id", "Requested Mail Id Not Matching with User Mail Id"));
+				}
+
+			}
+
+		}
+		return list;
 	}
 
 	

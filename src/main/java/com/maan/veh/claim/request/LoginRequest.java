@@ -16,4 +16,8 @@ public class LoginRequest {
 	@JsonProperty("Token")
 	private String token;
 	
+	@JsonProperty("ReLoginKey")
+	private String reLoginKey;
+	
+	
 }

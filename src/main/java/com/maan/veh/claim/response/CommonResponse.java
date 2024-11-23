@@ -1,5 +1,7 @@
 package com.maan.veh.claim.response;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -22,6 +24,9 @@ public class CommonResponse {
 	
 	@JsonProperty("IsError")
 	private Boolean isError;
+	
+	@JsonProperty("ErrorMessage")
+	private List<ErrorList> errorMessage;
 	
 	public CommonResponse(String message, Object response, Boolean isError) {
         this.message = message;

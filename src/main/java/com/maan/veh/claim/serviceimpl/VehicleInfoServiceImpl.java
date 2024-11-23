@@ -243,9 +243,8 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 
             // Check if there are any work orders for this garage
             if (workOrders.isEmpty()) {
-                response.setErrors(Collections.singletonList("No work orders found for the given garage ID"));
-                response.setMessage("Failed");
-                response.setIsError(true);
+                response.setMessage("No data found");
+                response.setIsError(false);
                 return response;
             }
             // Claim Number List

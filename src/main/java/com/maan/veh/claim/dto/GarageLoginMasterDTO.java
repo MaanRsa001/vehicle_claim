@@ -94,10 +94,10 @@ public class GarageLoginMasterDTO {
 	private String companyName;
 
 	@JsonProperty("CityCode")
-	private Integer cityCode;
+	private String cityCode;
 
 	@JsonProperty("StateCode")
-	private Integer stateCode;
+	private String stateCode;
 
 	@JsonProperty("CountryCode")
 	private String countryCode;
@@ -113,5 +113,9 @@ public class GarageLoginMasterDTO {
 
 	@JsonProperty("MobileCodeDesc")
 	private String mobileCodeDesc;
+	
+	@JsonProperty("ChangePassYN")
+	private String changePassYN;
+	
 	
 }
