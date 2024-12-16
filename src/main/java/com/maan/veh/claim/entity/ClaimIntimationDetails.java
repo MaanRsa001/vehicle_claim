@@ -58,6 +58,7 @@ public class ClaimIntimationDetails {
     @Column(name = "police_station")
     private String policeStation;
 
+    @Id	
     @Column(name = "police_report_no")
     private String policeReportNo;
 
@@ -66,5 +67,17 @@ public class ClaimIntimationDetails {
 
     @Column(name = "at_fault")
     private String atFault;
+    
+    @Column(name = "claim_status_code")
+    private String claimStatusCode;
+    
+    @Column(name = "fnol_sgs_id")
+    private String fnolSgsId;
+    
+    @Column(name = "claim_type")
+    private String claimType;
+    
+    @Column(name = "claim_party_id")
+    private String claimPartyId;
 }
 

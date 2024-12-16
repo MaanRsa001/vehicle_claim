@@ -1,5 +1,6 @@
 package com.maan.veh.claim.service;
 
+import com.maan.veh.claim.request.ExternalVehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleInfoRequest;
 import com.maan.veh.claim.response.CommonResponse;
@@ -18,4 +19,6 @@ public interface VehicleInfoService {
 	CommonResponse surveyorAsignedView(VehicleInfoRequest request);
 
 	CommonResponse dealerStatusSave(VehicleInfoRequest request);
+
+	CommonResponse getExternalGarageListByGarageId(ExternalVehicleGarageViewRequest request);
 }

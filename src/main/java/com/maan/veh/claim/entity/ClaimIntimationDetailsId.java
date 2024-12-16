@@ -13,4 +13,5 @@ public class ClaimIntimationDetailsId implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private String policyNo; // Primary key
+	private String policeReportNo;
 }

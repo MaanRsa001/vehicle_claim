@@ -31,6 +31,10 @@ public class ExternalApiData {
 
     @JsonProperty("claimPartyName") 
     private String claimPartyName;
+    
+    @JsonProperty("fnolSgsId") 
+    private String fnolSgsId;
+    
 
 }
 

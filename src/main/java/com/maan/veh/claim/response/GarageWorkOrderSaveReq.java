@@ -86,5 +86,50 @@ public class GarageWorkOrderSaveReq {
 	 	
 	 	@JsonProperty("UserType")
 	    private String userType;
+	 	
+	 	
+	 	//new feilds 09-12-2024
+	 	@JsonProperty("CompanyId")
+	    private String companyId;
+	 	
+	 	@JsonProperty("FnolSgsId")
+	    private String fnolSgsId;
+
+	    @JsonProperty("PolicyNo")
+	    private String policyNo;
+
+	    @JsonProperty("VehicleMake")
+	    private String vehicleMake;
+
+	    @JsonProperty("VehicleModel")
+	    private String vehicleModel;
+
+	    @JsonProperty("MakeYear")
+	    private String makeYear;
+
+	    @JsonProperty("ChassisNo")
+	    private String chassisNo;
+
+	    @JsonProperty("InsuredName")
+	    private String insuredName;
+
+	    @JsonProperty("Type")
+	    private String type;
+
+	    @JsonProperty("VehicleRegno")
+	    private String vehicleRegNo;
+	    
+	    @JsonFormat(pattern="dd/MM/yyyy")
+	    @JsonProperty("EntryDate")
+	    private Date entryDate;
+
+	    @JsonProperty("Status")
+	    private String status;
+	    
+	    @JsonProperty("DealerLogin")
+	    private String dealerLogin;
+	    
+	    @JsonProperty("GarageLoginId")
+	    private String garageLoginId;
 
 }

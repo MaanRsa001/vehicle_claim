@@ -1,24 +1,25 @@
 package com.maan.veh.claim.serviceimpl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.maan.veh.claim.dto.GarageClaimListDataDto;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
+import com.maan.veh.claim.request.ExternalVehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleInfoRequest;
 import com.maan.veh.claim.response.CommonResponse;
@@ -37,6 +38,9 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
     
     @Autowired
     private GarageWorkOrderRepository garageWorkOrderRepository;
+    
+    @Autowired
+    private ExternalApiServiceImpl ExternalApiServiceImpl;
 
     @Override
     public CommonResponse getVehicleInfoByCompanyId(VehicleGarageViewRequest request) {
@@ -572,5 +576,56 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 
         return response;
 	}
+
+	@Override
+	public CommonResponse getExternalGarageListByGarageId(ExternalVehicleGarageViewRequest request) {
+	    CommonResponse response = new CommonResponse();
+	    List<VehicleInfoResponse> vehList = new ArrayList<>();
+	    
+	    try {
+	        CommonResponse comRes = ExternalApiServiceImpl.getGarageClaimList(request);
+	        if (comRes.getResponse() != null) {
+	            List<GarageClaimListDataDto> externalData = (List<GarageClaimListDataDto>) comRes.getResponse();
+	            for (GarageClaimListDataDto data : externalData) {
+	                VehicleInfoResponse veh = new VehicleInfoResponse();
+	                
+	                // Mapping fields
+	                veh.setCompanyId(request.getCompanyId()); 
+	                veh.setPolicyNo(data.getPolicyNo());
+	                veh.setClaimNo(data.getClaimNo());
+	                veh.setVehicleMake(data.getMake());
+	                veh.setVehicleModel(data.getModel());
+	                veh.setMakeYear(data.getYear());
+	                veh.setChassisNo(data.getChassisNo());
+	                veh.setInsuredName(data.getInsuredName());
+	                veh.setType(data.getBodyType());
+	                veh.setVehicleRegNo(data.getVehRegNo());
+	                veh.setEntryDate(new Date());
+	                veh.setStatus("Y");
+	                veh.setQuoteStatus("PFG");
+	                veh.setQuotationNo(null);
+	                veh.setDealerLogin(null);
+	                veh.setGarageLoginId(data.getPartyId());
+	                veh.setFnolSgsId(String.valueOf(data.getFnolSgsId())); // Convert int to String
+	                veh.setLossLocation(data.getLossLocation());
+	                
+	                vehList.add(veh);
+	            }
+	        }
+	        response.setResponse(vehList);
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Success");
+	        response.setIsError(false);
+
+	    } catch (Exception e) {
+	        response.setErrors(Collections.singletonList("An error occurred: " + e.getMessage()));
+	        response.setMessage("Failed");
+	        response.setIsError(true);
+	        e.printStackTrace();
+	    }
+
+	    return response;
+	}
+
 
 }

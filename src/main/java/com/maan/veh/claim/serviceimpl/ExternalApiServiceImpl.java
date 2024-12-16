@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -38,6 +37,8 @@ import com.maan.veh.claim.dto.ClaimTransactionRequestDTO;
 import com.maan.veh.claim.dto.ClaimTransactionRequestDTOMetaData;
 import com.maan.veh.claim.dto.FnolRequestDTO;
 import com.maan.veh.claim.dto.FnolRequestDTOMetaData;
+import com.maan.veh.claim.dto.GarageClaimListDto;
+import com.maan.veh.claim.dto.GarageClaimListResponseDTO;
 import com.maan.veh.claim.dto.SaveClaimRequestDTO;
 import com.maan.veh.claim.dto.SaveSparePartsDTO;
 import com.maan.veh.claim.entity.ApiTransactionLog;
@@ -46,7 +47,6 @@ import com.maan.veh.claim.entity.ClaimIntimationDetailsId;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.SparePartsSaveDetails;
-import com.maan.veh.claim.entity.VcSparePartsDetails;
 import com.maan.veh.claim.external.ErrorDetail;
 import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.external.ExternalApiResponse;
@@ -61,6 +61,7 @@ import com.maan.veh.claim.request.ClaimIntimationThirdPartyInfo;
 import com.maan.veh.claim.request.ClaimListRequest;
 import com.maan.veh.claim.request.ClaimListRequestDTO;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
+import com.maan.veh.claim.request.ExternalVehicleGarageViewRequest;
 import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.request.SaveClaimRequest;
@@ -105,6 +106,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     
     @Value("${external.api.url.savespareparts}")  
     private String externalApiUrlSaveSpareparts;
+    
+    @Value("${external.api.url.garagelist}")  
+    private String externalApiUrlGarageList;
     
     @Value("${external.api.url.getfnol}")  
     private String externalApiUrlGetfnol;
@@ -225,6 +229,10 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     			if(optional.isPresent()){
     				oldData = optional.get();
     				oldData.setFnolNo(externalApiResponse.getData().getFnolNo());
+    				oldData.setClaimStatusCode(externalApiResponse.getData().getClaimStatusCode());
+    				oldData.setClaimType(externalApiResponse.getData().getClaimType());
+    				oldData.setFnolSgsId(externalApiResponse.getData().getFnolSgsId());
+    				oldData.setClaimPartyId(externalApiResponse.getData().getClaimPartyId());
     				claimIntimationDetailsRepository.save(oldData);
     			}
     			
@@ -708,7 +716,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
         try {
             // Check if a record already exists for the given policyNo
             Optional<ClaimIntimationDetails> existingRecord = claimIntimationDetailsRepository.findById(
-                    new ClaimIntimationDetailsId(saveClaimRequestDTO.getPolicyNo())
+                    new ClaimIntimationDetailsId(saveClaimRequestDTO.getPolicyNo(),saveClaimRequestDTO.getPoliceReportNo())
             );
 
             ClaimIntimationDetails claimIntimationDetails;
@@ -1382,6 +1390,87 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 		}
                    
          return comResponse;
+	}
+	
+	public CommonResponse getGarageClaimList(ExternalVehicleGarageViewRequest request) {
+
+	    CommonResponse response = new CommonResponse();
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+	    log.setEndpoint(externalApiUrlGarageList);
+
+	    try {
+
+	    	GarageClaimListDto dto = new GarageClaimListDto();
+	    	dto.setCategoryId(request.getCategoryId());
+	    	dto.setPartyId(request.getPartyId());
+	    	dto.setProdId(request.getProdId());
+	        
+	        // Authenticate and retrieve JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Create headers and add JWT token
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Convert DTO to JSON for request body and add headers
+	        String requestBody = objectMapper.writeValueAsString(dto);
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+	        log.setRequest(requestBody);
+	        
+	     // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+	        
+	        // Send request to external API
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
+	        log.setResponse(apiResponse.getBody());
+	        log.setStatus("SUCCESS");
+
+	        // Parse response into ExternalApiResponse object
+	        GarageClaimListResponseDTO externalApiResponse = objectMapper.readValue(apiResponse.getBody(), GarageClaimListResponseDTO.class);
+
+	        // Process response based on external API success status
+	        if (externalApiResponse.isHasError()) {
+	            response.setMessage(externalApiResponse.getMessage());
+	            //response.setResponse(externalApiResponse);
+	            response.setIsError(true);
+	        } else {
+	            response.setMessage(externalApiResponse.getMessage());
+	            response.setIsError(false);
+	            response.setResponse(externalApiResponse.getDataset());
+	        }
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to get data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        apiTransactionLogRepo.save(log);
+	    }
+
+	    return response;
 	}
 
 

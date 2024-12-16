@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.maan.veh.claim.request.ExternalVehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleInfoRequest;
 import com.maan.veh.claim.response.CommonResponse;
@@ -91,6 +92,12 @@ public class VehicleInfoController {
     @PostMapping("/dealer/status/save")
     public ResponseEntity<CommonResponse> dealerStatusSave(@RequestBody VehicleInfoRequest request) {
     	CommonResponse response = vehicleInfoService.dealerStatusSave(request);
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/external/garage/view")
+    public ResponseEntity<CommonResponse> getExternalGarageList(@RequestBody ExternalVehicleGarageViewRequest request) {
+    	CommonResponse response = vehicleInfoService.getExternalGarageListByGarageId(request);
         return ResponseEntity.ok(response);
     }
 }

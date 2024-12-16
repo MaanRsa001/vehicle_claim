@@ -61,4 +61,10 @@ public class VehicleInfoResponse {
     
     @JsonProperty("GarageLoginId")
     private String garageLoginId;
+    
+    @JsonProperty("fnolSgsId")
+    private String fnolSgsId;
+    
+    @JsonProperty("lossLocation")
+    private String lossLocation;
 }

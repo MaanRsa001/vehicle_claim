@@ -51,12 +51,18 @@ public class InsuredVehicleInfo {
 
     @Column(name = "vehicle_regno", length = 50)
     private String vehicleRegNo;
+    
+    @Column(name = "loss_location", length = 300)
+    private String lossLocation;
 
     @Column(name = "entry_date")
     private Date entryDate;
 
     @Column(name = "status", length = 20)
     private String status;
+    
+    @Column(name = "fnol_sgs_id", length = 100)
+    private String fnolSgsId;
     
     @Id
     @Column(name = "garage_id", length = 50)
