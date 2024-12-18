@@ -65,8 +65,14 @@ public class InsuredVehicleInfo {
     private String fnolSgsId;
     
     @Id
-    @Column(name = "garage_id", length = 50)
+    @Column(name = "garage_id")
     private String garageId;
+    
+    @Column(name = "surveyor_id")
+    private String surveyorId;
+    
+    @Column(name = "dealer_id")
+    private String dealerId;
     
     @Column(name = "quotation_no")
     private String quotationNo;

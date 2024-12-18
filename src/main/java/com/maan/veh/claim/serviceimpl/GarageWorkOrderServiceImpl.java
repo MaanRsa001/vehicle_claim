@@ -221,29 +221,29 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
                 insuredVehRepo.save(insuredVeh);
 			} else if(StringUtils.isNotBlank(req.getFnolSgsId())) {
 				// Instantiate a new InsuredVehicleInfo object
-				InsuredVehicleInfo newInsuredVeh = new InsuredVehicleInfo();
-
-				// Map fields from GarageWorkOrderSaveReq to InsuredVehicleInfo
-				newInsuredVeh.setCompanyId(req.getCompanyId() != null ? Integer.valueOf(req.getCompanyId()) : null);
-				newInsuredVeh.setFnolSgsId(req.getFnolSgsId());
-				newInsuredVeh.setPolicyNo(req.getPolicyNo());
-				newInsuredVeh.setClaimNo(req.getClaimNo());
-				newInsuredVeh.setVehicleMake(req.getVehicleMake());
-				newInsuredVeh.setVehicleModel(req.getVehicleModel());
-				newInsuredVeh.setMakeYear(req.getMakeYear() != null ? Integer.valueOf(req.getMakeYear()) : null);
-				newInsuredVeh.setChassisNo(req.getChassisNo());
-				newInsuredVeh.setInsuredName(req.getInsuredName());
-				newInsuredVeh.setType(req.getType());
-				newInsuredVeh.setVehicleRegNo(req.getVehicleRegNo());
-				newInsuredVeh.setEntryDate(req.getEntryDate());
-				newInsuredVeh.setStatus(req.getStatus());
-				newInsuredVeh.setGarageId(req.getGarageId());
-				newInsuredVeh.setQuotationNo(req.getQuotationNo());
-				insuredVehRepo.save(newInsuredVeh);
-//                response.setErrors(Collections.singletonList("No insured vehicle found for claim number: " + req.getClaimNo()));
-//                response.setMessage("Failed");
-//                response.setIsError(true);
-//                return response;
+//				InsuredVehicleInfo newInsuredVeh = new InsuredVehicleInfo();
+//
+//				// Map fields from GarageWorkOrderSaveReq to InsuredVehicleInfo
+//				newInsuredVeh.setCompanyId(req.getCompanyId() != null ? Integer.valueOf(req.getCompanyId()) : null);
+//				newInsuredVeh.setFnolSgsId(req.getFnolSgsId());
+//				newInsuredVeh.setPolicyNo(req.getPolicyNo());
+//				newInsuredVeh.setClaimNo(req.getClaimNo());
+//				newInsuredVeh.setVehicleMake(req.getVehicleMake());
+//				newInsuredVeh.setVehicleModel(req.getVehicleModel());
+//				newInsuredVeh.setMakeYear(req.getMakeYear() != null ? Integer.valueOf(req.getMakeYear()) : null);
+//				newInsuredVeh.setChassisNo(req.getChassisNo());
+//				newInsuredVeh.setInsuredName(req.getInsuredName());
+//				newInsuredVeh.setType(req.getType());
+//				newInsuredVeh.setVehicleRegNo(req.getVehicleRegNo());
+//				newInsuredVeh.setEntryDate(req.getEntryDate());
+//				newInsuredVeh.setStatus(req.getStatus());
+//				newInsuredVeh.setGarageId(req.getGarageId());
+//				newInsuredVeh.setQuotationNo(req.getQuotationNo());
+//				insuredVehRepo.save(newInsuredVeh);
+////                response.setErrors(Collections.singletonList("No insured vehicle found for claim number: " + req.getClaimNo()));
+////                response.setMessage("Failed");
+////                response.setIsError(true);
+////                return response;
 			}
             
             // Step 15: Prepare response

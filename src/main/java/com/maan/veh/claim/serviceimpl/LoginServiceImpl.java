@@ -211,6 +211,9 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	        response.put("UserType", login.getUserType());
 	        response.put("BranchCode", bm.getBranchCode());
 	        response.put("BranchName", bm.getBranchName());
+	        response.put("PartyId", login.getCoreAppCode());
+	        response.put("CategoryId", login.getAgencyCode());
+	        response.put("ProdId", "1100");
 	        response.put("MenuList", resMenuList);
 	        
 	        comResponse.setMessage("Success");

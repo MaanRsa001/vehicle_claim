@@ -71,6 +71,8 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	                veh.setType(vehicle.getType());
 	                veh.setVehicleRegNo(vehicle.getVehicleRegNo()); 
 	                veh.setEntryDate(vehicle.getEntryDate());
+	                veh.setFnolSgsId(vehicle.getFnolSgsId());
+	                veh.setLossLocation(vehicle.getLossLocation());
 	                if("Y".equalsIgnoreCase(vehicle.getStatus())) {
 	                	//veh.setStatus("P");
 	                	veh.setQuoteStatus("PFG");

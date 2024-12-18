@@ -31,6 +31,7 @@ import com.maan.veh.claim.dto.InsuredVehicleMasterDTO;
 import com.maan.veh.claim.entity.ApiTransactionLog;
 import com.maan.veh.claim.entity.ClaimIntimationDetails;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
+import com.maan.veh.claim.entity.InsuredVehicleInfoId;
 import com.maan.veh.claim.entity.SparePartsSaveDetails;
 import com.maan.veh.claim.external.ErrorDetail;
 import com.maan.veh.claim.external.ErrorResponse;
@@ -80,7 +81,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 		transactionLog.setEntryDate(new Date());
 		
 		try {
-			InsuredVehicleInfo newData = new InsuredVehicleInfo();
+			//InsuredVehicleInfo newData = new InsuredVehicleInfo();
 	        InsuredVehicleInfoDTO newdatas=new InsuredVehicleInfoDTO();
 			newdatas.setPartyId(requestPayload.getPartyId());
 			newdatas.setCategoryId(requestPayload.getCategoryId());
@@ -109,6 +110,18 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 				List<VcInuredVehicleApiReponse> data = externalApiResponse.getData();
 				for(VcInuredVehicleApiReponse insured:data) {
 					InsuredVehicleInfo insuredVehicleInfo =new  InsuredVehicleInfo();
+					
+					 InsuredVehicleInfoId insuredId = new InsuredVehicleInfoId(
+							    requestPayload.getCompanyid(),
+					            insured.getPolicyno(),
+					            insured.getClaimno(),
+					            requestPayload.getGarageid()
+					    );
+					 Optional<InsuredVehicleInfo> optionlData = repository.findById(insuredId);
+					 if(optionlData.isPresent()) {
+						 continue;
+					 }
+					 
 					insuredVehicleInfo.setClaimNo(insured.getClaimno());
 					insuredVehicleInfo.setCompanyId(requestPayload.getCompanyid());//
 					insuredVehicleInfo.setPolicyNo(insured.getPolicyno());
