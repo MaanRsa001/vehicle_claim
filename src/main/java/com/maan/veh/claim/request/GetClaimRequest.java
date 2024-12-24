@@ -9,5 +9,8 @@ public class GetClaimRequest {
 	
 	 @JsonProperty("PolicyNo")
 	 private String policyNo;
+	 
+	 @JsonProperty("PoliceReportNo")
+	 private String policeReportNo;
 
 }

@@ -1,9 +1,11 @@
 package com.maan.veh.claim.service;
 
 import com.maan.veh.claim.dto.SaveSparePartsDTO;
+import com.maan.veh.claim.request.CheckClaimStatusRequest;
 import com.maan.veh.claim.request.ClaimListRequest;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.FnolRequest;
+import com.maan.veh.claim.request.GetClaimRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.request.SaveClaimRequest;
 import com.maan.veh.claim.response.CommonResponse;
@@ -18,7 +20,7 @@ public interface ExternalApiService {
 	
 	CommonResponse authenticateUser(LoginRequest request);
 
-	CommonResponse getClaimByPolicy(String policyNo);
+	CommonResponse getClaimByPolicy(GetClaimRequest request);
 
 	CommonResponse getAllClaims();
 
@@ -27,5 +29,7 @@ public interface ExternalApiService {
 	CommonResponse saveSpareParts(SaveSparePartsDTO requestPayload);
 
 	CommonResponse getSavedSpareParts(SaveSparePartsDTO requestPayload);
+
+	CommonResponse checkClaimStatus(CheckClaimStatusRequest requestPayload);
 
 }

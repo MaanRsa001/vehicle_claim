@@ -28,6 +28,9 @@ public class SparePartsSaveDetails {
 	
     @Column(name = "quotation_no", length = 100)
     private String quotationNo;
+    
+    @Column(name = "saved_status")
+    private String savedStatus;
 	
 	@Column(name = "work_order_type", length = 50)
     private String workOrderType;

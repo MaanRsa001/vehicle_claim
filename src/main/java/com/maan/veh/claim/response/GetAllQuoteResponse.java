@@ -132,6 +132,9 @@ public class GetAllQuoteResponse {
  	@JsonProperty("QuoteStatus")
     private String quoteStatus;
  	
+ 	@JsonProperty("SavedStatus")
+    private String savedStatus;
+ 	
  	@JsonProperty("UserType")
     private String userType;
 }

@@ -189,7 +189,8 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
             	    .collect(Collectors.toList()); // Collect the results into a list
             
             // Fetch the list of vehicle info based on claim numbers and status
-            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoInAndGarageId(claimWithReplacement,request.getGarageId());
+            //List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoInAndGarageId(claimWithReplacement,request.getGarageId());
+            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoInAndGarageIdAndSurveyorId(claimWithReplacement,request.getGarageId(),request.getSurveyorId());
             
             // Check if any vehicles were found for the provided claim numbers and status
             if (!vehicleInfoList.isEmpty()) {
@@ -263,8 +264,9 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
            
 
             // Fetch the list of vehicle info based on claim numbers and status
-            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoIn(claimNumbers);
-
+            //List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoIn(claimNumbers);
+            List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoInAndDealerId(claimNumbers,request.getSparepartsDealerId());
+            
             // Check if any vehicles were found for the provided claim numbers and status
             if (!vehicleInfoList.isEmpty()) {
                 for (InsuredVehicleInfo vehicle : vehicleInfoList) {
@@ -293,7 +295,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
                 response.setMessage("Success");
                 response.setResponse(vehList);
             } else {
-                response.setErrors(Collections.singletonList("No vehicles found for the provided claim numbers and status"));
+                //response.setErrors(Collections.singletonList("No vehicles found for the provided claim numbers and status"));
                 response.setMessage("Failed");
                 response.setIsError(true);
                 response.setResponse(Collections.emptyList());
@@ -453,7 +455,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	    	List<SurveyorViewResponse> vehList = new ArrayList<>();
 
 	        // Fetch damage section details based on Status
-	        List<DamageSectionDetails> details = damageRepository.findByGarageLoginIdAndGarageDealerIsNotNull(request.getGarageId());
+	        List<DamageSectionDetails> details = damageRepository.findByGarageLoginIdAndSurveyorIdAndGarageDealerIsNotNull(request.getGarageId(),request.getSurveyorId());
 	        
 //	        // Also collecting the workorder which is asigned directly to garage without going to surveyor
 //	    	List<GarageWorkOrder> workList = garageWorkOrderRepository.findByGarageId(request.getGarageId());
@@ -484,7 +486,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	        	
 	        	veh.setAssignedTo(damage.getGarageDealer());
 	        	
-	        	Optional<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoAndGarageId(damage.getClaimNo(),damage.getGarageLoginId());
+	        	Optional<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoAndGarageIdAndSurveyorId(damage.getClaimNo(),damage.getGarageLoginId(),request.getSurveyorId());
 	        	if(vehicleInfoList.isPresent()) {
 	        		
 	        		InsuredVehicleInfo vehicle = vehicleInfoList.get();

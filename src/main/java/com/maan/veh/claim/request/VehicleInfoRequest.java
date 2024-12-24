@@ -15,6 +15,9 @@ public class VehicleInfoRequest {
     @JsonProperty("GarageId")
     private String garageId;
     
+    @JsonProperty("SurveyorId")
+    private String surveyorId;
+    
     @JsonProperty("SparepartsDealerId")
     private String sparepartsDealerId;
     

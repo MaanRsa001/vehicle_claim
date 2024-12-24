@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.maan.veh.claim.dto.SaveSparePartsDTO;
+import com.maan.veh.claim.request.CheckClaimStatusRequest;
 import com.maan.veh.claim.request.ClaimListRequest;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.FnolRequest;
@@ -49,7 +50,7 @@ public class ClaimIntimationController {
  // New API to get a single claim by policy number
     @PostMapping("/getClaimByPolicy")
     public ResponseEntity<CommonResponse> getClaimByPolicy(@RequestBody GetClaimRequest request) {
-        CommonResponse res = externalApiService.getClaimByPolicy(request.getPolicyNo());
+        CommonResponse res = externalApiService.getClaimByPolicy(request);
         return ResponseEntity.ok(res);
     }
 
@@ -75,6 +76,12 @@ public class ClaimIntimationController {
     @PostMapping("/getSpareParts")
     public ResponseEntity<CommonResponse> getSavedSpareParts(@RequestBody SaveSparePartsDTO requestPayload) {
         	CommonResponse res = externalApiService.getSavedSpareParts(requestPayload);
+            return ResponseEntity.ok(res);
+    }
+    
+    @PostMapping("/checkClaimStatus")
+    public ResponseEntity<CommonResponse> checkClaimStatus(@RequestBody CheckClaimStatusRequest requestPayload) {
+        	CommonResponse res = externalApiService.checkClaimStatus(requestPayload);
             return ResponseEntity.ok(res);
     }
 }

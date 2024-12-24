@@ -1,12 +1,12 @@
 package com.maan.veh.claim.serviceimpl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Collections;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -17,30 +17,26 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.maan.veh.claim.dto.ClaimIntimationDTODocumentDetails;
 import com.maan.veh.claim.dto.InsuredVehicleInfoDTO;
 import com.maan.veh.claim.dto.InsuredVehicleMasterDTO;
 import com.maan.veh.claim.entity.ApiTransactionLog;
-import com.maan.veh.claim.entity.ClaimIntimationDetails;
+import com.maan.veh.claim.entity.CoreInsuredVehicleInfo;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.entity.InsuredVehicleInfoId;
-import com.maan.veh.claim.entity.SparePartsSaveDetails;
-import com.maan.veh.claim.external.ErrorDetail;
 import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.external.VcInuredVehicleApiReponse;
 import com.maan.veh.claim.repository.ApiTransactionLogRepository;
+import com.maan.veh.claim.repository.CoreInsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.response.CommonResponse;
-import com.maan.veh.claim.response.GetAllQuoteResponse;
-import com.maan.veh.claim.response.InsuredVehicleRes;
 import com.maan.veh.claim.response.VcinsuredVehicleResponse;
 import com.maan.veh.claim.service.VcInsuredVehicleInfoService;
 
@@ -51,6 +47,10 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	
 	@Autowired
 	private InsuredVehicleInfoRepository repository;
+	
+	@Autowired
+	private CoreInsuredVehicleInfoRepository coreRepository;
+	
 	@Autowired
 	private RestTemplate restTemplate;
 	@Autowired
@@ -108,6 +108,9 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
                 VcinsuredVehicleResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), VcinsuredVehicleResponse.class);
                 List<InsuredVehicleInfo> InsuredInfo = new ArrayList<>();
 				List<VcInuredVehicleApiReponse> data = externalApiResponse.getData();
+				
+				saveInCoreTable(data,requestPayload);
+				
 				for(VcInuredVehicleApiReponse insured:data) {
 					InsuredVehicleInfo insuredVehicleInfo =new  InsuredVehicleInfo();
 					
@@ -139,6 +142,9 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 					insuredVehicleInfo.setStatus("Y");
 					insuredVehicleInfo.setFnolSgsId(insured.getFnolsgsid());
 					insuredVehicleInfo.setGarageId(requestPayload.getGarageid());
+					//entering default surveyor and garage
+					insuredVehicleInfo.setSurveyorId("surveyor_test1");
+					insuredVehicleInfo.setDealerId("dealer_test1");
 					InsuredInfo.add(insuredVehicleInfo);
 					}
 				    repository.saveAll(InsuredInfo);
@@ -163,6 +169,41 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 
 		}
 		return response;  // Return the response
+	}
+
+	private void saveInCoreTable(List<VcInuredVehicleApiReponse> data, InsuredVehicleMasterDTO requestPayload) {
+		try {
+			List<CoreInsuredVehicleInfo> InsuredInfo = new ArrayList<>();
+			for (VcInuredVehicleApiReponse insured : data) {
+				CoreInsuredVehicleInfo insuredVehicleInfo = new CoreInsuredVehicleInfo();
+
+				insuredVehicleInfo.setClaimNo(insured.getClaimno());
+				insuredVehicleInfo.setCompanyId(requestPayload.getCompanyid());//
+				insuredVehicleInfo.setPolicyNo(insured.getPolicyno());
+				insuredVehicleInfo.setVehicleMake(insured.getMake());//
+				insuredVehicleInfo.setVehicleModel(insured.getModel());//
+				insuredVehicleInfo.setMakeYear(insured.getYear());//
+				insuredVehicleInfo.setChassisNo(insured.getChassisno());
+				insuredVehicleInfo.setInsuredName(insured.getInsuredname());
+				insuredVehicleInfo.setType(insured.getBodytype());
+//				System.out.println(insured.getBodytype());
+				insuredVehicleInfo.setLossLocation(insured.getLosslocation());
+				insuredVehicleInfo.setVehicleRegNo(insured.getVehregno());
+//				System.out.println(insured.getVehregno());
+				insuredVehicleInfo.setEntryDate(new Date());
+				insuredVehicleInfo.setStatus(insured.getClaimstatus());
+				insuredVehicleInfo.setFnolSgsId(insured.getFnolsgsid());
+				insuredVehicleInfo.setGarageId(requestPayload.getGarageid());
+				// entering default surveyor and garage
+//				insuredVehicleInfo.setSurveyorId("surveyor_test1");
+//				insuredVehicleInfo.setDealerId("dealer_test1");
+				InsuredInfo.add(insuredVehicleInfo);
+			}
+			    coreRepository.saveAll(InsuredInfo);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	private void setupSSLContext() throws Exception {

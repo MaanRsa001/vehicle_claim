@@ -31,12 +31,10 @@ public class ClaimIntimationResponse {
 	private String insuredId;
 
 	@JsonProperty("LossDate")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-	private Date lossDate;
+	private String lossDate;
 
 	@JsonProperty("IntimatedDate")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-	private Date intimatedDate;
+	private String intimatedDate;
 
 	@JsonProperty("NatureOfLoss")
 	private String natureOfLoss;
