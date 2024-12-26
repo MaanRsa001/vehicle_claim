@@ -37,6 +37,8 @@ import com.maan.veh.claim.dto.ClaimIntimationDTORequestMetaData;
 import com.maan.veh.claim.dto.ClaimIntimationDTOThirdPartyInfo;
 import com.maan.veh.claim.dto.ClaimTransactionRequestDTO;
 import com.maan.veh.claim.dto.ClaimTransactionRequestDTOMetaData;
+import com.maan.veh.claim.dto.ClaimentCoverageRequestDTO;
+import com.maan.veh.claim.dto.ClaimentCoverageResponseDTO;
 import com.maan.veh.claim.dto.ClaimsDetailsRequestDto;
 import com.maan.veh.claim.dto.ClaimsDetailsResponseDto;
 import com.maan.veh.claim.dto.ClaimsDetailsResponseDto.ClaimDetails;
@@ -52,6 +54,7 @@ import com.maan.veh.claim.entity.ClaimIntimationDetailsId;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.SparePartsSaveDetails;
+import com.maan.veh.claim.entity.VcClaimStatus;
 import com.maan.veh.claim.external.ErrorDetail;
 import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.external.ExternalApiResponse;
@@ -60,6 +63,7 @@ import com.maan.veh.claim.repository.ClaimIntimationDetailsRepository;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
+import com.maan.veh.claim.repository.VcClaimStatusRepository;
 import com.maan.veh.claim.request.CheckClaimStatusRequest;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
 import com.maan.veh.claim.request.ClaimIntimationRequestMetaData;
@@ -67,6 +71,7 @@ import com.maan.veh.claim.request.ClaimIntimationThirdPartyInfo;
 import com.maan.veh.claim.request.ClaimListRequest;
 import com.maan.veh.claim.request.ClaimListRequestDTO;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
+import com.maan.veh.claim.request.ClaimentCoverageRequest;
 import com.maan.veh.claim.request.ExternalVehicleGarageViewRequest;
 import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.GetClaimRequest;
@@ -78,6 +83,7 @@ import com.maan.veh.claim.request.VehicleDamageDetailRequest;
 import com.maan.veh.claim.response.CheckClaimStatusResponse;
 import com.maan.veh.claim.response.ClaimIntimationResponse;
 import com.maan.veh.claim.response.ClaimListResponse;
+import com.maan.veh.claim.response.ClaimentCoverageResponse;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GetAllQuoteResponse;
@@ -106,6 +112,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     @Autowired
     private DamageSectionDetailsRepository damageSectionDetailsRepo;
     
+    @Autowired
+    private VcClaimStatusRepository vcClaimStatusRepo;
+    
     @Value("${external.api.url.createfnol}")  
     private String externalApiUrlCreatefnol;
     
@@ -126,6 +135,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     
     @Value("${external.api.url.getClaimsDetailsByClaimNo}")
     private String checkClaimStatusApi;
+    
+    @Value("${external.api.url.listClaimantCoverages}")
+    private String listClaimantCoverages;
     
     @Value("${external.api.url.authenticate}")
     private String externalApiUrlAuthenticate;
@@ -1610,6 +1622,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                
 	        		
 	        		resList.add(res);
+	        		saveClaimStatusToTable(CD);
 	        	}
 	            response.setMessage(externalApiResponse.getMessage());
 	            response.setIsError(false);
@@ -1630,6 +1643,56 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    return response;
 	}
 	
+	private void saveClaimStatusToTable(ClaimDetails claim) {
+	    try {
+	        // Create a new VcClaimStatus entity
+	        VcClaimStatus data = new VcClaimStatus();
+
+	        // Map fields from ClaimDetails to VcClaimStatus
+	        data.setClaimNo(claim.getClaimNo());
+	        data.setClaimNotificationNo(claim.getClaimNotificationNo());
+	        data.setPolicyNumber(claim.getPolicyNumber());
+	        data.setClaimStatus(claim.getClaimStatus());
+	        //data.setUpdatedAt(new Date()); // You can update this based on your requirements
+	        data.setCreatedAt(new Date()); // If needed, update this value
+	        data.setLossRemarks(claim.getLossRemarks());
+	        data.setFnolNo(claim.getFnolNo());
+	        data.setClaimType(claim.getClaimType());
+	        data.setLossDate(parseDate(claim.getLossDate()));
+	        data.setNatureOfLoss(claim.getNatureOfLoss());
+	        data.setProductId(claim.getProductId());
+	        data.setDriverName(claim.getDriverName());
+	        data.setAccidentNumber(claim.getAccidentNumber());
+	        data.setPolicyInceptionDate(parseDate(claim.getPolicyInceptionDate()));
+	        //data.setFaultPercentage(claim.getFaultPercentage());
+	        data.setAccidentLocation(claim.getAccidentLocation());
+	        data.setIntimationDate(parseDate(claim.getIntimationDate()));
+	        data.setPolicyExpiryDate(parseDate(claim.getPolicyExpiryDate()));
+	        data.setCaseNumber(claim.getCaseNumber());
+	        data.setOfficeCode(claim.getOfficeCode());
+	        data.setClaimantType(claim.getClaimantType());
+	        data.setGarageCode(claim.getGarageCode());
+	        data.setTotalLossYN(claim.getTotalLossYN());
+	        data.setCauseOfLoss(claim.getCauseOfLoss());
+	        data.setLobName(claim.getLobName());
+	        data.setInsuredName(claim.getInsuredName());
+
+	        // Save the data to the database
+	        vcClaimStatusRepo.save(data);
+
+	        // Log success if necessary
+	        System.out.println("Claim status saved successfully for Claim No: " + claim.getClaimNo());
+
+	    } catch (Exception e) {
+	        // Handle the exception
+	        System.err.println("Error saving claim status for Claim No: " + claim.getClaimNo());
+	        e.printStackTrace();
+
+	    }
+	}
+
+
+
 	private Date parseDate(String dateString) {
 	    if (dateString == null) {
 	        return null;
@@ -1640,6 +1703,109 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        e.printStackTrace();
 	        return null;
 	    }
+	}
+
+
+	@Override
+	public CommonResponse listClaimantCoverages(ClaimentCoverageRequest request) {
+		CommonResponse response = new CommonResponse();
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+	    log.setEndpoint(listClaimantCoverages);
+
+	    try {
+
+	    	ClaimentCoverageRequestDTO dto = new ClaimentCoverageRequestDTO();
+	    	dto.setPolicyNo(request.getPolicyNo());
+	    	dto.setRiskId(request.getRiskId());
+	    	dto.setSgsId(request.getSgsId());
+	    	dto.setClcpClfSgsId(request.getClcpClfSgsId());
+	    	
+	        // Authenticate and retrieve JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Create headers and add JWT token
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Convert DTO to JSON for request body and add headers
+	        String requestBody = objectMapper.writeValueAsString(dto);
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+	        log.setRequest(requestBody);
+	        
+	     // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+	        
+	        // Send request to external API
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
+	        log.setResponse(apiResponse.getBody());
+	        log.setStatus("SUCCESS");
+
+	        // Parse response into ExternalApiResponse object
+	        ClaimentCoverageResponseDTO externalApiResponse = objectMapper.readValue(apiResponse.getBody(), ClaimentCoverageResponseDTO.class);
+
+	        // Initialize ClaimentCoverageResponse to map the data
+	        ClaimentCoverageResponse res = new ClaimentCoverageResponse();
+
+	        if (externalApiResponse.isHasError()) {
+	            response.setMessage(externalApiResponse.getMessage());
+	            response.setIsError(true);
+
+	            // Map error-specific fields if needed
+	            res.setHasError(externalApiResponse.isHasError());
+	            res.setStatus(externalApiResponse.getStatus());
+	            res.setMessage(externalApiResponse.getMessage());
+	        } else {
+	            // Map all fields from DTO to the response
+	            res.setHasError(externalApiResponse.isHasError());
+	            res.setStatus(externalApiResponse.getStatus());
+	            res.setData(externalApiResponse.getData());
+
+	            // Map Dataset
+	            ClaimentCoverageResponse.Dataset dataset = new ClaimentCoverageResponse.Dataset();
+	            dataset.setClaimantList(externalApiResponse.getDataset().getClaimantList());
+	            dataset.setCoveragesList(externalApiResponse.getDataset().getCoveragesList());
+	            res.setDataset(dataset);
+
+	            // Set success message
+	            response.setMessage(externalApiResponse.getMessage());
+	            response.setIsError(false);
+	            response.setResponse(res);
+	        }
+
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to get data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        apiTransactionLogRepo.save(log);
+	    }
+
+	    return response;
+
 	}
 
 

@@ -4,6 +4,7 @@ import com.maan.veh.claim.dto.SaveSparePartsDTO;
 import com.maan.veh.claim.request.CheckClaimStatusRequest;
 import com.maan.veh.claim.request.ClaimListRequest;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
+import com.maan.veh.claim.request.ClaimentCoverageRequest;
 import com.maan.veh.claim.request.FnolRequest;
 import com.maan.veh.claim.request.GetClaimRequest;
 import com.maan.veh.claim.request.LoginRequest;
@@ -31,5 +32,7 @@ public interface ExternalApiService {
 	CommonResponse getSavedSpareParts(SaveSparePartsDTO requestPayload);
 
 	CommonResponse checkClaimStatus(CheckClaimStatusRequest requestPayload);
+
+	CommonResponse listClaimantCoverages(ClaimentCoverageRequest requestPayload);
 
 }
