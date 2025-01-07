@@ -388,5 +388,22 @@ public class DropDownController {
         // Throw the exception with the selected status
         throw new ResponseStatusException(randomStatus, "Random HTTP error occurred: " + randomStatus.getReasonPhrase());
     }
+    
+    @GetMapping(value = "/usertype")
+	public ResponseEntity<CommonRes> getUserType() {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getUserType();
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
 
 }

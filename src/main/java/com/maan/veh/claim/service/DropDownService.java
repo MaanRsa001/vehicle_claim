@@ -45,4 +45,6 @@ public interface DropDownService {
 	List<DropDownRes> getCountry(String companyIds);
 	
 	List<DropDownRes> getCity(String companyIds);
+
+	List<DropDownRes> getUserType();
 }

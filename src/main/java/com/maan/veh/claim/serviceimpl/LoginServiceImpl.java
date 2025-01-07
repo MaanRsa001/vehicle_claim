@@ -2,6 +2,7 @@ package com.maan.veh.claim.serviceimpl;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -18,10 +19,21 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,11 +41,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maan.veh.claim.auth.EncryDecryService;
 import com.maan.veh.claim.auth.JwtTokenUtil;
 import com.maan.veh.claim.auth.passwordEnc;
 import com.maan.veh.claim.dto.GarageLoginMasterDTO;
+import com.maan.veh.claim.dto.GetAllCoreAppCodeResponseDto;
+import com.maan.veh.claim.dto.GetAllCoreAppCodeResponseDto.Dataset;
+import com.maan.veh.claim.entity.ApiTransactionLog;
 import com.maan.veh.claim.entity.BranchMaster;
 import com.maan.veh.claim.entity.InsuranceCompanyMaster;
 import com.maan.veh.claim.entity.LoginMaster;
@@ -42,6 +59,8 @@ import com.maan.veh.claim.entity.LoginUserInfo;
 import com.maan.veh.claim.entity.MenuMaster;
 import com.maan.veh.claim.entity.NotifTransactionDetails;
 import com.maan.veh.claim.entity.SessionMaster;
+import com.maan.veh.claim.external.ErrorResponse;
+import com.maan.veh.claim.repository.ApiTransactionLogRepository;
 import com.maan.veh.claim.repository.BranchMasterRepository;
 import com.maan.veh.claim.repository.InsuranceCompanyMasterRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
@@ -51,8 +70,10 @@ import com.maan.veh.claim.repository.NotifTransactionDetailsRepository;
 import com.maan.veh.claim.repository.SessionMasterRepository;
 import com.maan.veh.claim.request.ChangePasswordReq;
 import com.maan.veh.claim.request.GetAllLoginRequest;
+import com.maan.veh.claim.request.GetCoreAppCodeRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.response.CommonResponse;
+import com.maan.veh.claim.response.DropDownRes;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.SuccessRes;
 import com.maan.veh.claim.service.LoginService;
@@ -103,6 +124,18 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	
 	@Autowired 
 	private NotifTransactionDetailsRepository notifTrans;
+	
+	@Autowired
+    private ApiTransactionLogRepository apiTransactionLogRepo;
+	
+	@Autowired
+    private ObjectMapper objectMapper;
+	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+    @Value("${external.api.url.partyMaster}")
+    private String partyMaster;
 	
 	@Override
 	public CommonResponse isValidUser(LoginRequest req) {
@@ -414,6 +447,8 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            userInfoNew.setEffectiveDateStart(req.getEffectiveDate());
 	            userInfoNew.setUserMobile(req.getMobileNo());
 	            userInfoNew.setUserMail(req.getEmailid());
+	            userInfoNew.setAgencyCode(req.getCatagoryId());
+	            
 	            LoginUserInfoRepo.save(userInfoNew);
 	        }
 
@@ -493,7 +528,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            dto.setCountryName(userInfo.getCountryName());
 	            dto.setMobileCode(userInfo.getMobileCode());
 	            dto.setMobileCodeDesc(userInfo.getMobileCodeDesc());
-
+	            
 	            // Merge data from LoginMaster
 	            LoginMaster loginMaster = loginMasterMap.get(userInfo.getLoginId());
 	            if (loginMaster != null) {
@@ -505,6 +540,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	                dto.setUserType(loginMaster.getUserType());
 	                dto.setLoginName(userInfo.getUserName());
 	                dto.setBranchCode(loginMaster.getBranchCode());
+		            dto.setCatagoryId(loginMaster.getAgencyCode());
 		            
 	            }
 
@@ -773,5 +809,108 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 			log.info(e);
 		}
 		return temppwd;
+	}
+
+	@Override
+	public CommonResponse getCoreAppCode(GetCoreAppCodeRequest req) {
+		CommonResponse response = new CommonResponse();
+		ApiTransactionLog logTab = new ApiTransactionLog();
+		logTab.setRequestTime(LocalDateTime.now());
+		logTab.setEntryDate(new Date());
+		logTab.setEndpoint(partyMaster);
+
+		try {
+
+			// Create headers and add JWT token
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Authorization", "No Auth");
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			HttpEntity<String> entity = new HttpEntity<>(headers);
+			logTab.setRequest(" ");
+
+			// Configure SSL Trust Managers (if necessary)
+			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+					return null;
+				}
+
+				public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+				}
+
+				public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+				}
+			} };
+
+			SSLContext sc = SSLContext.getInstance("SSL");
+			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+
+			// Send request to external API
+			ResponseEntity<String> apiResponse = restTemplate.exchange(logTab.getEndpoint(), // URL endpoint
+					HttpMethod.GET, // HTTP method
+					entity, // HttpEntity containing headers
+					String.class // Expected response type
+			);
+
+			logTab.setResponse(apiResponse.getBody());
+			logTab.setStatus("SUCCESS");
+
+			// Parse response into ExternalApiResponse object
+			GetAllCoreAppCodeResponseDto externalApiResponse = objectMapper.readValue(apiResponse.getBody(),
+					GetAllCoreAppCodeResponseDto.class);
+
+			if (externalApiResponse.isHasError()) {
+				response.setMessage(externalApiResponse.getMessage());
+				response.setIsError(true);
+
+			} else {
+				List<DropDownRes> resList = new ArrayList<>();
+
+				List<Dataset> datalist = externalApiResponse.getData();
+
+				// Filter the datalist by category and searchValue
+				List<GetAllCoreAppCodeResponseDto.Dataset> filteredDataList = datalist.stream().filter(
+						data -> req.getCategory() != null && req.getCategory().equalsIgnoreCase(data.getCategory())) // Filter
+																														// by
+																														// category
+						.filter(data -> {
+							// Apply searchValue filter (first compare with partyId, then partyName)
+							String searchValue = req.getSearchValue();
+							if (searchValue == null || searchValue.isEmpty()) {
+								return true; // No search value means include all in this category
+							}
+							return (data.getPartyId() != null && data.getPartyId().contains(searchValue))
+									|| (data.getPartyName() != null
+											&& data.getPartyName().toLowerCase().contains(searchValue.toLowerCase()));
+						}).collect(Collectors.toList());
+
+				for (GetAllCoreAppCodeResponseDto.Dataset data : filteredDataList) {
+					DropDownRes res = new DropDownRes();
+					res.setCode(data.getPartyId() != null ? data.getPartyId().toString() : "");
+					res.setCodeDesc(data.getPartyName());
+					resList.add(res);
+				}
+
+				// Set success message
+				response.setMessage(externalApiResponse.getMessage());
+				response.setIsError(false);
+				response.setResponse(resList);
+			}
+
+		} catch (Exception e) {
+			logTab.setStatus("FAILURE");
+			logTab.setErrorMessage(e.getMessage());
+			response.setMessage("Failed to get data");
+			response.setIsError(true);
+			response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
+		} finally {
+			logTab.setResponseTime(LocalDateTime.now());
+			//log.info("CoreAppCodes => " +logTab);
+			//apiTransactionLogRepo.save(log);
+		}
+
+		return response;
 	}
 }

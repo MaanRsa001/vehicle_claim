@@ -127,6 +127,10 @@ public class DropDownServiceImpl implements DropDownService {
 	public List<DropDownRes> getRepairType() {
 		return getDropdownValues("REPAIR_TYPE");
 	}
+	@Override
+	public List<DropDownRes> getUserType() {
+		return getDropdownValues("USER_TYPE");
+	}
 	
     private List<DropDownRes> getDropdownValues(String itemType) {
         List<DropDownRes> resList = new ArrayList<>();
@@ -355,4 +359,5 @@ public class DropDownServiceImpl implements DropDownService {
         }
         return resList;
 	}
+
 }

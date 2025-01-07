@@ -18,4 +18,7 @@ public class CheckClaimStatusRequest {
 
 	 @JsonProperty("FnolNo")
 	 private String fnolNo;
+	 
+	 @JsonProperty("CompanyId")
+	 private String companyId;
 }

@@ -53,6 +53,7 @@ import com.maan.veh.claim.entity.ClaimIntimationDetails;
 import com.maan.veh.claim.entity.ClaimIntimationDetailsId;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
+import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.SparePartsSaveDetails;
 import com.maan.veh.claim.entity.VcClaimStatus;
 import com.maan.veh.claim.external.ErrorDetail;
@@ -62,6 +63,7 @@ import com.maan.veh.claim.repository.ApiTransactionLogRepository;
 import com.maan.veh.claim.repository.ClaimIntimationDetailsRepository;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
+import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
 import com.maan.veh.claim.repository.VcClaimStatusRepository;
 import com.maan.veh.claim.request.CheckClaimStatusRequest;
@@ -114,6 +116,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     
     @Autowired
     private VcClaimStatusRepository vcClaimStatusRepo;
+    
+    @Autowired
+    private LoginMasterRepository loginMasterRepo;
     
     @Value("${external.api.url.createfnol}")  
     private String externalApiUrlCreatefnol;
@@ -1198,6 +1203,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			request.setTotalLoss(partsSaveDetails.getTotalLoss().toString());
 			request.setTotalLossType(partsSaveDetails.getTotalLossType());
 			request.setRemarks(partsSaveDetails.getRemarks());
+			request.setClaimNo(partsSaveDetails.getClaimNo());
 			
 			request.setReplacementCost(partsSaveDetails.getReplacementCost().toString());
 			request.setReplacementCostDeductible(partsSaveDetails.getReplacementCostDeductible().toString());
@@ -1620,6 +1626,46 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                res.setLobName(CD.getLobName());
 	                res.setGarageCode(CD.getGarageCode());
 	                
+	                String surveyorId = "";
+	                String gargeId = "";
+	                String dealerId = "";
+
+	                List<LoginMaster> loginList = loginMasterRepo.findByCompanyId(request.getCompanyId());
+
+	                try {
+	                    surveyorId = loginList.stream()
+	                        .filter(login -> "007".equalsIgnoreCase(login.getAgencyCode()) 
+	                                         && login.getCoreAppCode().equalsIgnoreCase(CD.getSurveyorId()))
+	                        .map(LoginMaster::getLoginId) 
+	                        .findFirst()
+	                        .orElse("");
+
+	                    gargeId = loginList.stream()
+	                        .filter(login -> "009".equalsIgnoreCase(login.getAgencyCode()) 
+	                                         && login.getCoreAppCode().equalsIgnoreCase(CD.getSurveyorId()))
+	                        .map(LoginMaster::getLoginId) 
+	                        .findFirst()
+	                        .orElse("");
+
+	                    dealerId = loginList.stream()
+	                        .filter(login -> "502".equalsIgnoreCase(login.getAgencyCode()) 
+	                                         && login.getCoreAppCode().equalsIgnoreCase(CD.getSurveyorId()))
+	                        .map(LoginMaster::getLoginId) 
+	                        .findFirst()
+	                        .orElse("");
+	                    
+	                    CD.setSurveyorId(surveyorId);
+	                    CD.setGarageId(gargeId);
+	                    CD.setDealerSpareId(dealerId);
+	                    
+	                } catch (Exception e) {
+	                    // Log the error
+	                    //e.printStackTrace();
+	                }
+
+	                res.setSurveyorId(surveyorId);
+                    res.setGarageId(gargeId);
+                    res.setDealerSpareId(dealerId);
 	        		
 	        		resList.add(res);
 	        		saveClaimStatusToTable(CD);
@@ -1676,7 +1722,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        data.setCauseOfLoss(claim.getCauseOfLoss());
 	        data.setLobName(claim.getLobName());
 	        data.setInsuredName(claim.getInsuredName());
-
+	        data.setSurveyorId(claim.getSurveyorId());
+	        data.setGarageId(claim.getGarageId());
+	        data.setDealerId(claim.getDealerSpareId());
 	        // Save the data to the database
 	        vcClaimStatusRepo.save(data);
 

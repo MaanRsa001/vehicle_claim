@@ -117,5 +117,8 @@ public class GarageLoginMasterDTO {
 	@JsonProperty("ChangePassYN")
 	private String changePassYN;
 	
+	@JsonProperty("CatagoryId")
+	private String catagoryId;
+	
 	
 }

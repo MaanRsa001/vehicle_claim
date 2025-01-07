@@ -100,4 +100,13 @@ public class VcClaimStatus {
 
     @Column(name = "insured_name", length = 100)
     private String insuredName;
+    
+    @Column(name = "surveyor_id", length = 100)
+    private String surveyorId;
+    
+    @Column(name = "garage_id", length = 100)
+    private String garageId;
+    
+    @Column(name = "dealer_id", length = 100)
+    private String dealerId;
 }

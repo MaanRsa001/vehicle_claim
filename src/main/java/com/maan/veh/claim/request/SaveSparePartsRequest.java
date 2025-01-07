@@ -11,6 +11,9 @@ public class SaveSparePartsRequest {
 
 	@JsonProperty("requestMetaData")
 	private SaveSparePartsRequestMetaData requestMetaData;
+	
+	@JsonProperty("claimNo")
+	private String claimNo;
 
 	@JsonProperty("workOrderType")
 	private String workOrderType;

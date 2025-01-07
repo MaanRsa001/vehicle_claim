@@ -170,9 +170,12 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             if (StringUtils.isNotBlank(req.getQuotationNo())) {
                 workOrder.setQuotationNo(req.getQuotationNo());
             } else {
+            	
                 long count = garageWorkOrderRepository.count();
                 count = count + 1;
-                String quoteNo = "QUO-" + req.getClaimNo() + "-" + count ;
+                //String quoteNo = "QUO-" + req.getClaimNo() + "-" + count ;
+                String extractedValue = req.getClaimNo().substring(req.getClaimNo().lastIndexOf("/") + 1);
+                String quoteNo = "QUO-" + extractedValue +"-" +count ;
                 workOrder.setQuotationNo(quoteNo);
             }
 

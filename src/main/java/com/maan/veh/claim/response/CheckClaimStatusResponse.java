@@ -88,4 +88,13 @@ public class CheckClaimStatusResponse {
 
     @JsonProperty("GarageCode")
     private String garageCode;
+    
+    @JsonProperty("surveyorId")
+    private String surveyorId;
+    
+    @JsonProperty("garageId")
+    private String garageId;
+    
+    @JsonProperty("dealerSpareId")
+    private String dealerSpareId;
 }

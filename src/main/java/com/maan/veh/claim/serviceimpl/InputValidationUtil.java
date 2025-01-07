@@ -1431,6 +1431,9 @@ List<ErrorList> errors = new ArrayList<>();
 	    if (StringUtils.isBlank(req.getUserType())) {
 	        list.add(new ErrorList("100", "UserType", "User Type cannot be blank"));
 	    }
+	    if (StringUtils.isBlank(req.getCatagoryId())) {
+	        list.add(new ErrorList("100", "CatagoryId", "Catagory Id cannot be blank"));
+	    }
 	    if (StringUtils.isBlank(req.getLoginName())) {
 		        list.add(new ErrorList("100", "Loginname", "Login name cannot be blank"));
 		}

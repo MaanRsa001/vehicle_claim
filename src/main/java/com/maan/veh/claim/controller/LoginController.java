@@ -16,6 +16,7 @@ import com.maan.veh.claim.dto.GarageLoginMasterDTO;
 import com.maan.veh.claim.error.Error;
 import com.maan.veh.claim.request.ChangePasswordReq;
 import com.maan.veh.claim.request.GetAllLoginRequest;
+import com.maan.veh.claim.request.GetCoreAppCodeRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.response.CommonLoginRes;
 import com.maan.veh.claim.response.CommonResponse;
@@ -143,6 +144,12 @@ public class LoginController {
 				
 	}
 	
+	@PostMapping("/create/admin")
+	public CommonResponse createAdminLogin(@RequestBody GarageLoginMasterDTO req) {
+			return service.createLogin(req);		
+				
+	}
+	
 	@PostMapping("/getAll/login")
 	public CommonResponse getAllLogin(@RequestBody GetAllLoginRequest req) {
 			return service.getAllLogin(req);		
@@ -152,6 +159,12 @@ public class LoginController {
 	@PostMapping("/getLoginDetails")
 	public CommonResponse getLoginDetails(@RequestBody GetAllLoginRequest req) {
 			return service.getLoginDetails(req);		
+				
+	}
+	
+	@PostMapping("/getCoreAppCode")
+	public CommonResponse getCoreAppCode(@RequestBody GetCoreAppCodeRequest req) {
+			return service.getCoreAppCode(req);		
 				
 	}
 	
