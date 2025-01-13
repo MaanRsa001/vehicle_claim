@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,19 +36,19 @@ public class ApiTransactionLog {
     @Column(nullable = false)
     private String endpoint;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Lob
     private String request;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
     private String response;
 
     @Column(nullable = false)
     private String status;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
     private String errorMessage;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
     private String additionalInfo;
 
     // Getters and setters

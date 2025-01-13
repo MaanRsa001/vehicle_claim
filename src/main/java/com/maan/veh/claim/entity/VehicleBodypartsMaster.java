@@ -69,7 +69,7 @@ private static final long serialVersionUID = 1L;
     @Column(name="COMPANY_ID", nullable=false)
     private BigDecimal companyId ;
 
-    @Column(name="SECTION_ID", nullable=false)
+    @Column(name="SECTION_ID")
     private BigDecimal sectionId ;
 
     //--- ENTITY DATA FIELDS 
@@ -93,10 +93,10 @@ private static final long serialVersionUID = 1L;
     private BigDecimal depreciationPercent ;
 
     @Temporal(TemporalType.DATE)
-    @Column(name="EFFECTIVE_DATE", nullable=false)
+    @Column(name="EFFECTIVE_DATE")
     private Date       effectiveDate ;
 
-    @Column(name="AMENDID", nullable=false)
+    @Column(name="AMENDID")
     private BigDecimal amendid ;
 
 
