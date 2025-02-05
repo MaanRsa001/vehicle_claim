@@ -38,7 +38,7 @@ public class CoreInsuredVehicleInfo {
     private String vehicleModel;
 
     @Column(name = "make_year")
-    private Integer makeYear;
+    private String makeYear;
 
     @Column(name = "chassis_no", length = 50)
     private String chassisNo;

@@ -457,16 +457,16 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	        // Fetch damage section details based on Status
 	        List<DamageSectionDetails> details = damageRepository.findByGarageLoginIdAndSurveyorIdAndGarageDealerIsNotNull(request.getGarageId(),request.getSurveyorId());
 	        
-//	        // Also collecting the workorder which is asigned directly to garage without going to surveyor
-//	    	List<GarageWorkOrder> workList = garageWorkOrderRepository.findByGarageId(request.getGarageId());
-//	    	if(workList != null) {
-//	    		workList = workList.stream().filter(work -> "WA".equalsIgnoreCase(work.getQuoteStatus())).collect(Collectors.toList());
-//	    	}
-//	    	
-//	        for(GarageWorkOrder work : workList) {
-//	    		List<DamageSectionDetails> completedDetails = damageRepository.findByClaimNoAndQuotationNo(work.getClaimNo(), work.getQuotationNo());
-//	    		details.addAll(completedDetails);
-//	    	}
+	        // Also collecting the workorder which is asigned directly to garage without going to dealer
+	    	List<GarageWorkOrder> workList = garageWorkOrderRepository.findByGarageIdAndSparepartsDealerId(request.getGarageId(),null);
+	    	if(workList != null) {
+	    		workList = workList.stream().filter(work -> "WA".equalsIgnoreCase(work.getQuoteStatus())).collect(Collectors.toList());
+	    	}
+	    	
+	        for(GarageWorkOrder work : workList) {
+	    		List<DamageSectionDetails> completedDetails = damageRepository.findByClaimNoAndQuotationNo(work.getClaimNo(), work.getQuotationNo());
+	    		details.addAll(completedDetails);
+	    	}
 	        
 	        if(details != null) {
 	        	

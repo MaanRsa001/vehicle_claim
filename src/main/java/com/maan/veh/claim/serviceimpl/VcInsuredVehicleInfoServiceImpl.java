@@ -262,7 +262,8 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 			transactionLog.setErrorMessage(e.getMessage());
 		} finally {
 			transactionLog.setResponseTime(LocalDateTime.now());
-			apiTransactionLogRepo.save(transactionLog);
+			//apiTransactionLogRepo.save(transactionLog);
+			logger.info(externalApiUrlAuthenticate + " ====> " +transactionLog);
 		}
 		return null;  // Return null if authentication fails
 	}

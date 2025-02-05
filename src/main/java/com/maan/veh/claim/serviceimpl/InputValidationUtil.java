@@ -102,6 +102,9 @@ public class InputValidationUtil {
 		
 		if (StringUtils.isNotBlank(req.getLoginId()) && StringUtils.isNotBlank(req.getPassword())) {
 			LoginMaster loginData = loginRepo.findByLoginId(req.getLoginId());
+			if(loginData == null) {
+				list.add(new ErrorList("100","LoginId","Please enter valid loginId"));
+			}
 			sessionlist = sessionRep.findByLoginIdOrderByEntryDateDesc(req.getLoginId());
 			
 			if (loginData != null  ) {

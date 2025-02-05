@@ -498,6 +498,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             if (optionalInsuredVeh.isPresent()) {
                 InsuredVehicleInfo insuredVeh = optionalInsuredVeh.get();
                 insuredVeh.setStatus(req.getQuoteStatus());
+                insuredVeh.setDealerId(req.getSparepartsDealerId());
                 insuredVehRepo.save(insuredVeh);
             } else {
                 response.setErrors(Collections.singletonList("No insured vehicle found for claim number: " + req.getClaimNo()));

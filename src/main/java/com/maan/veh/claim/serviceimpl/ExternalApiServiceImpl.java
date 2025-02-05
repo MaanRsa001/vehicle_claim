@@ -222,7 +222,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             String requestBody = objectMapper.writeValueAsString(dto);
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
             log.setRequest(requestBody);
-            
+            logger.info(requestBody);
             // Configure SSL Trust Managers (if necessary)
             TrustManager[] trustAllCerts = new TrustManager[] {
                 new X509TrustManager() {
@@ -275,7 +275,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
                 // Create custom error response
                 List<ErrorResponse> errorList = new ArrayList<>();
                 for (ErrorDetail error : externalApiResponse.getData().getErrorDetailsList()) {
-                    errorList.add(new ErrorResponse(error.getErrorCode(), error.getErrorField(), error.getErrorDescription()));
+                    errorList.add(new ErrorResponse("Azentio API "+externalApiUrlCreatefnol, error.getErrorField(), error.getErrorDescription()));
                 }
                 response.setErrors(errorList);
                 response.setMessage(externalApiResponse.getMessage());
@@ -295,7 +295,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage()))); // General error
         } finally {
             log.setResponseTime(LocalDateTime.now());
-            apiTransactionLogRepo.save(log);
+            //apiTransactionLogRepo.save(log);
+            logger.info(externalApiUrlCreatefnol +" ==> "+ log);
         }
 
         return response;
@@ -334,7 +335,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             String requestBody = objectMapper.writeValueAsString(dto);
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
             log.setRequest(requestBody);
-
+            logger.info(requestBody);
             // Send request to external API with JWT in Authorization header
             ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
             log.setResponse(apiResponse.getBody());
@@ -357,7 +358,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             response.setIsError(true);
         } finally {
             log.setResponseTime(LocalDateTime.now());
-            apiTransactionLogRepo.save(log);
+            //apiTransactionLogRepo.save(log);
+            logger.info(externalApiUrlGetfnol +" ==> "+ log);
         }
 
         return response;
@@ -394,7 +396,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             String requestBody = objectMapper.writeValueAsString(dto);
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
             log.setRequest(requestBody);
-
+            logger.info(requestBody);
             // Send request to external API with JWT in Authorization header
             ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
             log.setResponse(apiResponse.getBody());
@@ -417,7 +419,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             response.setIsError(true);
         } finally {
             log.setResponseTime(LocalDateTime.now());
-            apiTransactionLogRepo.save(log);
+            //apiTransactionLogRepo.save(log);
+            logger.info(externalApiUrlGetFnolStatus +" ==> "+ log);
         }
 
         return response;
@@ -451,7 +454,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        // Convert Map to JSON string
 	        String requestBody = objectMapper.writeValueAsString(formattedRequest);
 	        log.setRequest(requestBody);
-
+	        logger.info(requestBody);
 	        // Set the headers, including Content-Type as application/json
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.APPLICATION_JSON);  // Fix the Content-Type to application/json
@@ -486,7 +489,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        response.setResponse(e.getMessage());
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
-	        apiTransactionLogRepo.save(log);
+	        ////apiTransactionLogRepo.save(log);
+	        logger.info(externalApiUrlAuthenticate +" ==> "+ log);
 	    }
 
 	    return response;
@@ -691,7 +695,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        // Convert Map to JSON string
 	        String requestBody = objectMapper.writeValueAsString(formattedRequest);
 	        log.setRequest(requestBody);
-	        
+	        logger.info(requestBody);
 	        // Set the headers, including Content-Type as application/json
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.APPLICATION_JSON);  // Fix the Content-Type to application/json
@@ -736,7 +740,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        log.setErrorMessage(e.getMessage());
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
-	        apiTransactionLogRepo.save(log);
+	        //apiTransactionLogRepo.save(log);
+	        logger.info(externalApiUrlAuthenticate +" ==> "+ log);
 	    }
 
 	    return null; // Return null if authentication fails
@@ -930,7 +935,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             String requestBody = objectMapper.writeValueAsString(dto);
             HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
             log.setRequest(requestBody);
-            
+            logger.info(requestBody);
             // Configure SSL Trust Managers (if necessary)
             TrustManager[] trustAllCerts = new TrustManager[] {
                 new X509TrustManager() {
@@ -983,7 +988,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage()))); // General error
         } finally {
             log.setResponseTime(LocalDateTime.now());
-            apiTransactionLogRepo.save(log);
+            //apiTransactionLogRepo.save(log);
+            logger.info(externalApiUrlClaimListing +" ==> "+ log);
         }
 
         return response;
@@ -1118,7 +1124,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        String requestBody = objectMapper.writeValueAsString(dto);
 	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 	        log.setRequest(requestBody);
-	        
+	        logger.info(requestBody);
 	     // Configure SSL Trust Managers (if necessary)
             TrustManager[] trustAllCerts = new TrustManager[] {
                 new X509TrustManager() {
@@ -1173,7 +1179,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
 	        if(StringUtils.isNotBlank(log.getRequest())){
-	        	apiTransactionLogRepo.save(log);
+	        	//apiTransactionLogRepo.save(log);
+	        	logger.info(externalApiUrlSaveSpareparts +" ==> "+ log);
 	        }
 	    }
 
@@ -1205,23 +1212,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			request.setRemarks(partsSaveDetails.getRemarks());
 			request.setClaimNo(partsSaveDetails.getClaimNo());
 			
-			request.setReplacementCost(partsSaveDetails.getReplacementCost().toString());
-			request.setReplacementCostDeductible(partsSaveDetails.getReplacementCostDeductible().toString());
-			request.setSparePartDepreciation(partsSaveDetails.getSparePartDepreciation().toString());
-			request.setDiscountonSpareParts(partsSaveDetails.getDiscountOnSpareParts().toString());
-			request.setTotalAmountReplacement(partsSaveDetails.getTotalAmountReplacement().toString());
-			request.setRepairLabour(partsSaveDetails.getRepairLabour().toString());
-			request.setRepairLabourDeductible(partsSaveDetails.getRepairLabourDeductible().toString());
-			request.setRepairLabourDiscountAmount(partsSaveDetails.getRepairLabourDiscountAmount().toString());
-			request.setTotalAmountRepairLabour(partsSaveDetails.getTotalAmountRepairLabour().toString());
-			request.setNetAmount(partsSaveDetails.getNetAmount().toString());
-			request.setUnkownAccidentDeduction(partsSaveDetails.getUnknownAccidentDeduction().toString());
-			request.setAmounttobeRecovered(partsSaveDetails.getAmountToBeRecovered().toString());
-			request.setTotalafterDeductions(partsSaveDetails.getTotalAfterDeductions().toString());
-			request.setVatRatePer(partsSaveDetails.getVatRatePercentage().toString());
-			request.setVatRate(partsSaveDetails.getVatRate().toString());
-			request.setVatAmount(partsSaveDetails.getVatAmount().toString());
-			request.setTotalWithVAT(partsSaveDetails.getTotalWithVat().toString());
+			
 
 			// Map DamageSectionDetails list to vehicleDamageDetails
 			List<VehicleDamageDetailRequest> vehicleDamageDetails = damageDetails.stream().map(detail -> {
@@ -1247,6 +1238,26 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			metaData.setRequestGeneratedDateTime(isoDateFormat.format(new Date()));
 			//metaData.setConsumerTrackingID(UUID.randomUUID().toString()); // example, replace as necessary
 			request.setRequestMetaData(metaData);
+			
+			request.setReplacementCost(partsSaveDetails.getReplacementCost() != null ? partsSaveDetails.getReplacementCost().toString() : "0");
+			request.setReplacementCostDeductible(partsSaveDetails.getReplacementCostDeductible() != null ? partsSaveDetails.getReplacementCostDeductible().toString() : "0");
+			request.setSparePartDepreciation(partsSaveDetails.getSparePartDepreciation() != null ? partsSaveDetails.getSparePartDepreciation().toString() : "0");
+			request.setDiscountonSpareParts(partsSaveDetails.getDiscountOnSpareParts() != null ? partsSaveDetails.getDiscountOnSpareParts().toString() : "0");
+			request.setTotalAmountReplacement(partsSaveDetails.getTotalAmountReplacement() != null ? partsSaveDetails.getTotalAmountReplacement().toString() : "0");
+			request.setRepairLabour(partsSaveDetails.getRepairLabour() != null ? partsSaveDetails.getRepairLabour().toString() : "0");
+			request.setRepairLabourDeductible(partsSaveDetails.getRepairLabourDeductible() != null ? partsSaveDetails.getRepairLabourDeductible().toString() : "0");
+			request.setRepairLabourDiscountAmount(partsSaveDetails.getRepairLabourDiscountAmount() != null ? partsSaveDetails.getRepairLabourDiscountAmount().toString() : "0");
+			request.setTotalAmountRepairLabour(partsSaveDetails.getTotalAmountRepairLabour() != null ? partsSaveDetails.getTotalAmountRepairLabour().toString() : "0");
+			request.setNetAmount(partsSaveDetails.getNetAmount() != null ? partsSaveDetails.getNetAmount().toString() : "0");
+			request.setUnkownAccidentDeduction(partsSaveDetails.getUnknownAccidentDeduction() != null ? partsSaveDetails.getUnknownAccidentDeduction().toString() : "0");
+			request.setAmounttobeRecovered(partsSaveDetails.getAmountToBeRecovered() != null ? partsSaveDetails.getAmountToBeRecovered().toString() : "0");
+			request.setTotalafterDeductions(partsSaveDetails.getTotalAfterDeductions() != null ? partsSaveDetails.getTotalAfterDeductions().toString() : "0");
+			request.setVatRatePer(partsSaveDetails.getVatRatePercentage() != null ? partsSaveDetails.getVatRatePercentage().toString() : "0");
+			request.setVatRate(partsSaveDetails.getVatRate() != null ? partsSaveDetails.getVatRate().toString() : "0");
+			request.setVatAmount(partsSaveDetails.getVatAmount() != null ? partsSaveDetails.getVatAmount().toString() : "0");
+			request.setTotalWithVAT(partsSaveDetails.getTotalWithVat() != null ? partsSaveDetails.getTotalWithVat().toString() : "0");
+
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1527,7 +1538,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
-	        apiTransactionLogRepo.save(log);
+	        //apiTransactionLogRepo.save(log);
+	        logger.info(externalApiUrlGarageList +" ==> "+ log);
 	    }
 
 	    return response;
@@ -1683,7 +1695,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
-	        apiTransactionLogRepo.save(log);
+	        //apiTransactionLogRepo.save(log);
+	        logger.info(checkClaimStatusApi +" ==> "+ log);
 	    }
 
 	    return response;
@@ -1849,7 +1862,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
-	        apiTransactionLogRepo.save(log);
+	        //apiTransactionLogRepo.save(log);
+	        logger.info(listClaimantCoverages +" ==> "+ log);
 	    }
 
 	    return response;

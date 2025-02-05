@@ -28,7 +28,7 @@ public class VcInuredVehicleApiReponse {
 		 
 		 
 		 @JsonProperty("year")
-		 private int year ;
+		 private String year ;
 		 
 		 
 		 @JsonProperty("chassisNo")
