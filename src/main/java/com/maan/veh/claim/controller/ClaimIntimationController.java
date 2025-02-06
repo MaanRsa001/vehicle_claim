@@ -74,9 +74,21 @@ public class ClaimIntimationController {
             return ResponseEntity.ok(res);
     }
     
+    @PostMapping("/garage/saveSpareParts")
+    public ResponseEntity<CommonResponse> saveGarageSpareParts(@RequestBody SaveSparePartsDTO requestPayload) {
+        	CommonResponse res = externalApiService.saveSpareParts(requestPayload);
+            return ResponseEntity.ok(res);
+    }
+    
     @PostMapping("/getSpareParts")
     public ResponseEntity<CommonResponse> getSavedSpareParts(@RequestBody SaveSparePartsDTO requestPayload) {
         	CommonResponse res = externalApiService.getSavedSpareParts(requestPayload);
+            return ResponseEntity.ok(res);
+    }
+    
+    @PostMapping("/garage/getSpareParts")
+    public ResponseEntity<CommonResponse> getSavedGarageSpareParts(@RequestBody SaveSparePartsDTO requestPayload) {
+        	CommonResponse res = externalApiService.getSavedGarageSpareParts(requestPayload);
             return ResponseEntity.ok(res);
     }
     

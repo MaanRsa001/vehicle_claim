@@ -88,6 +88,22 @@ public class DropDownServiceImpl implements DropDownService {
     public List<DropDownRes> getWorkOrderType() {
         return getDropdownValues("WORK_ORDER_TYPE");
     }
+    
+    @Transactional
+    @Override
+    public String getItemCodeByItemValue(String value,String type) {
+    	try {
+			List<ListItemValue> list = listRepo.findByItemValueAndItemTypeOrderByAmendIdDesc(value,type);
+			if(list != null && list.size()>0) {
+				return list.get(0).getItemCode();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+    	return null;
+    }
 
     @Override
     public List<DropDownRes> getSettlementType() {
@@ -187,6 +203,20 @@ public class DropDownServiceImpl implements DropDownService {
             return null;
         }
         return resList;
+	}
+	
+	@Override
+	public String getbodyPartCodeByValue(String value) {
+		String code;
+        try {
+            List<VehicleBodypartsMaster> getList = bodyPartRepo.findByStatusAndPartDescriptionOrderByPartIdAsc("Y",value);
+            code = getList.get(0).getCoreAppCode();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.info("Exception is ---> " + e.getMessage());
+            return null;
+        }
+        return code;
 	}
 	
 

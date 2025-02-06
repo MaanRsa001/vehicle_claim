@@ -98,6 +98,9 @@ private static final long serialVersionUID = 1L;
 
     @Column(name="AMENDID")
     private BigDecimal amendid ;
+    
+    @Column(name="core_app_code")
+    private String  coreAppCode ;
 
 
     //--- ENTITY LINKS ( RELATIONSHIP )

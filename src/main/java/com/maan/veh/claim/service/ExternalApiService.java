@@ -34,5 +34,7 @@ public interface ExternalApiService {
 	CommonResponse checkClaimStatus(CheckClaimStatusRequest requestPayload);
 
 	CommonResponse listClaimantCoverages(ClaimentCoverageRequest requestPayload);
+	
+	CommonResponse getSavedGarageSpareParts(SaveSparePartsDTO requestPayload);
 
 }

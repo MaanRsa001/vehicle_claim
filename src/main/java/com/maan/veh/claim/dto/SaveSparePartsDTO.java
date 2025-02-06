@@ -15,4 +15,7 @@ public class SaveSparePartsDTO {
 	
 	@JsonProperty("QuotationNo")
     private String quotationNo;
+	
+	@JsonProperty("GarageLoginId")
+    private String garageLoginId;
 }

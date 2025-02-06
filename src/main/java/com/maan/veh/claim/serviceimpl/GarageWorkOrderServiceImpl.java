@@ -17,11 +17,13 @@ import org.springframework.stereotype.Service;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
+import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.SparePartsSaveDetails;
 import com.maan.veh.claim.entity.VcSparePartsDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
+import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
 import com.maan.veh.claim.repository.VcSparePartsDetailsRepository;
 import com.maan.veh.claim.request.GarageWorkOrderRequest;
@@ -54,6 +56,9 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
     
     @Autowired
     private SparePartsSaveDetailsRepository SparePartsSaveDetailsRepo;
+    
+    @Autowired
+	private LoginMasterRepository loginRepo;
 
     @Override
     public CommonResponse getGarageWorkOrders(GarageWorkOrderRequest req) {
@@ -248,6 +253,10 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 ////                response.setIsError(true);
 ////                return response;
 			}
+            //saving data in spare parts details table for direct garage save
+            if("GPC".equalsIgnoreCase(req.getQuoteStatus())) {
+            	directGarageSave(optionalInsuredVeh.get(),workOrder);
+            }
             
             // Step 15: Prepare response
             Map<String, String> resMap = new HashMap<>();
@@ -272,7 +281,90 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 
 	
 	
-    @Override
+    private void directGarageSave(InsuredVehicleInfo insuredVehicleInfo, GarageWorkOrder workOrder) {
+    	try {
+        	SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNo(workOrder.getClaimNo());
+        	if(spareSave == null) {
+        		spareSave = new SparePartsSaveDetails();
+        	}
+        	LoginMaster loginMaster = loginRepo.findByLoginId(insuredVehicleInfo.getGarageId());
+			if(workOrder != null) {
+				spareSave.setClaimNo(workOrder.getClaimNo());
+				spareSave.setWorkOrderNo(workOrder.getWorkOrderNo());
+				spareSave.setWorkOrderType("G");
+				spareSave.setWorkOrderDate(workOrder.getWorkOrderDate());
+				spareSave.setAccountSettlementType("I");
+				spareSave.setAccountSettlementName(insuredVehicleInfo.getInsuredName());
+				spareSave.setGarageQuotationNo(workOrder.getQuotationNo());
+				spareSave.setGarageCode(loginMaster.getCoreAppCode());
+				spareSave.setDeliveredTo(workOrder.getGarageName());
+				spareSave.setQuotationNo(workOrder.getQuotationNo());
+				spareSave.setDeliveryDate(workOrder.getDeliveryDate());
+				spareSave.setJointOrder("N");
+				spareSave.setSubrogation("N");
+				spareSave.setTotalLoss(workOrder.getTotalLoss());
+				spareSave.setTotalLossType(workOrder.getLossType());
+				spareSave.setRemarks(workOrder.getRemarks());
+				spareSave.setSparePartsDealer(loginMaster.getCoreAppCode());		         
+				 
+				List<DamageSectionDetails> damageList = damageRepository.findByClaimNoAndQuotationNo(workOrder.getClaimNo(), workOrder.getQuotationNo());
+
+				BigDecimal replacementCost = BigDecimal.ZERO;
+				BigDecimal repairLabour = BigDecimal.ZERO;
+				BigDecimal netAmount = BigDecimal.ZERO;
+
+				if (damageList != null) {  // Ensure list is not null
+				    for (DamageSectionDetails damage : damageList) {
+				        if (damage == null) continue;  // Skip null elements in the list
+				        BigDecimal replaceCost = damage.getReplaceCost() != null ? damage.getReplaceCost() : BigDecimal.ZERO;
+				        if ("REPAIR".equals(damage.getRepairReplace())) {
+				        	
+				            repairLabour = repairLabour.add(replaceCost);
+				            netAmount = netAmount.add(replaceCost);
+				            replacementCost = replacementCost.add(replaceCost);
+				        } else if("REPLACE".equals(damage.getRepairReplace())){
+				        	BigDecimal garagePrice = damage.getGaragePrice() != null ? damage.getGaragePrice() : BigDecimal.ZERO;
+				        	BigDecimal noOfParts = damage.getNoOfParts() != null ? BigDecimal.valueOf(damage.getNoOfParts()) : BigDecimal.ZERO;
+				        	BigDecimal labourCost = damage.getLabourCost() != null ? damage.getLabourCost() : BigDecimal.ZERO;
+
+				        	BigDecimal totamtReplace = garagePrice.multiply(noOfParts).add(labourCost);
+
+				            netAmount = netAmount.add(totamtReplace);
+				            replacementCost = replacementCost.add(replaceCost);
+				        }
+				        
+				        
+				    }
+				}
+
+				 spareSave.setReplacementCost(replacementCost);
+	        	 spareSave.setReplacementCostDeductible(BigDecimal.ZERO);
+	        	 spareSave.setSparePartDepreciation(BigDecimal.ZERO);
+	        	 spareSave.setDiscountOnSpareParts(BigDecimal.ZERO);
+	        	 spareSave.setTotalAmountReplacement(replacementCost);
+	        	 spareSave.setRepairLabour(repairLabour);
+	        	 spareSave.setRepairLabourDeductible(BigDecimal.ZERO);
+	        	 spareSave.setRepairLabourDiscountAmount(BigDecimal.ZERO);
+	        	 spareSave.setTotalAmountRepairLabour(repairLabour);
+	        	 spareSave.setNetAmount(netAmount);
+	        	 spareSave.setUnknownAccidentDeduction(BigDecimal.ZERO);
+	        	 spareSave.setAmountToBeRecovered(BigDecimal.ZERO);
+	        	 spareSave.setTotalAfterDeductions(netAmount);
+	        	 spareSave.setVatRatePercentage(BigDecimal.ZERO);
+	        	 spareSave.setVatRate(BigDecimal.ZERO);
+	        	 spareSave.setVatAmount(BigDecimal.ZERO);
+	        	 spareSave.setTotalWithVat(netAmount);   
+
+			          
+			     SparePartsSaveDetailsRepo.save(spareSave);	
+			
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+	}
+
+	@Override
     public CommonResponse getGarageWorkOrdersByClaimNo(GarageWorkOrderRequest request) {
         CommonResponse response = new CommonResponse(); 
         try {

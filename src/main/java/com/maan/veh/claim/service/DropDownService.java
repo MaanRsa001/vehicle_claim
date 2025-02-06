@@ -47,4 +47,8 @@ public interface DropDownService {
 	List<DropDownRes> getCity(String companyIds);
 
 	List<DropDownRes> getUserType();
+	
+	String getItemCodeByItemValue(String itemValue,String itemType);
+
+	String getbodyPartCodeByValue(String value);
 }

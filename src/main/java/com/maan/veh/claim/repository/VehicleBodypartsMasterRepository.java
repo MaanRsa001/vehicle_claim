@@ -33,6 +33,8 @@ public interface VehicleBodypartsMasterRepository  extends JpaRepository<Vehicle
 
 	List<VehicleBodypartsMaster> findByStatusOrderByPartIdAsc(String string);
 
+	List<VehicleBodypartsMaster> findByStatusAndPartDescriptionOrderByPartIdAsc(String string, String value);
+
 	
 
 }

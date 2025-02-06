@@ -44,6 +44,10 @@ public class SaveSparePartsRequest {
 
 	@JsonProperty("deliveredTo")
 	private String deliveredTo;
+	
+	@JsonProperty("deliveredId")
+	private String deliveredId;
+
 
 	@JsonProperty("subrogation")
 	private boolean subrogation;
