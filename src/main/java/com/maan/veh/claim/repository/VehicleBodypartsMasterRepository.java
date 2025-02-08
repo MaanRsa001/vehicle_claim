@@ -12,6 +12,7 @@
 
 package com.maan.veh.claim.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,7 +32,7 @@ import com.maan.veh.claim.entity.VehicleBodypartsMasterId;
  
 public interface VehicleBodypartsMasterRepository  extends JpaRepository<VehicleBodypartsMaster,VehicleBodypartsMasterId > , JpaSpecificationExecutor<VehicleBodypartsMaster> {
 
-	List<VehicleBodypartsMaster> findByStatusOrderByPartIdAsc(String string);
+	List<VehicleBodypartsMaster> findByStatusAndCompanyIdOrderByPartIdAsc(String string,BigDecimal comapanyId);
 
 	List<VehicleBodypartsMaster> findByStatusAndPartDescriptionOrderByPartIdAsc(String string, String value);
 

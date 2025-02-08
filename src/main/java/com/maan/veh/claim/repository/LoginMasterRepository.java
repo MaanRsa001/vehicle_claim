@@ -18,7 +18,7 @@ public interface LoginMasterRepository extends JpaRepository<LoginMaster, LoginM
 
 	LoginMaster findByLoginIdIgnoreCaseAndPassword(String loginId, String password);
 
-	List<LoginMaster> findByUserType(String string);
+	List<LoginMaster> findByUserTypeAndCompanyId(String string,String companyId);
 
 	List<LoginMaster> findByCompanyId(String companyId);
 

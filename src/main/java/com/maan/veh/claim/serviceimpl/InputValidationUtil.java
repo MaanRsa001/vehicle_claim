@@ -458,7 +458,7 @@ public class InputValidationUtil {
 				list.add(new ErrorList("102", "DamageDirection", "Damage direction cannot be blank in line number : "+line));
 			}
 			if (StringUtils.isBlank(req.getDamagePart())) {
-				list.add(new ErrorList("103", "DamagePart", "Damage part cannot be blank in line number : "+line));
+				//list.add(new ErrorList("103", "DamagePart", "Damage part cannot be blank in line number : "+line));
 			}
 			if (StringUtils.isBlank(req.getRepairReplace())) {
 				list.add(new ErrorList("104", "RepairReplace", "Repair/Replace field cannot be blank in line number : "+line));
@@ -472,7 +472,7 @@ public class InputValidationUtil {
 			}
 			
 			if (StringUtils.isBlank(req.getNoOfUnits())) {
-				list.add(new ErrorList("105", "NoOfUnits", "Number of Units cannot be blank in line number : "+line));
+				//list.add(new ErrorList("105", "NoOfUnits", "Number of Units cannot be blank in line number : "+line));
 			}
 			
 			if (StringUtils.isBlank(req.getReplacementCharge())) {

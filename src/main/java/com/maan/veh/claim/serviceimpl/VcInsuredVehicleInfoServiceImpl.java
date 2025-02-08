@@ -145,6 +145,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 					//entering default surveyor and garage
 					insuredVehicleInfo.setSurveyorId("surveyor_test1");
 					insuredVehicleInfo.setDealerId("dealer_test1");
+					insuredVehicleInfo.setLpoId(insured.getLpoId());
 					InsuredInfo.add(insuredVehicleInfo);
 					}
 				    repository.saveAll(InsuredInfo);
@@ -197,6 +198,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 				// entering default surveyor and garage
 //				insuredVehicleInfo.setSurveyorId("surveyor_test1");
 //				insuredVehicleInfo.setDealerId("dealer_test1");
+				insuredVehicleInfo.setLpoId(insured.getLpoId());
 				InsuredInfo.add(insuredVehicleInfo);
 			}
 			    coreRepository.saveAll(InsuredInfo);

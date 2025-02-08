@@ -24,11 +24,11 @@ public class DropDownController {
 	@Autowired
 	private DropDownService dropDownService;
 
-	@GetMapping("/getdamagedirection")
-	public ResponseEntity<CommonRes> getDamageDirection() {
+	@GetMapping("/getdamagedirection/{companyId}")
+	public ResponseEntity<CommonRes> getDamageDirection(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getDamageDirection();
+		List<DropDownRes> res = dropDownService.getDamageDirection(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -42,11 +42,11 @@ public class DropDownController {
 
 	}
 
-	@GetMapping("/getdamagedropdown")
-	public ResponseEntity<CommonRes> getDamageDropdown() {
+	@GetMapping("/getdamagedropdown/{companyId}")
+	public ResponseEntity<CommonRes> getDamageDropdown(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getDamageDropdown();
+		List<DropDownRes> res = dropDownService.getDamageDropdown(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -59,11 +59,11 @@ public class DropDownController {
 		}
 	}
 
-	@GetMapping("/getworkordertype")
-	public ResponseEntity<CommonRes> getWorkOrderType() {
+	@GetMapping("/getworkordertype/{companyId}")
+	public ResponseEntity<CommonRes> getWorkOrderType(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getWorkOrderType();
+		List<DropDownRes> res = dropDownService.getWorkOrderType(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -76,11 +76,11 @@ public class DropDownController {
 		}
 	}
 
-	@GetMapping("/getsettlementtype")
-	public ResponseEntity<CommonRes> getSettlementType() {
+	@GetMapping("/getsettlementtype/{companyId}")
+	public ResponseEntity<CommonRes> getSettlementType(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getSettlementType();
+		List<DropDownRes> res = dropDownService.getSettlementType(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -93,46 +93,11 @@ public class DropDownController {
 		}
 	}
 
-	@GetMapping("/getlosstype")
-	public ResponseEntity<CommonRes> getLossType() {
+	@GetMapping("/getlosstype/{companyId}")
+	public ResponseEntity<CommonRes> getLossType(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getLossType();
-		data.setCommonResponse(res);
-		data.setIsError(false);
-		data.setErrorMessage(null);
-		data.setMessage("Success");
-
-		if (res != null) {
-			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	@GetMapping("/getdamagetype")
-	public ResponseEntity<CommonRes> getDamageType() {
-		CommonRes data = new CommonRes();
-
-		List<DropDownRes> res = dropDownService.getDamageType();
-		data.setCommonResponse(res);
-		data.setIsError(false);
-		data.setErrorMessage(null);
-		data.setMessage("Success");
-
-		if (res != null) {
-			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	@GetMapping(value = "/claimlosstype")
-	public ResponseEntity<CommonRes> getLosstype() {
-
-		CommonRes data = new CommonRes();
-
-		List<DropDownRes> res = dropDownService.getLosstype();
+		List<DropDownRes> res = dropDownService.getLossType(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -145,11 +110,46 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/vehiclebodyparts")
-	public ResponseEntity<CommonRes> getbodyPart() {
+	@GetMapping("/lossLocation/{companyId}")
+	public ResponseEntity<CommonRes> getLossLocation(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getbodyPart();
+		List<DropDownRes> res = dropDownService.getLossLocation(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@GetMapping("/getdamagetype/{companyId}")
+	public ResponseEntity<CommonRes> getDamageType(@PathVariable String companyId) {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getDamageType(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@GetMapping(value = "/claimlosstype/{companyId}")
+	public ResponseEntity<CommonRes> getLosstype(@PathVariable String companyId) {
+
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getLosstype(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -162,11 +162,11 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/vatpercentage")
-	public ResponseEntity<CommonRes> getVatPercentage() {
+	@GetMapping(value = "/vehiclebodyparts/{companyId}")
+	public ResponseEntity<CommonRes> getbodyPart(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getVatPercentage();
+		List<DropDownRes> res = dropDownService.getbodyPart(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -179,11 +179,11 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/accountforsettlement")
-	public ResponseEntity<CommonRes> getAccountForSettlement() {
+	@GetMapping(value = "/vatpercentage/{companyId}")
+	public ResponseEntity<CommonRes> getVatPercentage(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getAccountForSettlement();
+		List<DropDownRes> res = dropDownService.getVatPercentage(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -196,11 +196,11 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/repairreplace")
-	public ResponseEntity<CommonRes> getRepairReplace() {
+	@GetMapping(value = "/accountforsettlement/{companyId}")
+	public ResponseEntity<CommonRes> getAccountForSettlement(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getRepairReplace();
+		List<DropDownRes> res = dropDownService.getAccountForSettlement(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -213,11 +213,11 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/garageLoginId")
-	public ResponseEntity<CommonRes> getGarageLoginId() {
+	@GetMapping(value = "/repairreplace/{companyId}")
+	public ResponseEntity<CommonRes> getRepairReplace(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getGarageLoginId();
+		List<DropDownRes> res = dropDownService.getRepairReplace(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -230,11 +230,11 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/dealerLoginId")
-	public ResponseEntity<CommonRes> getDealerLoginId() {
+	@GetMapping(value = "/garageLoginId/{companyId}")
+	public ResponseEntity<CommonRes> getGarageLoginId(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getDealerLoginId();
+		List<DropDownRes> res = dropDownService.getGarageLoginId(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -247,11 +247,11 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/status")
-	public ResponseEntity<CommonRes> getStatus() {
+	@GetMapping(value = "/dealerLoginId/{companyId}")
+	public ResponseEntity<CommonRes> getDealerLoginId(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getStatus();
+		List<DropDownRes> res = dropDownService.getDealerLoginId(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -264,11 +264,11 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/repairtype")
-	public ResponseEntity<CommonRes> getRepairType() {
+	@GetMapping(value = "/status/{companyId}")
+	public ResponseEntity<CommonRes> getStatus(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getRepairType();
+		List<DropDownRes> res = dropDownService.getStatus(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -281,11 +281,28 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/documentType")
-	public ResponseEntity<CommonRes> getDocumentType() {
+	@GetMapping(value = "/repairtype/{companyId}")
+	public ResponseEntity<CommonRes> getRepairType(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.geDocumentType();
+		List<DropDownRes> res = dropDownService.getRepairType(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@GetMapping(value = "/documentType/{companyId}")
+	public ResponseEntity<CommonRes> getDocumentType(@PathVariable String companyId) {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.geDocumentType(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -315,11 +332,11 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/company")
-	public ResponseEntity<CommonRes> getCompany() {
+	@GetMapping(value = "/company/{companyId}")
+	public ResponseEntity<CommonRes> getCompany(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getCompany();
+		List<DropDownRes> res = dropDownService.getCompany(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -389,11 +406,11 @@ public class DropDownController {
         throw new ResponseStatusException(randomStatus, "Random HTTP error occurred: " + randomStatus.getReasonPhrase());
     }
     
-    @GetMapping(value = "/usertype")
-	public ResponseEntity<CommonRes> getUserType() {
+    @GetMapping(value = "/usertype/{companyId}")
+	public ResponseEntity<CommonRes> getUserType(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getUserType();
+		List<DropDownRes> res = dropDownService.getUserType(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);

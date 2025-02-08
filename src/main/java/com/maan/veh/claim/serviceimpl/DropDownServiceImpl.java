@@ -1,5 +1,6 @@
 package com.maan.veh.claim.serviceimpl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -75,18 +76,18 @@ public class DropDownServiceImpl implements DropDownService {
     private CityMasterRepository cityMasterRepo;
 
     @Override
-    public List<DropDownRes> getDamageDirection() {
-        return getDropdownValues("DAMAGE_DIRECTION");
+    public List<DropDownRes> getDamageDirection(String companyId) {
+        return getDropdownValues("DAMAGE_DIRECTION",companyId);
     }
 
     @Override
-    public List<DropDownRes> getDamageDropdown() {
-        return getDropdownValues("DAMAGE_DROPDOWN");
+    public List<DropDownRes> getDamageDropdown(String companyId) {
+        return getDropdownValues("DAMAGE_DROPDOWN",companyId);
     }
 
     @Override
-    public List<DropDownRes> getWorkOrderType() {
-        return getDropdownValues("WORK_ORDER_TYPE");
+    public List<DropDownRes> getWorkOrderType(String companyId) {
+        return getDropdownValues("WORK_ORDER_TYPE",companyId);
     }
     
     @Transactional
@@ -106,53 +107,57 @@ public class DropDownServiceImpl implements DropDownService {
     }
 
     @Override
-    public List<DropDownRes> getSettlementType() {
-        return getDropdownValues("SETTLEMENT_TYPE");
+    public List<DropDownRes> getSettlementType(String companyId) {
+        return getDropdownValues("SETTLEMENT_TYPE",companyId);
     }
 
     @Override
-    public List<DropDownRes> getLossType() {
-        return getDropdownValues("LOSS_TYPE");
+    public List<DropDownRes> getLossType(String companyId) {
+        return getDropdownValues("LOSS_TYPE",companyId);
     }
 
     @Override
-    public List<DropDownRes> getDamageType() {
-        return getDropdownValues("DAMAGE_TYPE");
+    public List<DropDownRes> getDamageType(String companyId) {
+        return getDropdownValues("DAMAGE_TYPE",companyId);
     }
     
 	@Override
-	public List<DropDownRes> getVatPercentage() {
-		 return getDropdownValues("VAT_PERCENTAGE");
+	public List<DropDownRes> getVatPercentage(String companyId) {
+		 return getDropdownValues("VAT_PERCENTAGE",companyId);
 	}
 	
 	@Override
-	public List<DropDownRes> getAccountForSettlement() {
-		 return getDropdownValues("ACCOUNT_SETTLEMENT");
+	public List<DropDownRes> getAccountForSettlement(String companyId) {
+		 return getDropdownValues("ACCOUNT_SETTLEMENT",companyId);
 	}
 	
 	@Override
-	public List<DropDownRes> getRepairReplace() {
-		 return getDropdownValues("REPAIR_REPLACE");
+	public List<DropDownRes> getRepairReplace(String companyId) {
+		 return getDropdownValues("REPAIR_REPLACE",companyId);
 	}
 	
 	@Override
-	public List<DropDownRes> getStatus() {
-		 return getDropdownValues("STATUS");
+	public List<DropDownRes> getStatus(String companyId) {
+		 return getDropdownValues("STATUS",companyId);
 	}
 	@Override
-	public List<DropDownRes> getRepairType() {
-		return getDropdownValues("REPAIR_TYPE");
+	public List<DropDownRes> getRepairType(String companyId) {
+		return getDropdownValues("REPAIR_TYPE",companyId);
 	}
 	@Override
-	public List<DropDownRes> getUserType() {
-		return getDropdownValues("USER_TYPE");
+	public List<DropDownRes> getUserType(String companyId) {
+		return getDropdownValues("USER_TYPE",companyId);
+	}
+	@Override
+	public List<DropDownRes> getLossLocation(String companyId) {
+		return getDropdownValues("LOSS_LOCATION",companyId);
 	}
 	
-    private List<DropDownRes> getDropdownValues(String itemType) {
+    private List<DropDownRes> getDropdownValues(String itemType,String companyId) {
         List<DropDownRes> resList = new ArrayList<>();
         try {
             //List<ListItemValue> getList = listRepo.findByItemTypeAndStatusOrderByItemCodeAsc(itemType, "Y");
-        	List<ListItemValue> getList = getFromListItemValue(itemType);
+        	List<ListItemValue> getList = getFromListItemValue(itemType,companyId);
             for (ListItemValue data : getList) {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getItemCode());
@@ -168,10 +173,10 @@ public class DropDownServiceImpl implements DropDownService {
     }
 
 	@Override
-	public List<DropDownRes> getLosstype() {
+	public List<DropDownRes> getLosstype(String companyId) {
 		List<DropDownRes> resList = new ArrayList<>();
         try {
-            List<ClaimLossTypeMaster> getList = lossRepo.findByStatusOrderByCategoryIdAsc("Y");
+            List<ClaimLossTypeMaster> getList = lossRepo.findByStatusAndCompanyIdOrderByCategoryIdAsc("Y",Integer.valueOf(companyId));
             for (ClaimLossTypeMaster data : getList) {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getCategoryId().toString());
@@ -187,10 +192,10 @@ public class DropDownServiceImpl implements DropDownService {
 	}
 
 	@Override
-	public List<DropDownRes> getbodyPart() {
+	public List<DropDownRes> getbodyPart(String companyId) {
 		List<DropDownRes> resList = new ArrayList<>();
         try {
-            List<VehicleBodypartsMaster> getList = bodyPartRepo.findByStatusOrderByPartIdAsc("Y");
+            List<VehicleBodypartsMaster> getList = bodyPartRepo.findByStatusAndCompanyIdOrderByPartIdAsc("Y",new BigDecimal(companyId));
             for (VehicleBodypartsMaster data : getList) {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getPartId().toString());
@@ -207,10 +212,12 @@ public class DropDownServiceImpl implements DropDownService {
 	
 	@Override
 	public String getbodyPartCodeByValue(String value) {
-		String code;
+		String code = "";
         try {
             List<VehicleBodypartsMaster> getList = bodyPartRepo.findByStatusAndPartDescriptionOrderByPartIdAsc("Y",value);
-            code = getList.get(0).getCoreAppCode();
+            if(getList != null && getList.size() > 0) {
+            	code = getList.get(0).getCoreAppCode();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             log.info("Exception is ---> " + e.getMessage());
@@ -221,7 +228,7 @@ public class DropDownServiceImpl implements DropDownService {
 	
 
 	@Transactional
-	public List<ListItemValue> getFromListItemValue(String itemType) {
+	public List<ListItemValue> getFromListItemValue(String itemType,String companyId) {
 		try {
 			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 			CriteriaQuery<ListItemValue> cq = cb.createQuery(ListItemValue.class);
@@ -239,9 +246,10 @@ public class DropDownServiceImpl implements DropDownService {
 			Predicate itemTypePredicate = cb.equal(root.get("itemType"), itemType);
 			Predicate statusPredicate = cb.equal(root.get("status"), "Y");
 			Predicate amendIdPredicate = cb.equal(root.get("amendId"), subquery);
+			Predicate companyIdPredicate = cb.equal(root.get("companyId"), companyId);
 
 			// Combine the predicates
-			cq.where(cb.and(itemTypePredicate, statusPredicate, amendIdPredicate));
+			cq.where(cb.and(itemTypePredicate, statusPredicate, amendIdPredicate,companyIdPredicate));
 
 			// Order by itemCode ascending
 			cq.orderBy(cb.asc(root.get("itemCode")));
@@ -258,10 +266,10 @@ public class DropDownServiceImpl implements DropDownService {
 	}
 
 	@Override
-	public List<DropDownRes> getGarageLoginId() {
+	public List<DropDownRes> getGarageLoginId(String companyId) {
 		List<DropDownRes> resList = new ArrayList<>();
         try {
-            List<LoginMaster> getList = loginRepo.findByUserType("Garage");
+            List<LoginMaster> getList = loginRepo.findByUserTypeAndCompanyId("Garage",companyId);
             for (LoginMaster data : getList) {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getOaCode() != null ? data.getOaCode().toString() : "");
@@ -277,10 +285,10 @@ public class DropDownServiceImpl implements DropDownService {
 	}
 
 	@Override
-	public List<DropDownRes> getDealerLoginId() {
+	public List<DropDownRes> getDealerLoginId(String companyId) {
 		List<DropDownRes> resList = new ArrayList<>();
         try {
-            List<LoginMaster> getList = loginRepo.findByUserType("Dealer");
+            List<LoginMaster> getList = loginRepo.findByUserTypeAndCompanyId("Dealer",companyId);
             for (LoginMaster data : getList) {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getLoginId());
@@ -296,10 +304,10 @@ public class DropDownServiceImpl implements DropDownService {
 	}
 
 	@Override
-	public List<DropDownRes> geDocumentType() {
+	public List<DropDownRes> geDocumentType(String companyId) {
 		List<DropDownRes> resList = new ArrayList<>();
         try {
-            List<VcDocumentMaster> getList = documentMasterRepo.findByStatusOrderByDocumentIdAsc("Y");
+            List<VcDocumentMaster> getList = documentMasterRepo.findByStatusAndCompanyIdOrderByDocumentIdAsc("Y",Integer.valueOf(companyId));
             for (VcDocumentMaster data : getList) {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getDocumentId().toString());
@@ -334,7 +342,7 @@ public class DropDownServiceImpl implements DropDownService {
 	}
 
 	@Override
-	public List<DropDownRes> getCompany() {
+	public List<DropDownRes> getCompany(String companyId) {
 		List<DropDownRes> resList = new ArrayList<>();
         try {
             List<InsuranceCompanyMaster> getList = companyMasterRepo.findByStatus("Y");

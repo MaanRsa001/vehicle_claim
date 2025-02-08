@@ -118,5 +118,8 @@ public class DamageSectionDetails {
 
     @Column(name = "garage_dealer", length = 50)
     private String garageDealer;
+    
+    @Column(name = "as_per_invoice")
+    private String asPerInvoice;
 
 }

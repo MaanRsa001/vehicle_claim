@@ -45,5 +45,15 @@ public class GarageSectionDetailsSaveReq {
     
     @JsonProperty("Status")
     private String Status;
+    
+    @JsonProperty("AsPerInvoice")
+    private String asPerInvoice;
+    
+    @JsonProperty("DeductablePer")
+    private String deductablePer;
+    
+    @JsonProperty("DeductableAmount")
+    private String deductableAmount;
+
 
 }

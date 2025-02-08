@@ -6,49 +6,51 @@ import com.maan.veh.claim.response.DropDownRes;
 
 public interface DropDownService {
 
-	List<DropDownRes> getDamageDirection();
+	List<DropDownRes> getDamageDirection(String companyId);
 
-	List<DropDownRes> getDamageDropdown();
+	List<DropDownRes> getDamageDropdown(String companyId);
 
-	List<DropDownRes> getWorkOrderType();
+	List<DropDownRes> getWorkOrderType(String companyId);
 
-	List<DropDownRes> getSettlementType();
+	List<DropDownRes> getSettlementType(String companyId);
 
-	List<DropDownRes> getLossType();
+	List<DropDownRes> getLossType(String companyId);
 
-	List<DropDownRes> getDamageType();
+	List<DropDownRes> getDamageType(String companyId);
 
-	List<DropDownRes> getLosstype();
+	List<DropDownRes> getLosstype(String companyId);
 
-	List<DropDownRes> getbodyPart();
+	List<DropDownRes> getbodyPart(String companyId);
 
-	List<DropDownRes> getVatPercentage();
+	List<DropDownRes> getVatPercentage(String companyId);
 
-	List<DropDownRes> getAccountForSettlement();
+	List<DropDownRes> getAccountForSettlement(String companyId);
 
-	List<DropDownRes> getRepairReplace();
+	List<DropDownRes> getRepairReplace(String companyId);
 
-	List<DropDownRes> getGarageLoginId();
+	List<DropDownRes> getGarageLoginId(String companyId);
 
-	List<DropDownRes> getStatus();
+	List<DropDownRes> getStatus(String companyId);
 
-	List<DropDownRes> getDealerLoginId();
+	List<DropDownRes> getDealerLoginId(String companyId);
 
-	List<DropDownRes> getRepairType();
+	List<DropDownRes> getRepairType(String companyId);
 
-	List<DropDownRes> geDocumentType();
+	List<DropDownRes> geDocumentType(String companyId);
 
 	List<DropDownRes> getBranch(String companyId);
 
-	List<DropDownRes> getCompany();
+	List<DropDownRes> getCompany(String companyId);
 
 	List<DropDownRes> getCountry(String companyIds);
 	
 	List<DropDownRes> getCity(String companyIds);
 
-	List<DropDownRes> getUserType();
+	List<DropDownRes> getUserType(String companyId);
 	
 	String getItemCodeByItemValue(String itemValue,String itemType);
 
 	String getbodyPartCodeByValue(String value);
+
+	List<DropDownRes> getLossLocation(String companyId);
 }

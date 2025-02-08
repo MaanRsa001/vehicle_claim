@@ -30,6 +30,6 @@ import com.maan.veh.claim.entity.ClaimLossTypeMasterId;
 public interface ClaimLosstypeMasterRepository extends JpaRepository<ClaimLossTypeMaster, ClaimLossTypeMasterId>,
 		JpaSpecificationExecutor<ClaimLossTypeMaster> {
 
-	List<ClaimLossTypeMaster> findByStatusOrderByCategoryIdAsc(String string);
+	List<ClaimLossTypeMaster> findByStatusAndCompanyIdOrderByCategoryIdAsc(String string,Integer companyId);
 
 }

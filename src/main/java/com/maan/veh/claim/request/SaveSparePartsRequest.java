@@ -35,6 +35,9 @@ public class SaveSparePartsRequest {
 
 	@JsonProperty("garageCode")
 	private String garageCode;
+	
+	@JsonProperty("lpoId")
+	private String lpoId;
 
 	@JsonProperty("garageQuotationNo")
 	private String garageQuotationNo;

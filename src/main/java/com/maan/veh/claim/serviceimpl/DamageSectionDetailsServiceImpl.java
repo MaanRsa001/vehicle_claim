@@ -331,9 +331,12 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 						details.setLabourCost(new BigDecimal(req.getReplacementCharge()));
 						details.setGaragePrice(new BigDecimal(req.getUnitPrice()));
 					}else {
-						details.setNoOfParts(Integer.valueOf(req.getNoOfUnits()));
+						details.setNoOfParts(StringUtils.isNotBlank(req.getNoOfUnits())?Integer.valueOf(req.getNoOfUnits()):0);
 						details.setReplaceCost(new BigDecimal(req.getReplacementCharge()));
 						details.setGaragePrice(new BigDecimal(req.getReplacementCharge()));
+						details.setLabourCostDeductPercentage(StringUtils.isNotBlank(req.getDeductablePer())? new BigDecimal(req.getDeductablePer()):BigDecimal.ZERO);
+						details.setLabourCostDeduct(StringUtils.isNotBlank(req.getDeductableAmount())? new BigDecimal(req.getDeductableAmount()):BigDecimal.ZERO);
+						details.setAsPerInvoice(StringUtils.isNotBlank(req.getAsPerInvoice())? req.getAsPerInvoice():"false");
 						details.setGarageDealer("Garage");
 					}
 					
@@ -466,7 +469,9 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            }
 	            res.setGarageLoginId(data.getGarageLoginId());
 	            res.setStatus(data.getStatus());
-	            
+	            res.setDeductablePer(data.getLabourCostDeductPercentage() != null ? data.getLabourCostDeductPercentage().toString():"0");
+	            res.setDeductableAmount(data.getLabourCostDeduct() != null ? data.getLabourCostDeduct().toString():"0");
+	            res.setAsPerInvoice(data.getAsPerInvoice());
 	            groupedDamageDetails.add(res); 
 	        }
 	        

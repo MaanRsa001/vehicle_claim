@@ -1253,6 +1253,12 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			    	damageRequest.setUnitPrice(BigDecimal.ZERO);
 			    	 BigDecimal replacementCharge = detail.getReplaceCost() != null ? detail.getReplaceCost() : BigDecimal.ZERO;
 			    	total = replacementCharge;
+			    	damageRequest.setAsPerInvoice(detail.getAsPerInvoice() != null ? detail.getAsPerInvoice() : "false");
+			    	damageRequest.setDeductiblePer(detail.getLabourCostDeductPercentage() != null ? detail.getReplaceCost() : BigDecimal.ZERO);
+			    	damageRequest.setDeductibleAmount(detail.getLabourCostDeduct() != null ? detail.getLabourCostDeduct() : BigDecimal.ZERO);
+			    	damageRequest.setBeforeDeduction(replacementCharge);
+			    	BigDecimal dedudct = detail.getLabourCostDeduct() != null ? detail.getLabourCostDeduct() : BigDecimal.ZERO;
+			    	total = replacementCharge.subtract(dedudct);
 			    	damageRequest.setTotal(total);
 			    }
 			    

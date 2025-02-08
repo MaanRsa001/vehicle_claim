@@ -10,6 +10,6 @@ import com.maan.veh.claim.entity.VcDocumentMasterId;
 @Repository
 public interface VcDocumentMasterRepository extends JpaRepository<VcDocumentMaster, VcDocumentMasterId> {
 
-	List<VcDocumentMaster> findByStatusOrderByDocumentIdAsc(String string);
+	List<VcDocumentMaster> findByStatusAndCompanyIdOrderByDocumentIdAsc(String string,Integer companyId);
     // You can add custom query methods here if needed
 }

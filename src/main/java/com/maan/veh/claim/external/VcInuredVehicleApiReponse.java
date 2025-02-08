@@ -91,4 +91,6 @@ public class VcInuredVehicleApiReponse {
 		@JsonProperty("claimStatus")
 		private String claimstatus ;
 		
+		@JsonProperty("lpoId")
+		 private String lpoId ;
 }

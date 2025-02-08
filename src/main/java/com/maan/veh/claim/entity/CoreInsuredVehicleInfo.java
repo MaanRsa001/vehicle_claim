@@ -76,4 +76,7 @@ public class CoreInsuredVehicleInfo {
     
     @Column(name = "quotation_no")
     private String quotationNo;
+    
+    @Column(name = "lpo_id")
+    private String lpoId;
 }
