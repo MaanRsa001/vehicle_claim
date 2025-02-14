@@ -15,5 +15,7 @@ public interface MenuMasterRepository extends JpaRepository<MenuMaster, MenuMast
 
 	List<MenuMaster> findByCompanyIdAndUsertypeIgnoreCase(String companyId, String userType);
 
+	List<MenuMaster> findByCompanyIdAndStatusAndUsertypeIgnoreCase(String companyId, String string, String userType);
+
 
 }

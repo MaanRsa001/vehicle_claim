@@ -67,4 +67,28 @@ public class VehicleInfoResponse {
     
     @JsonProperty("lossLocation")
     private String lossLocation;
+    
+    @JsonProperty("WorkOrderType")
+    private String workOrderType;
+
+    @JsonProperty("EngineNo")
+    private String engineNo;
+
+    @JsonProperty("ClaimantType")
+    private String claimantType;
+
+    @JsonProperty("LossLocationDesc")
+    private String lossLocationDesc;
+
+    @JsonProperty("ClaimStatus")
+    private String claimStatus;
+
+    @JsonProperty("FileNo")
+    private String fileNo;
+
+    @JsonProperty("GarageAddress")
+    private String garageAddress;
+
+    @JsonProperty("PlateType")
+    private String plateType;
 }

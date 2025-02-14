@@ -20,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.maan.veh.claim.auth.passwordEnc;
 import com.maan.veh.claim.dto.GarageLoginMasterDTO;
+import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.LoginUserInfo;
@@ -27,6 +28,7 @@ import com.maan.veh.claim.entity.SessionMaster;
 import com.maan.veh.claim.entity.VcFlowMaster;
 import com.maan.veh.claim.error.Error;
 import com.maan.veh.claim.file.DocumentUploadDetailsReqRes;
+import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.LoginUserInfoRepository;
@@ -79,6 +81,9 @@ public class InputValidationUtil {
 	
 	@Autowired
 	private LoginUserInfoRepository loginUserRepo ;
+	
+	@Autowired
+	private DamageSectionDetailsRepository damageSectionDetailsRepo;
 	
 	private static SimpleDateFormat DD_MM_YYYY = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -518,6 +523,13 @@ public class InputValidationUtil {
 	            } catch (NumberFormatException e) {
 	                list.add(new ErrorList("120", "TotalPrice", "Invalid format for TotalPrice in line number : " + line));
 	            }
+	        }
+	        if(StringUtils.isBlank(req.getDamagePart())) {
+	        	List<DamageSectionDetails> damageDir = damageSectionDetailsRepo.findByClaimNoAndQuotationNoAndDamageDirection(req.getClaimNo(), req.getQuotationNo(), req.getDamageDirection());
+	        	if(damageDir != null && damageDir.size()>0  && Integer.valueOf(req.getDamageSno())!=damageDir.get(0).getDamageSno()  ) {
+	        		System.out.println(req.getDamageSno() + "==>"+damageDir.get(0).getDamageSno());
+	        		list.add(new ErrorList("121", "DamageDirection", "same damage direction cannot be repeated"));
+	        	}
 	        }
 	        
 			line++;

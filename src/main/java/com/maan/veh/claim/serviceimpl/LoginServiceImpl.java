@@ -180,7 +180,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	        LoginUserInfo userInfo = LoginUserInfoRepo.findByLoginId(login.getLoginId());
 	        
 	        // --- MenuList Block Start ---
-	        List<MenuMaster> menu_master = menuMasterRepo.findByCompanyIdAndUsertypeIgnoreCase(login.getCompanyId(), login.getUserType());
+	        List<MenuMaster> menu_master = menuMasterRepo.findByCompanyIdAndStatusAndUsertypeIgnoreCase(login.getCompanyId(),"Y", login.getUserType());
 
 	        // Step 1: Map each MenuMaster to a Map<String, Object>
 	        Map<String, Map<String, Object>> menuMap = new HashMap<>();
@@ -195,6 +195,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            menu.put("IsDesti", "Y".equalsIgnoreCase(m.getIsclick()));
 	            menu.put("children", null); // To be populated later
 	            menu.put("titleLocal", StringUtils.isBlank(m.getMenuNameLocal()) ? null : m.getMenuNameLocal());
+	            menu.put("flowId",m.getRsacode());
 	            menuMap.put(m.getMenuId().toString(), menu);
 	        }
 

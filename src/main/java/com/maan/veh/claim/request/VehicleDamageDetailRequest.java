@@ -19,26 +19,26 @@ public class VehicleDamageDetailRequest {
     private String replaceOrRepair;
 
     @JsonProperty("noUnits")
-    private int noUnits;
+    private String noUnits;
 
     @JsonProperty("unitPrice")
-    private BigDecimal unitPrice;
+    private String unitPrice;
     
     @JsonProperty("deductibleAmount")
-    private BigDecimal deductibleAmount;
+    private String deductibleAmount;
     
     @JsonProperty("deductiblePer")
-    private BigDecimal deductiblePer;
+    private String deductiblePer;
     
     @JsonProperty("asPerInvoice")
     private String asPerInvoice;
 
     @JsonProperty("replacementCharge")
-    private BigDecimal replacementCharge;
+    private String replacementCharge;
     
     @JsonProperty("beforeDeduction")
-    private BigDecimal beforeDeduction;
+    private String beforeDeduction;
 
     @JsonProperty("total")
-    private BigDecimal total;
+    private String total;
 }

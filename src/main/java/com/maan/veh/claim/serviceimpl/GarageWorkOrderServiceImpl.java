@@ -176,12 +176,15 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
                 workOrder.setQuotationNo(req.getQuotationNo());
             } else {
             	
-                long count = garageWorkOrderRepository.count();
-                count = count + 1;
-                //String quoteNo = "QUO-" + req.getClaimNo() + "-" + count ;
-                String extractedValue = req.getClaimNo().substring(req.getClaimNo().lastIndexOf("/") + 1);
-                String quoteNo = "QUO-" + extractedValue +"-" +count ;
-                workOrder.setQuotationNo(quoteNo);
+            	long count = garageWorkOrderRepository.count();
+            	count = count + 1;
+
+            	String extractedValue = req.getClaimNo().substring(req.getClaimNo().lastIndexOf("/") + 1);
+            	extractedValue = extractedValue.substring(Math.max(extractedValue.length() - 3, 0)); // Get last 3 digits
+
+            	String quoteNo = "QUO-" + extractedValue + "-" + count;
+            	workOrder.setQuotationNo(quoteNo);
+
             }
 
             // Step 8: Set delivery and other dates
@@ -226,6 +229,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
                 InsuredVehicleInfo insuredVeh = optionalInsuredVeh.get();
                 insuredVeh.setStatus(req.getQuoteStatus());
                 insuredVeh.setQuotationNo(workOrder.getQuotationNo());
+                insuredVeh.setEntryDate(new Date());
                 insuredVehRepo.save(insuredVeh);
 			} else if(StringUtils.isNotBlank(req.getFnolSgsId())) {
 				// Instantiate a new InsuredVehicleInfo object
@@ -283,11 +287,12 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 	
     private void directGarageSave(InsuredVehicleInfo insuredVehicleInfo, GarageWorkOrder workOrder) {
     	try {
-        	SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNo(workOrder.getClaimNo());
+    		LoginMaster loginMaster = loginRepo.findByLoginId(insuredVehicleInfo.getGarageId());
+        	//SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNo(workOrder.getClaimNo());
+    		SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNoAndGarageCode(workOrder.getClaimNo(),loginMaster.getCoreAppCode());
         	if(spareSave == null) {
         		spareSave = new SparePartsSaveDetails();
         	}
-        	LoginMaster loginMaster = loginRepo.findByLoginId(insuredVehicleInfo.getGarageId());
 			if(workOrder != null) {
 				spareSave.setClaimNo(workOrder.getClaimNo());
 				spareSave.setWorkOrderNo(workOrder.getWorkOrderNo());
@@ -306,11 +311,13 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 				spareSave.setTotalLossType(workOrder.getLossType());
 				spareSave.setRemarks(workOrder.getRemarks());
 				spareSave.setSparePartsDealer(loginMaster.getCoreAppCode());		         
-				 
+				spareSave.setLpoId(insuredVehicleInfo.getLpoId());
+				
 				List<DamageSectionDetails> damageList = damageRepository.findByClaimNoAndQuotationNo(workOrder.getClaimNo(), workOrder.getQuotationNo());
 
 				BigDecimal replacementCost = BigDecimal.ZERO;
 				BigDecimal repairLabour = BigDecimal.ZERO;
+				BigDecimal deductAmount = BigDecimal.ZERO;
 				BigDecimal netAmount = BigDecimal.ZERO;
 
 				if (damageList != null) {  // Ensure list is not null
@@ -318,7 +325,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 				        if (damage == null) continue;  // Skip null elements in the list
 				        BigDecimal replaceCost = damage.getReplaceCost() != null ? damage.getReplaceCost() : BigDecimal.ZERO;
 				        if ("REPAIR".equals(damage.getRepairReplace())) {
-				        	
+				        	deductAmount = deductAmount.add(damage.getLabourCostDeduct()!=null?damage.getLabourCostDeduct():BigDecimal.ZERO);
 				            repairLabour = repairLabour.add(replaceCost);
 				            netAmount = netAmount.add(replaceCost);
 				            replacementCost = replacementCost.add(replaceCost);
@@ -347,14 +354,14 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 	        	 spareSave.setRepairLabourDiscountAmount(BigDecimal.ZERO);
 	        	 spareSave.setTotalAmountRepairLabour(repairLabour);
 	        	 spareSave.setNetAmount(netAmount);
-	        	 spareSave.setUnknownAccidentDeduction(BigDecimal.ZERO);
+	        	 spareSave.setUnknownAccidentDeduction(deductAmount);
 	        	 spareSave.setAmountToBeRecovered(BigDecimal.ZERO);
-	        	 spareSave.setTotalAfterDeductions(netAmount);
+	        	 spareSave.setTotalAfterDeductions(netAmount.subtract(deductAmount));
 	        	 spareSave.setVatRatePercentage(BigDecimal.ZERO);
 	        	 spareSave.setVatRate(BigDecimal.ZERO);
 	        	 spareSave.setVatAmount(BigDecimal.ZERO);
-	        	 spareSave.setTotalWithVat(netAmount);   
-
+	        	 spareSave.setTotalWithVat(netAmount.subtract(deductAmount));   
+	        	 spareSave.setEntryDate(new Date());
 			          
 			     SparePartsSaveDetailsRepo.save(spareSave);	
 			
@@ -705,7 +712,8 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 	public CommonResponse surveyorQuoteSave(GarageWorkOrderRequest req) {
 		CommonResponse comResponse = new CommonResponse(); 
         try {
-        	SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNo(req.getClaimNo());
+        	LoginMaster loginMaster = loginRepo.findByLoginId(req.getGarageLoginId());
+        	SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNoAndGarageCode(req.getClaimNo(),loginMaster.getCoreAppCode());
         	if(spareSave == null) {
         		spareSave = new SparePartsSaveDetails();
         	}

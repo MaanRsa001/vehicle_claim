@@ -18,4 +18,6 @@ public class SparePartsSaveDetailsId implements Serializable {
 
 	private String claimNo;
 	
+	private String garageCode;
+	
 }

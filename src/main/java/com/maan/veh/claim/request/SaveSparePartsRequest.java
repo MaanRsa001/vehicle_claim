@@ -53,10 +53,10 @@ public class SaveSparePartsRequest {
 
 
 	@JsonProperty("subrogation")
-	private boolean subrogation;
+	private String subrogation;
 
 	@JsonProperty("jointOrder")
-	private boolean jointOrder;
+	private String jointOrder;
 
 	@JsonProperty("totalLoss")
 	private String totalLoss;

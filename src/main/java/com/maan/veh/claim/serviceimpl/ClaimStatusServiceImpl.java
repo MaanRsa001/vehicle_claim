@@ -1,6 +1,8 @@
 package com.maan.veh.claim.serviceimpl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,19 +70,22 @@ public class ClaimStatusServiceImpl implements ClaimStatusService{
 	}
 
 	@Override
-	public List<DropDownRes> getGridStatus(String usertype) {
+	public List<DropDownRes> getGridStatus(String usertype,String companyId,String flowId) {
 		List<DropDownRes> resList = new ArrayList<>();
 	    try {
 	        // Retrieve list of VcFlowMaster with usertype "Garage"
-	        List<VcFlowMaster> flowList = flowMasterRepo.findByUsertype(usertype);
+	    	List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndCompanyIdAndFlowId(usertype, companyId,flowId);
 
-	        // Convert the list to a map with subStatus as the key and subStatusDescription as the value
-	        Map<String, String> statusMap = flowList.stream()
-	                .collect(Collectors.toMap(
-	                        VcFlowMaster::getSubStatus,
-	                        VcFlowMaster::getGridDescription,
-	                        (existing, replacement) -> existing // Handle duplicate keys by keeping the existing value
-	                ));
+	    	// Convert the list to a map with subStatus as the key and subStatusDescription as the value, sorted by orderId
+	    	Map<String, String> statusMap = flowList.stream()
+	    	        .sorted(Comparator.comparing(VcFlowMaster::getOrderId)) // Sorting by orderId
+	    	        .collect(Collectors.toMap(
+	    	                VcFlowMaster::getSubStatus,
+	    	                VcFlowMaster::getGridDescription,
+	    	                (existing, replacement) -> existing, // Handle duplicate keys by keeping the existing value
+	    	                LinkedHashMap::new // Maintain insertion order (sorted order)
+	    	        ));
+
 
 	        // Iterate over the map entries to create DropDownRes objects
 	        for (Map.Entry<String, String> entry : statusMap.entrySet()) {

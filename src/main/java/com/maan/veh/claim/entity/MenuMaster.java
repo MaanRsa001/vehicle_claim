@@ -82,6 +82,7 @@ private static final long serialVersionUID = 1L;
     @Column(name="STATUS", nullable=false, length=1)
     private String     status ;
 
+    //mapped with flow master flow id
     @Column(name="RSACODE", length=25)
     private String     rsacode ;
 

@@ -299,7 +299,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             log.setErrorMessage(e.getMessage());
             response.setMessage("Failed to save data");
             response.setIsError(true);
-            response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage()))); // General error
+            response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage()))); // API Error error
         } finally {
             log.setResponseTime(LocalDateTime.now());
             //apiTransactionLogRepo.save(log);
@@ -992,7 +992,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             log.setErrorMessage(e.getMessage());
             response.setMessage("Failed to save data");
             response.setIsError(true);
-            response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage()))); // General error
+            response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage()))); // API Error error
         } finally {
             log.setResponseTime(LocalDateTime.now());
             //apiTransactionLogRepo.save(log);
@@ -1098,8 +1098,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    try {
 	        // Retrieve data from repositories
 	    	GarageWorkOrder workOrder = garageWorkOrderRepo.findByClaimNoAndQuotationNo(request.getClaimNo(),request.getQuotationNo());
+	    	LoginMaster loginMaster = loginRepo.findByLoginId(workOrder.getGarageId());
 	        List<DamageSectionDetails> damageDetails = damageSectionDetailsRepo.findByClaimNoAndQuotationNo(request.getClaimNo(),request.getQuotationNo());
-	        SparePartsSaveDetails partsSaveDetails = SparePartsSaveDetailsRepo.findByClaimNo(request.getClaimNo());
+	        SparePartsSaveDetails partsSaveDetails = SparePartsSaveDetailsRepo.findByClaimNoAndGarageCode(request.getClaimNo(),loginMaster.getCoreAppCode());
 	        if (workOrder == null || damageDetails.isEmpty()) {
 	            response.setMessage("No data found for the provided claim or work order number");
 	            response.setIsError(true);
@@ -1181,7 +1182,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        log.setErrorMessage(e.getMessage());
 	        response.setMessage("Failed to save data");
 	        response.setIsError(true);
-	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
 	        //partsSaveDetails.setSavedStatus("N");
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
@@ -1214,13 +1215,15 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			request.setDeliveryDate(isoDateFormat.format(partsSaveDetails.getDeliveryDate()));
 			request.setDeliveredTo(partsSaveDetails.getDeliveredTo());
 			request.setDeliveredId(partsSaveDetails.getGarageCode());
-			request.setSubrogation("Y".equalsIgnoreCase(partsSaveDetails.getSubrogation()));
-			request.setJointOrder("Y".equalsIgnoreCase(partsSaveDetails.getJointOrder()));
-			request.setTotalLoss(partsSaveDetails.getTotalLoss().toString());
-			request.setTotalLossType(partsSaveDetails.getTotalLossType());
+			request.setSubrogation(partsSaveDetails.getSubrogation());
+			request.setJointOrder(partsSaveDetails.getJointOrder());
+			//request.setTotalLoss(partsSaveDetails.getTotalLoss().toString());
+			request.setTotalLoss("N");
+			//request.setTotalLossType(partsSaveDetails.getTotalLossType());
+			request.setTotalLossType("");
 			request.setRemarks(partsSaveDetails.getRemarks());
 			request.setClaimNo(partsSaveDetails.getClaimNo());
-			
+			request.setLpoId(partsSaveDetails.getLpoId());
 			
 
 			List<VehicleDamageDetailRequest> vehicleDamageDetails = new ArrayList<>();
@@ -1232,10 +1235,12 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			    BigDecimal total = BigDecimal.ZERO;
 			    damageRequest.setDamageDirection(directionCode);
 			    damageRequest.setPartyType(partCode);
-			    damageRequest.setReplaceOrRepair(detail.getRepairReplace());
-			    damageRequest.setNoUnits(detail.getNoOfParts());
+			    //damageRequest.setReplaceOrRepair(detail.getRepairReplace());
+			    damageRequest.setReplaceOrRepair("");
+			    //damageRequest.setNoUnits(detail.getNoOfParts());
+			    damageRequest.setNoUnits("0");
 			    if("REPLACE".equalsIgnoreCase(detail.getRepairReplace())) {
-			    	damageRequest.setUnitPrice(detail.getGaragePrice());
+			    	damageRequest.setUnitPrice(detail.getGaragePrice()!=null?detail.getGaragePrice().toString():"");
 			    	BigDecimal unitPrice = detail.getGaragePrice() != null ? detail.getGaragePrice() : BigDecimal.ZERO;
 				    int noOfParts = detail.getNoOfParts() > 0 ? detail.getNoOfParts() : 0;
 				    BigDecimal replacementCharge = detail.getReplaceCost() != null ? detail.getReplaceCost() : BigDecimal.ZERO;
@@ -1248,22 +1253,24 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 				        total = BigDecimal.ZERO;
 				    }
 
-				    damageRequest.setTotal(total);
+				    //damageRequest.setTotal(total);
+				    damageRequest.setTotal("");
 			    }else {
-			    	damageRequest.setUnitPrice(BigDecimal.ZERO);
+			    	damageRequest.setUnitPrice("");
 			    	 BigDecimal replacementCharge = detail.getReplaceCost() != null ? detail.getReplaceCost() : BigDecimal.ZERO;
 			    	total = replacementCharge;
-			    	damageRequest.setAsPerInvoice(detail.getAsPerInvoice() != null ? detail.getAsPerInvoice() : "false");
-			    	damageRequest.setDeductiblePer(detail.getLabourCostDeductPercentage() != null ? detail.getReplaceCost() : BigDecimal.ZERO);
-			    	damageRequest.setDeductibleAmount(detail.getLabourCostDeduct() != null ? detail.getLabourCostDeduct() : BigDecimal.ZERO);
-			    	damageRequest.setBeforeDeduction(replacementCharge);
+			    	damageRequest.setAsPerInvoice("true".equalsIgnoreCase(detail.getAsPerInvoice())?"Y" : "N");
+			    	damageRequest.setDeductiblePer(detail.getLabourCostDeductPercentage() != null ? detail.getLabourCostDeductPercentage().toString() : "0");
+			    	damageRequest.setDeductibleAmount(detail.getLabourCostDeduct() != null ? detail.getLabourCostDeduct().toString() : "0");
+			    	//damageRequest.setBeforeDeduction(replacementCharge!=null ? replacementCharge.toString():"0");
+			    	damageRequest.setBeforeDeduction("");
 			    	BigDecimal dedudct = detail.getLabourCostDeduct() != null ? detail.getLabourCostDeduct() : BigDecimal.ZERO;
 			    	total = replacementCharge.subtract(dedudct);
-			    	damageRequest.setTotal(total);
+			    	damageRequest.setTotal("");
 			    }
 			    
 			    
-			    damageRequest.setReplacementCharge(detail.getReplaceCost());
+			    damageRequest.setReplacementCharge(detail.getReplaceCost()!=null ?detail.getReplaceCost().toString():"0");
 			    
 
 			    vehicleDamageDetails.add(damageRequest);
@@ -1283,19 +1290,24 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			//metaData.setConsumerTrackingID(UUID.randomUUID().toString()); // example, replace as necessary
 			request.setRequestMetaData(metaData);
 			
-			request.setReplacementCost(partsSaveDetails.getReplacementCost() != null ? partsSaveDetails.getReplacementCost().toString() : "0");
+//			request.setReplacementCost(partsSaveDetails.getReplacementCost() != null ? partsSaveDetails.getReplacementCost().toString() : "0");
+			request.setReplacementCost("");
 			request.setReplacementCostDeductible(partsSaveDetails.getReplacementCostDeductible() != null ? partsSaveDetails.getReplacementCostDeductible().toString() : "0");
 			request.setSparePartDepreciation(partsSaveDetails.getSparePartDepreciation() != null ? partsSaveDetails.getSparePartDepreciation().toString() : "0");
 			request.setDiscountonSpareParts(partsSaveDetails.getDiscountOnSpareParts() != null ? partsSaveDetails.getDiscountOnSpareParts().toString() : "0");
-			request.setTotalAmountReplacement(partsSaveDetails.getTotalAmountReplacement() != null ? partsSaveDetails.getTotalAmountReplacement().toString() : "0");
-			request.setRepairLabour(partsSaveDetails.getRepairLabour() != null ? partsSaveDetails.getRepairLabour().toString() : "0");
+//			request.setTotalAmountReplacement(partsSaveDetails.getTotalAmountReplacement() != null ? partsSaveDetails.getTotalAmountReplacement().toString() : "0");
+			request.setTotalAmountReplacement("");
+//			request.setRepairLabour(partsSaveDetails.getRepairLabour() != null ? partsSaveDetails.getRepairLabour().toString() : "0");
+			request.setRepairLabour("");
 			request.setRepairLabourDeductible(partsSaveDetails.getRepairLabourDeductible() != null ? partsSaveDetails.getRepairLabourDeductible().toString() : "0");
 			request.setRepairLabourDiscountAmount(partsSaveDetails.getRepairLabourDiscountAmount() != null ? partsSaveDetails.getRepairLabourDiscountAmount().toString() : "0");
-			request.setTotalAmountRepairLabour(partsSaveDetails.getTotalAmountRepairLabour() != null ? partsSaveDetails.getTotalAmountRepairLabour().toString() : "0");
+			request.setTotalAmountRepairLabour("");
+			//request.setTotalAmountRepairLabour(partsSaveDetails.getTotalAmountRepairLabour() != null ? partsSaveDetails.getTotalAmountRepairLabour().toString() : "0");
 			request.setNetAmount(partsSaveDetails.getNetAmount() != null ? partsSaveDetails.getNetAmount().toString() : "0");
 			request.setUnkownAccidentDeduction(partsSaveDetails.getUnknownAccidentDeduction() != null ? partsSaveDetails.getUnknownAccidentDeduction().toString() : "0");
 			request.setAmounttobeRecovered(partsSaveDetails.getAmountToBeRecovered() != null ? partsSaveDetails.getAmountToBeRecovered().toString() : "0");
-			request.setTotalafterDeductions(partsSaveDetails.getTotalAfterDeductions() != null ? partsSaveDetails.getTotalAfterDeductions().toString() : "0");
+//			request.setTotalafterDeductions(partsSaveDetails.getTotalAfterDeductions() != null ? partsSaveDetails.getTotalAfterDeductions().toString() : "0");
+			request.setTotalafterDeductions("0");
 			request.setVatRatePer(partsSaveDetails.getVatRatePercentage() != null ? partsSaveDetails.getVatRatePercentage().toString() : "0");
 			request.setVatRate(partsSaveDetails.getVatRate() != null ? partsSaveDetails.getVatRate().toString() : "0");
 			request.setVatAmount(partsSaveDetails.getVatAmount() != null ? partsSaveDetails.getVatAmount().toString() : "0");
@@ -1327,8 +1339,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			request.setGarageQuotationNo(workOrder.getQuotationNo());
 			request.setDeliveryDate(isoDateFormat.format(workOrder.getDeliveryDate()));
 			request.setDeliveredTo(workOrder.getGarageName());
-			request.setSubrogation("Y".equalsIgnoreCase(workOrder.getSubrogationYn()));
-			request.setJointOrder("Y".equalsIgnoreCase(workOrder.getJointOrderYn()));
+			request.setSubrogation(workOrder.getSubrogationYn());
+			request.setJointOrder(workOrder.getJointOrderYn());
 			request.setTotalLoss(workOrder.getTotalLoss().toString());
 			request.setTotalLossType(workOrder.getLossType());
 			request.setRemarks(workOrder.getRemarks());
@@ -1356,11 +1368,11 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			    VehicleDamageDetailRequest damageRequest = new VehicleDamageDetailRequest();
 			    damageRequest.setDamageDirection(detail.getDamageDirection());
 			    damageRequest.setPartyType(detail.getDamagePart());
-			    damageRequest.setReplaceOrRepair(detail.getRepairReplace());
-			    damageRequest.setNoUnits(detail.getNoOfParts());
-			    damageRequest.setUnitPrice(detail.getGaragePrice());
-			    damageRequest.setReplacementCharge(detail.getReplaceCost());
-			    damageRequest.setTotal(detail.getTotPrice());
+//			    damageRequest.setReplaceOrRepair(detail.getRepairReplace());
+//			    damageRequest.setNoUnits(detail.getNoOfParts());
+//			    damageRequest.setUnitPrice(detail.getGaragePrice());
+//			    damageRequest.setReplacementCharge(detail.getReplaceCost());
+//			    damageRequest.setTotal(detail.getTotPrice());
 			    return damageRequest;
 			}).collect(Collectors.toList());
 			request.setVehicleDamageDetails(vehicleDamageDetails);
@@ -1512,7 +1524,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 		CommonResponse comResponse = new CommonResponse(); 
         try {
         	LoginMaster loginMaster = loginRepo.findByLoginId(requestPayload.getGarageLoginId());
-        	List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByGarageCode(loginMaster.getCoreAppCode());
+        	//List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByGarageCode(loginMaster.getCoreAppCode());
+        	List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByGarageCodeOrderByEntryDateDesc(loginMaster.getCoreAppCode());
 			
 			if(spareSavedList != null && spareSavedList.size()>0) {
 		    	List<GetAllQuoteResponse> res = new ArrayList<>();
@@ -1678,7 +1691,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        log.setErrorMessage(e.getMessage());
 	        response.setMessage("Failed to get data");
 	        response.setIsError(true);
-	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
 	        //apiTransactionLogRepo.save(log);
@@ -1835,7 +1848,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        log.setErrorMessage(e.getMessage());
 	        response.setMessage("Failed to get data");
 	        response.setIsError(true);
-	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
 	        //apiTransactionLogRepo.save(log);
@@ -2002,7 +2015,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        log.setErrorMessage(e.getMessage());
 	        response.setMessage("Failed to get data");
 	        response.setIsError(true);
-	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "General", e.getMessage())));
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
 	        //apiTransactionLogRepo.save(log);

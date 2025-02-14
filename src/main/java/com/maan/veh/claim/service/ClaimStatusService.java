@@ -12,6 +12,6 @@ public interface ClaimStatusService {
 
 	List<DropDownRes> getDealerStatus(String currentStatus);
 
-	List<DropDownRes> getGridStatus(String usertype);
+	List<DropDownRes> getGridStatus(String usertype,String companyId,String flowId);
 
 }

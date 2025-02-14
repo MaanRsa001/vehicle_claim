@@ -26,6 +26,10 @@ public class SparePartsSaveDetails {
 	@Column(name = "claim_no", length = 100)
     private String claimNo;
 	
+	@Id
+	@Column(name = "garage_code", length = 50)
+    private String garageCode;
+	
     @Column(name = "quotation_no", length = 100)
     private String quotationNo;
     
@@ -51,9 +55,6 @@ public class SparePartsSaveDetails {
     @Column(name = "spare_parts_dealer", length = 255)
     private String sparePartsDealer;
 
-    @Column(name = "garage_code", length = 50)
-    private String garageCode;
-
     @Column(name = "garage_quotation_no", length = 50)
     private String garageQuotationNo;
 
@@ -78,6 +79,9 @@ public class SparePartsSaveDetails {
 
     @Column(name = "remarks")
     private String remarks;
+    
+    @Column(name = "lpo_id")
+    private String lpoId;
 
     @Column(name = "replacement_cost", precision = 15, scale = 2)
     private BigDecimal replacementCost;
@@ -129,4 +133,7 @@ public class SparePartsSaveDetails {
 
     @Column(name = "total_with_vat", precision = 15, scale = 2)
     private BigDecimal totalWithVat;
+    
+    @Column(name = "entry_date")
+    private Date entryDate;
 }

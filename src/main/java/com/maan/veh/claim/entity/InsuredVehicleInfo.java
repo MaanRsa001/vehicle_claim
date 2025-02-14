@@ -79,4 +79,29 @@ public class InsuredVehicleInfo {
     
     @Column(name = "lpo_id")
     private String lpoId;
+
+    // Newly added columns
+    @Column(name = "work_order_type", length = 100)
+    private String workOrderType;
+
+    @Column(name = "engine_no", length = 100)
+    private String engineNo;
+
+    @Column(name = "claimant_type", length = 100)
+    private String claimantType;
+
+    @Column(name = "loss_location_desc", length = 2000)
+    private String lossLocationDesc;
+
+    @Column(name = "claim_status", length = 100)
+    private String claimStatus;
+
+    @Column(name = "file_no", length = 255)
+    private String fileNo;
+
+    @Column(name = "garage_address", length = 500)
+    private String garageAddress;
+
+    @Column(name = "plate_type", length = 100)
+    private String plateType;
 }

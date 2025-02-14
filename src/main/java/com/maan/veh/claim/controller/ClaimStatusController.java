@@ -75,11 +75,11 @@ public class ClaimStatusController {
 
 	}
 	
-	@GetMapping("/grid/status/{usertype}")
-	public ResponseEntity<CommonRes> getGridStatus(@PathVariable String usertype) {
+	@GetMapping("/grid/status/{usertype}/{companyId}")
+	public ResponseEntity<CommonRes> getGridStatus(@PathVariable String usertype,@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = service.getGridStatus(usertype);
+		List<DropDownRes> res = service.getGridStatus(usertype,companyId,"1");
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
