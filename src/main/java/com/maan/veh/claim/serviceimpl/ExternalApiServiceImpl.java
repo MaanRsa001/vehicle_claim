@@ -1167,13 +1167,14 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	            //response.setErrors(externalApiResponse.getErrors());
 	            response.setResponse(externalApiResponse);
 	            response.setIsError(true);
-	            partsSaveDetails.setSavedStatus("N");
+	            partsSaveDetails.setSavedStatus("GPC");
 	            SparePartsSaveDetailsRepo.save(partsSaveDetails);
 	        } else {
 	            response.setMessage("Data saved successfully");
 	            response.setIsError(false);
 	            response.setResponse(externalApiResponse);
-	            partsSaveDetails.setSavedStatus("Y");
+	            partsSaveDetails.setSavedStatus("ESB");
+	            partsSaveDetails.setClgwSgsId(externalApiResponse.getClgwSgsId());
 	            SparePartsSaveDetailsRepo.save(partsSaveDetails);
 	        }
 
@@ -1208,7 +1209,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			request.setWorkOrderNo(partsSaveDetails.getWorkOrderNo());
 			request.setWorkOrderDate(isoDateFormat.format(partsSaveDetails.getWorkOrderDate())); 
 			request.setAccForSettlementType(partsSaveDetails.getAccountSettlementType());
-			request.setAccForSettlement(partsSaveDetails.getAccountSettlementName());
+//			request.setAccForSettlement(partsSaveDetails.getAccountSettlementName());
+			request.setAccForSettlement("");
 			request.setSparePartsDealer(partsSaveDetails.getSparePartsDealer());
 			request.setGarageCode(partsSaveDetails.getGarageCode());
 			request.setGarageQuotationNo(partsSaveDetails.getQuotationNo());
@@ -1222,7 +1224,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			//request.setTotalLossType(partsSaveDetails.getTotalLossType());
 			request.setTotalLossType("");
 			request.setRemarks(partsSaveDetails.getRemarks());
-			request.setClaimNo(partsSaveDetails.getClaimNo());
+//			request.setClaimNo(partsSaveDetails.getClaimNo());
+			request.setClaimNo(partsSaveDetails.getFileNo());
 			request.setLpoId(partsSaveDetails.getLpoId());
 			
 

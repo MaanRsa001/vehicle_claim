@@ -19,10 +19,12 @@ import org.springframework.stereotype.Service;
 
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
+import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.entity.TotalAmountDetails;
 import com.maan.veh.claim.entity.VcSparePartsDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
+import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.TotalAmountDetailsRepository;
 import com.maan.veh.claim.repository.VcSparePartsDetailsRepository;
 import com.maan.veh.claim.request.DamageSectionDetailsRequest;
@@ -32,6 +34,7 @@ import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.VcSparePartsDetailsRequest;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DamageSectionDetailsResponse;
+import com.maan.veh.claim.response.DropDownRes;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
 
@@ -54,6 +57,15 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	
 	@Autowired
 	private VcSparePartsDetailsRepository sparePartsDetailsRepo;
+	
+	@Autowired
+	private DropDownServiceImpl dropDownServiceImpl;
+	
+	@Autowired
+	private GarageWorkOrderServiceImpl garageWorkOrderServiceImpl;
+	
+	@Autowired
+	private InsuredVehicleInfoRepository insuredVehicleInfoRepo;
 
 	@Override
 	public List<DamageSectionDetailsResponse> getDamageDetailsByClaimNo(DamageSectionDetailsRequest request) {
@@ -190,6 +202,8 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            response.setErrors(Collections.emptyList());
 	            response.setMessage("Success");
 	            response.setResponse(Collections.emptyList());
+	            //saving in spareparts details
+	            //garageWorkOrderServiceImpl.directGarageSave();
 	        } else {
 	            response.setErrors(errors);
 	            response.setMessage("Failed");
@@ -307,9 +321,13 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	        	
 	        	List<DamageSectionDetails> saveList = new ArrayList<DamageSectionDetails>();
 	        	int damageSno = 1;
-	        	
+	        	String claimNo = "";
+	        	String garageId = "";
+	        	String quotationNo = "";
 	            for (GarageSectionDetailsSaveReq req:reqList) {
-	            	
+	            	claimNo = req.getClaimNo();
+	            	garageId = req.getGarageLoginId();
+	            	quotationNo = req.getQuotationNo();
 	            	DamageSectionDetails details = repository.findByClaimNoAndQuotationNoAndDamageSno(req.getClaimNo(),req.getQuotationNo(),Optional.ofNullable(req.getDamageSno()).map(Integer::valueOf).orElse(damageSno));
 	            	if(details == null ) {
 	            		details = new DamageSectionDetails();
@@ -354,6 +372,14 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            response.setErrors(Collections.emptyList());
 	            response.setMessage("Success");
 	            response.setResponse(Collections.emptyList());
+	            try {
+					Optional<InsuredVehicleInfo> optional = insuredVehicleInfoRepo.findByClaimNoAndGarageId(claimNo, garageId);
+					GarageWorkOrder garageWorkOrder = garageWorkOrderRepo.findByClaimNoAndQuotationNo(claimNo, quotationNo);
+					garageWorkOrderServiceImpl.directGarageSave(optional.get(), garageWorkOrder);
+				} catch (Exception e) {
+					
+					System.out.println("Error in saving spare parts table "+e.getMessage());
+				}
 	        } else {
 	            response.setErrors(errors);
 	            response.setMessage("Failed");
@@ -786,6 +812,54 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	        response.setIsError(true);
 	    }
 	    
+	    return response;
+	}
+
+	@Override
+	public CommonResponse getDamageDetails(String companyId) {
+		CommonResponse response = new CommonResponse();
+	    try {
+	        
+	        List<GarageSectionDetailsSaveReq> groupedDamageDetails = new ArrayList<>();
+	        
+
+	        List<DropDownRes> damageDirection = dropDownServiceImpl.getDamageDirection(companyId);
+	        
+	        for (DropDownRes data : damageDirection) {
+	            GarageSectionDetailsSaveReq res = new GarageSectionDetailsSaveReq();
+	            
+	            // Populate the fields from the retrieved data
+	            res.setClaimNo("");
+	            res.setQuotationNo("");
+	            res.setDamageSno("");
+	            res.setDamageDirection(data.getCodeDesc());
+	            res.setDamageDirectionCode(data.getCode());
+	            res.setDamagePart("");
+	            res.setRepairReplace("");    
+	            res.setNoOfUnits("");
+	            res.setReplacementCharge("");
+	            res.setUnitPrice("");
+	            res.setGarageLoginId("");
+	            res.setStatus("");
+	            res.setDeductablePer("");
+	            res.setDeductableAmount("");
+	            res.setAsPerInvoice("");
+	            groupedDamageDetails.add(res); 
+	        }
+	        
+	        
+	        // Set the response
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Success");
+	        response.setResponse(groupedDamageDetails);  
+	        
+	    } catch (Exception e) {
+	        // Handle exceptions
+	    	String exceptionDetails = e.getClass().getSimpleName() + ": " + e.getMessage();
+	        response.setResponse(exceptionDetails);
+	        response.setMessage("Failed");
+	        response.setResponse(null);
+	    }
 	    return response;
 	}
 

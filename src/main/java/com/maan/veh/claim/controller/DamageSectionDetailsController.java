@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,8 +17,10 @@ import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
 import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.VcSparePartsDetailsRequest;
+import com.maan.veh.claim.response.CommonRes;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DamageSectionDetailsResponse;
+import com.maan.veh.claim.response.DropDownRes;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
 
 @RestController
@@ -50,6 +54,13 @@ public class DamageSectionDetailsController {
         CommonResponse response = service.viewGarageDamageSectionDetails(req);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    
+    @GetMapping("/getdamagedetails/{companyId}")
+	public ResponseEntity<CommonResponse> getDamageDetails(@PathVariable String companyId) {
+    	CommonResponse response = service.getDamageDetails(companyId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
+	}
     
     @PostMapping("/garagedelete")
     public ResponseEntity<CommonResponse> deleteGarageDamageSectionDetails(@RequestBody List<GarageSectionDetailsSaveReq> req) {

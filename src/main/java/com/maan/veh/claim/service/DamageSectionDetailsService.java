@@ -32,4 +32,6 @@ public interface DamageSectionDetailsService {
 	CommonResponse saveSpareParts(VcSparePartsDetailsRequest req);
 
 	CommonResponse viewsaveSpareParts(GarageSectionDetailsSaveReq req);
+
+	CommonResponse getDamageDetails(String companyId);
 }

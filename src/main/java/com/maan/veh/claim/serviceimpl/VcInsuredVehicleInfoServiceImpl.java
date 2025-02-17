@@ -137,7 +137,8 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	                InsuredVehicleInfo insuredVehicleInfo = new InsuredVehicleInfo();
 	                insuredVehicleInfo.setCompanyId(requestPayload.getCompanyid());
 	                insuredVehicleInfo.setPolicyNo(insured.getPolicyNo());
-	                insuredVehicleInfo.setClaimNo(insured.getClaimNo());
+	                //insuredVehicleInfo.setClaimNo(insured.getClaimNo());
+	                insuredVehicleInfo.setClaimNo(insured.getFileNo());
 	                insuredVehicleInfo.setGarageId(requestPayload.getGarageid());
 	                insuredVehicleInfo.setVehicleMake(insured.getMake());
 	                insuredVehicleInfo.setVehicleModel(insured.getModel());
@@ -157,7 +158,8 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	                insuredVehicleInfo.setClaimantType(insured.getClaimantType());
 	                insuredVehicleInfo.setLossLocationDesc(insured.getLossLocationDesc());
 	                insuredVehicleInfo.setClaimStatus(insured.getClaimStatus());
-	                insuredVehicleInfo.setFileNo(insured.getFileNo());
+	                //insuredVehicleInfo.setFileNo(insured.getFileNo());
+	                insuredVehicleInfo.setFileNo(insured.getClaimNo());
 	                insuredVehicleInfo.setGarageAddress(insured.getGarageAddress());
 	                insuredVehicleInfo.setPlateType(insured.getPlateType());
 	                

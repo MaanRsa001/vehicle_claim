@@ -136,4 +136,10 @@ public class SparePartsSaveDetails {
     
     @Column(name = "entry_date")
     private Date entryDate;
+    
+    @Column(name = "file_no")
+    private String fileNo;
+    
+    @Column(name = "clgw_sgs_id")
+    private String clgwSgsId;
 }

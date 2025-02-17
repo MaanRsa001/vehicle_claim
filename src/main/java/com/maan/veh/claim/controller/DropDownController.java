@@ -42,6 +42,7 @@ public class DropDownController {
 
 	}
 
+
 	@GetMapping("/getdamagedropdown/{companyId}")
 	public ResponseEntity<CommonRes> getDamageDropdown(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();

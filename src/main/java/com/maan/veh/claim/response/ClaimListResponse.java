@@ -16,6 +16,9 @@ public class ClaimListResponse {
 
     @JsonProperty("status")
     private String status;
+    
+    @JsonProperty("clgwSgsId")
+    private String clgwSgsId;
 
     @JsonProperty("data")
     private List<ClaimData> data;

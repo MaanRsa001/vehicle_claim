@@ -524,13 +524,13 @@ public class InputValidationUtil {
 	                list.add(new ErrorList("120", "TotalPrice", "Invalid format for TotalPrice in line number : " + line));
 	            }
 	        }
-	        if(StringUtils.isBlank(req.getDamagePart())) {
-	        	List<DamageSectionDetails> damageDir = damageSectionDetailsRepo.findByClaimNoAndQuotationNoAndDamageDirection(req.getClaimNo(), req.getQuotationNo(), req.getDamageDirection());
-	        	if(damageDir != null && damageDir.size()>0  && Integer.valueOf(req.getDamageSno())!=damageDir.get(0).getDamageSno()  ) {
-	        		System.out.println(req.getDamageSno() + "==>"+damageDir.get(0).getDamageSno());
-	        		list.add(new ErrorList("121", "DamageDirection", "same damage direction cannot be repeated"));
-	        	}
-	        }
+//	        if(StringUtils.isBlank(req.getDamagePart())) {
+//	        	List<DamageSectionDetails> damageDir = damageSectionDetailsRepo.findByClaimNoAndQuotationNoAndDamageDirection(req.getClaimNo(), req.getQuotationNo(), req.getDamageDirection());
+//	        	if(damageDir != null && damageDir.size()>0  && Integer.valueOf(req.getDamageSno())!=damageDir.get(0).getDamageSno()  ) {
+//	        		System.out.println(req.getDamageSno() + "==>"+damageDir.get(0).getDamageSno());
+//	        		list.add(new ErrorList("121", "DamageDirection", "same damage direction cannot be repeated"));
+//	        	}
+//	        }
 	        
 			line++;
 		}

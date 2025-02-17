@@ -285,7 +285,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 
 	
 	
-    private void directGarageSave(InsuredVehicleInfo insuredVehicleInfo, GarageWorkOrder workOrder) {
+    public void directGarageSave(InsuredVehicleInfo insuredVehicleInfo, GarageWorkOrder workOrder) {
     	try {
     		LoginMaster loginMaster = loginRepo.findByLoginId(insuredVehicleInfo.getGarageId());
         	//SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNo(workOrder.getClaimNo());
@@ -362,7 +362,9 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 	        	 spareSave.setVatAmount(BigDecimal.ZERO);
 	        	 spareSave.setTotalWithVat(netAmount.subtract(deductAmount));   
 	        	 spareSave.setEntryDate(new Date());
-			          
+	        	 spareSave.setSavedStatus(insuredVehicleInfo.getStatus());
+	        	 spareSave.setFileNo(insuredVehicleInfo.getFileNo());
+	        	 System.out.println("claim number ==> "+ insuredVehicleInfo.getClaimNo() + ", file number == > "+insuredVehicleInfo.getFileNo());
 			     SparePartsSaveDetailsRepo.save(spareSave);	
 			
 			}

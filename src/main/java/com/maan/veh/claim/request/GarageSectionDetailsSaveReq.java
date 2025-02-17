@@ -18,6 +18,9 @@ public class GarageSectionDetailsSaveReq {
 
     @JsonProperty("DamageDirection")
     private String damageDirection;
+    
+    @JsonProperty("DamageDirectionCode")
+    private String damageDirectionCode;
 
     @JsonProperty("DamagePart")
     private String damagePart;
