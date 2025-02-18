@@ -232,7 +232,9 @@ public class InputValidationUtil {
 	    }
 
 	    if (StringUtils.isBlank(req.getWorkOrderNo())) {
-	        list.add(new ErrorList("100", "WorkOrderNo", "Work order number cannot be blank"));
+	        list.add(new ErrorList("100", "QuotationNo", "Quotation number cannot be blank"));
+	    } else if (!req.getWorkOrderNo().matches("^[a-zA-Z0-9 ]{1,50}$")) { 
+	        list.add(new ErrorList("101", "QuotationNo", "Quotation number must be alphanumeric, without special characters, and up to 50 characters long"));
 	    }
 
 	    if (StringUtils.isBlank(req.getWorkOrderType())) {
@@ -280,21 +282,41 @@ public class InputValidationUtil {
 	    Date workOrderDate = req.getWorkOrderDate();
 	    Date deliveryDate = req.getDeliveryDate();
 
-	    // Parse and validate workOrderDate
-	    if (req.getWorkOrderDate() == null) {
-	    	list.add(new ErrorList("100", "WorkOrderDate", "Work order date is invalid or not in the correct format (dd/MM/yyyy)"));
+	    // Validate Work Order Date
+	    if (workOrderDate == null) {
+	        list.add(new ErrorList("100", "QuotationDate", "Quotation date is required and must be in the format (dd/MM/yyyy)."));
 	    }
-	    if (req.getDeliveryDate() == null) {
-	    	 list.add(new ErrorList("100", "DeliveryDate", "Delivery Date is invalid or not in the correct format (dd/MM/yyyy)"));
-	    }
-	   
 
-	    // Validate deliveryDate is not before workOrderDate
+	    // Validate Delivery Date
+	    if (deliveryDate == null) {
+	        list.add(new ErrorList("100", "DeliveryDate", "Delivery date is required and must be in the format (dd/MM/yyyy)."));
+	    }
+
+	    // Validate logical order of dates
 	    if (workOrderDate != null && deliveryDate != null) {
 	        if (deliveryDate.before(workOrderDate)) {
-	            list.add(new ErrorList("101", "DeliveryDate", "Delivery date must not be less than work order date"));
+	            list.add(new ErrorList("101", "DeliveryDate", "Delivery date cannot be earlier than the work order date."));
 	        }
 	    }
+
+	    // Ensure Work Order Date is not in the past (allow today's date)
+	    if (workOrderDate != null) {
+	        Date today = new Date();
+	        
+	        // Remove time component to compare only dates
+	        Calendar cal = Calendar.getInstance();
+	        cal.setTime(today);
+	        cal.set(Calendar.HOUR_OF_DAY, 0);
+	        cal.set(Calendar.MINUTE, 0);
+	        cal.set(Calendar.SECOND, 0);
+	        cal.set(Calendar.MILLISECOND, 0);
+	        today = cal.getTime();
+
+	        if (workOrderDate.before(today)) {
+	            list.add(new ErrorList("102", "QuotationDate", "Quotation date cannot be earlier than today."));
+	        }
+	    }
+
 
 	    // Validate totalLoss
 	    try {

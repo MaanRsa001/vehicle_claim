@@ -44,7 +44,7 @@ public class ClaimStatusServiceImpl implements ClaimStatusService{
 		List<DropDownRes> resList = new ArrayList<>();
 	    try {
 	        // Retrieve list of VcFlowMaster with usertype "Garage"
-	        List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndStatusId(usertype,currentStatus);
+	        List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndStatusIdAndCompanyId(usertype,currentStatus,"100030");
 
 	        // Convert the list to a map with subStatus as the key and subStatusDescription as the value
 	        Map<String, String> statusMap = flowList.stream()
