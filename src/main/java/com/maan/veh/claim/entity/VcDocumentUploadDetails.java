@@ -25,7 +25,7 @@ import lombok.ToString;
 @Entity
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "vc_document_upload_details")
+@Table(name = "qiic_document_upload_details")
 @IdClass(VcDocumentUploadDetailsId.class)
 public class VcDocumentUploadDetails {
 

@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "vc_garage_work_order")
+@Table(name = "qiic_garage_work_order")
 @IdClass(GarageWorkOrderId.class)
 public class GarageWorkOrder {
 
