@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "vc_insured_vehicle_info")
+@Table(name = "qiic_insured_vehicle_info")
 @IdClass(InsuredVehicleInfoId.class)
 public class InsuredVehicleInfo {
 

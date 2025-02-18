@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "spare_parts_save_details")
+@Table(name = "qiic_spare_parts_save_details")
 @IdClass(SparePartsSaveDetailsId.class)
 public class SparePartsSaveDetails {
 	

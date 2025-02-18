@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "api_transaction_log")
+@Table(name = "qiic_api_transaction_log")
 public class ApiTransactionLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
