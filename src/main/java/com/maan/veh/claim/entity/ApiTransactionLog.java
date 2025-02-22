@@ -5,8 +5,6 @@ import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
@@ -20,36 +18,40 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "qiic_api_transaction_log")
 public class ApiTransactionLog {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long sno;
+	
+	@Id
+	@Column(name = "sno")
+	private Long sno;  // Primary Key
 
-    @Column(nullable = false)
+	
+    @Column(name = "request_time")
     private LocalDateTime requestTime;
 
-    @Column(nullable = false)
+    @Column(name = "response_time")
     private LocalDateTime responseTime;
 
-    @Column(nullable = false)
+    @Column(name = "entry_date")
     private Date entryDate;
 
-    @Column(nullable = false)
+    @Column(name = "endpoint", length = 255)
     private String endpoint;
 
-    @Lob
-    private String request;
-
-    @Lob
-    private String response;
-
-    @Column(nullable = false)
+    @Column(name = "status", length = 255)  // Renamed to match STATUSV column
     private String status;
 
     @Lob
+    @Column(name = "request")
+    private String request;
+
+    @Lob
+    @Column(name = "response")
+    private String response;
+
+    @Lob
+    @Column(name = "error_message")
     private String errorMessage;
 
     @Lob
+    @Column(name = "additional_info")
     private String additionalInfo;
-
-    // Getters and setters
 }

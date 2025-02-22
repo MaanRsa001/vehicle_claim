@@ -137,4 +137,10 @@ public class GetAllQuoteResponse {
  	
  	@JsonProperty("UserType")
     private String userType;
+ 	
+ 	@JsonProperty("ClgwSgsId")
+ 	private String clgwSgsId;
+ 	
+ 	@JsonProperty("AmndVersionId")
+ 	private String AmndVersionId;
 }

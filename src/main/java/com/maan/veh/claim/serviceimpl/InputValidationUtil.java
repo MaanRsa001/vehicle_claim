@@ -20,19 +20,23 @@ import org.springframework.util.CollectionUtils;
 
 import com.maan.veh.claim.auth.passwordEnc;
 import com.maan.veh.claim.dto.GarageLoginMasterDTO;
-import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.LoginUserInfo;
 import com.maan.veh.claim.entity.SessionMaster;
+import com.maan.veh.claim.entity.VcDocumentMaster;
+import com.maan.veh.claim.entity.VcDocumentUploadDetails;
 import com.maan.veh.claim.entity.VcFlowMaster;
 import com.maan.veh.claim.error.Error;
 import com.maan.veh.claim.file.DocumentUploadDetailsReqRes;
+import com.maan.veh.claim.qiic.request.GetGarageWorkOrderRequest;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.LoginUserInfoRepository;
 import com.maan.veh.claim.repository.SessionMasterRepository;
+import com.maan.veh.claim.repository.VcDocumentMasterRepository;
+import com.maan.veh.claim.repository.VcDocumentUploadDetailsRepository;
 import com.maan.veh.claim.repository.VcFlowMasterRepository;
 import com.maan.veh.claim.request.ChangePasswordReq;
 import com.maan.veh.claim.request.ClaimDetailsSaveRequest;
@@ -84,6 +88,12 @@ public class InputValidationUtil {
 	
 	@Autowired
 	private DamageSectionDetailsRepository damageSectionDetailsRepo;
+	
+	@Autowired
+	private VcDocumentUploadDetailsRepository VcDocumentUploadDetailsRepo;
+	
+	@Autowired
+	private VcDocumentMasterRepository VcDocumentMasterRepo;
 	
 	private static SimpleDateFormat DD_MM_YYYY = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -313,7 +323,7 @@ public class InputValidationUtil {
 	        today = cal.getTime();
 
 	        if (workOrderDate.before(today)) {
-	            list.add(new ErrorList("102", "QuotationDate", "Quotation date cannot be earlier than today."));
+	            //list.add(new ErrorList("102", "QuotationDate", "Quotation date cannot be earlier than today."));
 	        }
 	    }
 
@@ -327,50 +337,50 @@ public class InputValidationUtil {
 	        list.add(new ErrorList("100", "TotalLoss", "Total loss must be a valid number"));
 	    }
 	    
-	    // Status check block
-	    try {
-	        Optional<GarageWorkOrder> optional = garageWorkOrderRepository.findByClaimNoAndGarageId(req.getClaimNo(),req.getGarageId());
-	        
-	        if (optional.isPresent()) {
-	            String quoteStatus = optional.get().getQuoteStatus();
-	            
-	            // Dynamically retrieve flowList based on usertype and quoteStatus
-	            List<VcFlowMaster> flowList = flowMasterRepo.findByStatusId(quoteStatus);
-	            
-	            // Extract the list of valid status IDs dynamically
-	            Set<String> validStatusIds = flowList.stream()
-	                                                 .map(VcFlowMaster::getSubStatus)
-	                                                 .collect(Collectors.toSet());
-	            
-	            // Check if the requested quote status is valid
-	            if (!validStatusIds.contains(req.getQuoteStatus())) {
-	            	List<VcFlowMaster> flowListStatus = flowMasterRepo.findByStatusId(req.getQuoteStatus());
-	            	String stausDesc = (flowListStatus!=null && flowListStatus.size()>0) ? flowListStatus.get(0).getStatusDescription() : "Current Status";
-	                list.add(new ErrorList("101", "Status", 
-	                        String.format("The Status cannot be %s", stausDesc)));
-	            }
-	        }else {
-                String quoteStatus = "PFG";
-	            
-	            // Dynamically retrieve flowList based on usertype and quoteStatus
-	            List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndStatusId("Garage", quoteStatus);
-	            
-	            // Extract the list of valid status IDs dynamically
-	            Set<String> validStatusIds = flowList.stream()
-	                                                 .map(VcFlowMaster::getSubStatus)
-	                                                 .collect(Collectors.toSet());
-	            
-	            // Check if the requested quote status is valid
-	            if (!validStatusIds.contains(req.getQuoteStatus())) {
-	            	List<VcFlowMaster> flowListStatus = flowMasterRepo.findByStatusId(req.getQuoteStatus());
-	            	String stausDesc = (flowListStatus!=null && flowListStatus.size()>0) ? flowListStatus.get(0).getStatusDescription() : "Current Status";
-	                list.add(new ErrorList("101", "Status", 
-	                        String.format("The Status cannot be %s", stausDesc)));
-	            }
-	        }
-	    } catch (Exception ex) {
-	        //log.error("Exception during status check: {}", ex.getMessage(), ex);
-	    }
+//	    // Status check block
+//	    try {
+//	        Optional<GarageWorkOrder> optional = garageWorkOrderRepository.findByClaimNoAndGarageId(req.getClaimNo(),req.getGarageId());
+//	        
+//	        if (optional.isPresent()) {
+//	            String quoteStatus = optional.get().getQuoteStatus();
+//	            
+//	            // Dynamically retrieve flowList based on usertype and quoteStatus
+//	            List<VcFlowMaster> flowList = flowMasterRepo.findByStatusId(quoteStatus);
+//	            
+//	            // Extract the list of valid status IDs dynamically
+//	            Set<String> validStatusIds = flowList.stream()
+//	                                                 .map(VcFlowMaster::getSubStatus)
+//	                                                 .collect(Collectors.toSet());
+//	            
+//	            // Check if the requested quote status is valid
+//	            if (!validStatusIds.contains(req.getQuoteStatus())) {
+//	            	List<VcFlowMaster> flowListStatus = flowMasterRepo.findByStatusId(req.getQuoteStatus());
+//	            	String stausDesc = (flowListStatus!=null && flowListStatus.size()>0) ? flowListStatus.get(0).getStatusDescription() : "Current Status";
+//	                list.add(new ErrorList("101", "Status", 
+//	                        String.format("The Status cannot be %s", stausDesc)));
+//	            }
+//	        }else {
+//                String quoteStatus = "PFG";
+//	            
+//	            // Dynamically retrieve flowList based on usertype and quoteStatus
+//	            List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndStatusId("Garage", quoteStatus);
+//	            
+//	            // Extract the list of valid status IDs dynamically
+//	            Set<String> validStatusIds = flowList.stream()
+//	                                                 .map(VcFlowMaster::getSubStatus)
+//	                                                 .collect(Collectors.toSet());
+//	            
+//	            // Check if the requested quote status is valid
+//	            if (!validStatusIds.contains(req.getQuoteStatus())) {
+//	            	List<VcFlowMaster> flowListStatus = flowMasterRepo.findByStatusId(req.getQuoteStatus());
+//	            	String stausDesc = (flowListStatus!=null && flowListStatus.size()>0) ? flowListStatus.get(0).getStatusDescription() : "Current Status";
+//	                list.add(new ErrorList("101", "Status", 
+//	                        String.format("The Status cannot be %s", stausDesc)));
+//	            }
+//	        }
+//	    } catch (Exception ex) {
+//	        //log.error("Exception during status check: {}", ex.getMessage(), ex);
+//	    }
 
 
 	    return list;
@@ -1989,6 +1999,33 @@ List<ErrorList> errors = new ArrayList<>();
 		}
 		return list;
 	}
+
+	public List<ErrorList> validateCreateWorkBasket(GetGarageWorkOrderRequest req) {
+	    List<ErrorList> list = new ArrayList<>();
+
+	    // Fetch mandatory documents from the master table
+	    List<VcDocumentMaster> mandatoryDocList = VcDocumentMasterRepo
+	            .findByStatusAndMandatoryStatusAndCompanyIdOrderByDocumentIdAsc("Y", "Y", req.getCompanyid());
+
+	    // Fetch uploaded documents for the given claim number
+	    List<VcDocumentUploadDetails> uploadedList = VcDocumentUploadDetailsRepo.findByClaimNo(req.getClaimNo());
+
+	    // Convert uploaded document names into a set for quick lookup
+	    Set<String> uploadedDocNames = uploadedList.stream()
+	            .map(VcDocumentUploadDetails::getDocName)
+	            .collect(Collectors.toSet());
+
+	    // Validate if all mandatory documents are uploaded
+	    for (VcDocumentMaster mandatoryDoc : mandatoryDocList) {
+	        if (!uploadedDocNames.contains(mandatoryDoc.getDocumentName())) {
+	            list.add(new ErrorList("123", "Document", 
+	                "Please upload mandatory document: " + mandatoryDoc.getDocumentName()));
+	        }
+	    }
+
+	    return list;
+	}
+
 
 	
 }

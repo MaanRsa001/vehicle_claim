@@ -3,6 +3,8 @@ package com.maan.veh.claim.entity;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -142,4 +144,13 @@ public class SparePartsSaveDetails {
     
     @Column(name = "clgw_sgs_id")
     private String clgwSgsId;
+    
+    @Column(name ="veh_id")
+    private String vehId;
+    
+    @Column(name ="clcp_id")
+    private String clcpId;
+    
+    @Column(name ="prod_id")
+    private String prodId;
 }

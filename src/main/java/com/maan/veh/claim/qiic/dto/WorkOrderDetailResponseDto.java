@@ -1,12 +1,13 @@
-package com.maan.veh.claim.response;
+package com.maan.veh.claim.qiic.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 
 @Data
-public class VcInuredVehicleApiResponseQIIC {
-
-    @JsonProperty("partyId")
+public class WorkOrderDetailResponseDto {
+		
+	@JsonProperty("partyId")
     private String partyId;
     
     @JsonProperty("workOrderType")
@@ -107,4 +108,11 @@ public class VcInuredVehicleApiResponseQIIC {
     
     @JsonProperty("createddate")
     private String createdDate;
+    
+    @JsonProperty("netamount")
+    private String netamount;
+    
+    @JsonProperty("amndverno")
+    private String amndverno;
+    
 }

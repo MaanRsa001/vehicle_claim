@@ -310,7 +310,7 @@ public class DropDownServiceImpl implements DropDownService {
             List<VcDocumentMaster> getList = documentMasterRepo.findByStatusAndCompanyIdOrderByDocumentIdAsc("Y",Integer.valueOf(companyId));
             for (VcDocumentMaster data : getList) {
                 DropDownRes res = new DropDownRes();
-                res.setCode(data.getDocumentId().toString());
+                res.setCode(data.getCoreAppCode());
                 res.setCodeDesc(data.getDocumentName());
                 resList.add(res);
             }

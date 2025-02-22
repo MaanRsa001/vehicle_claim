@@ -1,4 +1,4 @@
-package com.maan.veh.claim.request;
+package com.maan.veh.claim.qiic.response;
 
 import java.util.List;
 
@@ -7,10 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class SaveSparePartsRequest {
-
-	@JsonProperty("requestMetaData")
-	private SaveSparePartsRequestMetaData requestMetaData;
+public class LpoApprovalSyncResponse {
 	
 	@JsonProperty("claimNo")
 	private String claimNo;
@@ -117,13 +114,7 @@ public class SaveSparePartsRequest {
 
 	@JsonProperty("totalWithVAT")
 	private String totalWithVAT;
-	
-	@JsonProperty("vehId")
-	private String vehId;
-	    
-	@JsonProperty("clcpId")
-	private String clcpId;
 
 	@JsonProperty("vehicleDamageDetails")
-	private List<VehicleDamageDetailRequest> vehicleDamageDetails;
+	private List<LpoApprovalSyncDamageResponse> vehicleDamageDetails;
 }

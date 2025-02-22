@@ -1,5 +1,7 @@
 package com.maan.veh.claim.serviceimpl;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -7,9 +9,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -18,16 +22,20 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,24 +57,50 @@ import com.maan.veh.claim.dto.GarageClaimListDto;
 import com.maan.veh.claim.dto.GarageClaimListResponseDTO;
 import com.maan.veh.claim.dto.SaveClaimRequestDTO;
 import com.maan.veh.claim.dto.SaveSparePartsDTO;
+import com.maan.veh.claim.entity.ApiIntegMaster;
 import com.maan.veh.claim.entity.ApiTransactionLog;
 import com.maan.veh.claim.entity.ClaimIntimationDetails;
 import com.maan.veh.claim.entity.ClaimIntimationDetailsId;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
+import com.maan.veh.claim.entity.InsuredVehicleInfo;
+import com.maan.veh.claim.entity.InsuredVehicleInfoId;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.SparePartsSaveDetails;
 import com.maan.veh.claim.entity.VcClaimStatus;
+import com.maan.veh.claim.entity.VcDocumentUploadDetails;
 import com.maan.veh.claim.external.ErrorDetail;
 import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.external.ExternalApiResponse;
+import com.maan.veh.claim.file.BASE64DecodedMultipartFile;
+import com.maan.veh.claim.file.DocumentUploadDetailsReqRes;
+import com.maan.veh.claim.file.MultipartInputStreamFileResource;
+import com.maan.veh.claim.qiic.dto.CreateWorkBasketRequestDto;
+import com.maan.veh.claim.qiic.dto.DownloadDocumentRequest;
+import com.maan.veh.claim.qiic.dto.FileUploadRequestDto;
+import com.maan.veh.claim.qiic.dto.GarageSettlementListRequestDto;
+import com.maan.veh.claim.qiic.dto.GarageSettlementListResponseDto;
+import com.maan.veh.claim.qiic.dto.GarageSettlementResponseDto;
+import com.maan.veh.claim.qiic.dto.GetGarageWorkOrderRequestDto;
+import com.maan.veh.claim.qiic.dto.LpoApprovalSyncReqDto;
+import com.maan.veh.claim.qiic.dto.UploadedDocumentListResponseDto;
+import com.maan.veh.claim.qiic.dto.WorkOrderDetailResponseDto;
+import com.maan.veh.claim.qiic.dto.WorkOrderPendingResponseDto;
+import com.maan.veh.claim.qiic.request.GarageSettlementListRequest;
+import com.maan.veh.claim.qiic.request.GetGarageWorkOrderRequest;
+import com.maan.veh.claim.qiic.request.LpoApprovalSyncRequest;
+import com.maan.veh.claim.qiic.response.LpoApprovalSyncDamageResponse;
+import com.maan.veh.claim.qiic.response.LpoApprovalSyncResponse;
+import com.maan.veh.claim.repository.ApiIntegMasterRepository;
 import com.maan.veh.claim.repository.ApiTransactionLogRepository;
 import com.maan.veh.claim.repository.ClaimIntimationDetailsRepository;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
+import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
 import com.maan.veh.claim.repository.VcClaimStatusRepository;
+import com.maan.veh.claim.repository.VcDocumentUploadDetailsRepository;
 import com.maan.veh.claim.request.CheckClaimStatusRequest;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
 import com.maan.veh.claim.request.ClaimIntimationRequestMetaData;
@@ -77,6 +111,7 @@ import com.maan.veh.claim.request.ClaimTransactionRequest;
 import com.maan.veh.claim.request.ClaimentCoverageRequest;
 import com.maan.veh.claim.request.ExternalVehicleGarageViewRequest;
 import com.maan.veh.claim.request.FnolRequest;
+import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.GetClaimRequest;
 import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.request.SaveClaimRequest;
@@ -88,6 +123,7 @@ import com.maan.veh.claim.response.ClaimIntimationResponse;
 import com.maan.veh.claim.response.ClaimListResponse;
 import com.maan.veh.claim.response.ClaimentCoverageResponse;
 import com.maan.veh.claim.response.CommonResponse;
+import com.maan.veh.claim.response.DropDownRes;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GetAllQuoteResponse;
 import com.maan.veh.claim.service.ExternalApiService;
@@ -121,6 +157,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     @Autowired
     private LoginMasterRepository loginMasterRepo;
     
+    @Autowired
+    private ApiIntegMasterRepository apiIntegMasterRepository;
+    
     @Value("${external.api.url.createfnol}")  
     private String externalApiUrlCreatefnol;
     
@@ -148,6 +187,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     @Value("${external.api.url.authenticate}")
     private String externalApiUrlAuthenticate;
     
+    @Value("${external.api.url.uploaddoc}")
+    private String externalApiUrlUploadDoc;
+    
     @Value("${auth.username}")
     private String apiusername;
 
@@ -165,6 +207,12 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     
     @Autowired
     private DropDownServiceImpl dropDownServiceImpl;
+    
+    @Autowired
+    private InsuredVehicleInfoRepository repository;
+    
+	@Autowired
+	private VcDocumentUploadDetailsRepository documentUploadDetailsRepo;
 
     @Override
     public CommonResponse createFnol(SaveClaimRequest requestPayload) {
@@ -1106,8 +1154,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	            response.setIsError(true);
 	            response.setErrors(Collections.singletonList(new ErrorResponse("404", "Data Not Found", "Data not found for the provided claim or work order number")));
 	            return response;
-	        }else if("Y".equalsIgnoreCase(partsSaveDetails.getSavedStatus())) {
+	        }else if("Y".equalsIgnoreCase(partsSaveDetails.getSavedStatus())||"ESB".equalsIgnoreCase(partsSaveDetails.getSavedStatus())) {
 	        	//response.setMessage("No data found for the provided claim or work order number");
+	        	System.out.println("saved  status ==>"+partsSaveDetails.getSavedStatus());
 	            response.setIsError(true);
 	            ClaimListResponse externalRes = new ClaimListResponse();
 	            externalRes.setMessage("spareparts details already saved");
@@ -1227,7 +1276,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 //			request.setClaimNo(partsSaveDetails.getClaimNo());
 			request.setClaimNo(partsSaveDetails.getFileNo());
 			request.setLpoId(partsSaveDetails.getLpoId());
-			
+			request.setVehId(partsSaveDetails.getVehId());
+			request.setClcpId(partsSaveDetails.getClcpId());
 
 			List<VehicleDamageDetailRequest> vehicleDamageDetails = new ArrayList<>();
 
@@ -1549,7 +1599,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			         response.setLossType(spareSaved.getTotalLossType());
 			         response.setRemarks(spareSaved.getRemarks());
 			         response.setSavedStatus(spareSaved.getSavedStatus());
-			         response.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String ::valueOf).orElse(""));		         
+			         response.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String ::valueOf).orElse(""));	
+			         response.setClgwSgsId(spareSaved.getClgwSgsId());
 			         
 						response.setReplacementCost(
 								spareSaved.getReplacementCost() != null ? spareSaved.getReplacementCost().toString()
@@ -1625,7 +1676,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	public CommonResponse getGarageClaimList(ExternalVehicleGarageViewRequest request) {
 
 	    CommonResponse response = new CommonResponse();
-	    ApiTransactionLog log = new ApiTransactionLog();
+	    ApiTransactionLog log = new ApiTransactionLog();;
 	    log.setRequestTime(LocalDateTime.now());
 	    log.setEntryDate(new Date());
 	    log.setEndpoint(externalApiUrlGarageList);
@@ -2028,6 +2079,1027 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    return response;
 
 	}
+
+
+	@Override
+	public CommonResponse lpoSyncView(LpoApprovalSyncRequest requestPayload) {
+		CommonResponse response = new CommonResponse();
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setSno(apiTransactionLogRepo.findMaxSno()+1);
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+	    
+	    // Fetch company ID from request payload (Modify this as needed)
+        String companyId = requestPayload.getCompanyId();
+
+        // Fetch API URL from the database
+        String apiType = "GET_SPARE_PARTS";  // Match API_TYPE column value
+        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository.findByCompanyIdAndApiTypeAndStatus(companyId, apiType,"Y");
+
+        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+            response.setMessage("API URL not found for company: " + companyId);
+            response.setIsError(true);
+            return response;
+        }
+
+        String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
+        log.setEndpoint(externalApiUrlCreatefnol);
+
+	    try {
+	        
+	        LpoApprovalSyncReqDto dto = new LpoApprovalSyncReqDto();
+	        dto.setClaimNo(requestPayload.getClaimNo());
+	        dto.setLpoId(requestPayload.getLpoId());
+
+	        // Authenticate and retrieve JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Create headers and add JWT token
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Convert DTO to JSON for request body and add headers
+	        String requestBody = objectMapper.writeValueAsString(dto);
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+	        log.setRequest(requestBody);
+	        logger.info(requestBody);
+	        
+	        // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+	        
+	        // Send request to external API
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
+	        log.setResponse(apiResponse.getBody());
+	        log.setStatus("SUCCESS");
+
+	        // Parse response into ExternalApiResponse object
+	        LpoApprovalSyncResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), LpoApprovalSyncResponse.class);
+
+	        // Process response based on external API success status
+	        if (externalApiResponse.getVehicleDamageDetails()!=null) {
+	        	List<GarageSectionDetailsSaveReq> groupedDamageDetails = new ArrayList<>();
+	        	List<DropDownRes> damageDirection = dropDownServiceImpl.getDamageDirection(companyId);
+	        	
+	        	Map<String, String> damageDirectionMap = damageDirection.stream()
+	        	        .collect(Collectors.toMap(DropDownRes::getCode, DropDownRes::getCodeDesc));
+
+	        	groupedDamageDetails = mapToGroupedDamageDetails(externalApiResponse,damageDirectionMap);
+	            response.setMessage("Data Retrived Success");
+	            response.setResponse(groupedDamageDetails);
+	            response.setIsError(true);
+
+	        }
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+	        //partsSaveDetails.setSavedStatus("N");
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        if(StringUtils.isNotBlank(log.getRequest())){
+	        	apiTransactionLogRepo.save(log);
+	        	logger.info("LPO Approval Sync " +" ==> "+ log);
+	        }
+	    }
+
+	    return response;
+	}
+
+
+	private List<GarageSectionDetailsSaveReq> mapToGroupedDamageDetails(LpoApprovalSyncResponse externalApiResponse,Map<String, String> damageDirectionMap) {
+		
+		List<GarageSectionDetailsSaveReq> groupedDamageDetails = new ArrayList<>();
+		
+		try {
+			int damageSno = 1;
+			for (LpoApprovalSyncDamageResponse data : externalApiResponse.getVehicleDamageDetails()) {
+			    GarageSectionDetailsSaveReq res = new GarageSectionDetailsSaveReq();
+			    // Populate the fields from the retrieved data
+			    res.setClaimNo(externalApiResponse.getClaimNo());
+			    res.setQuotationNo(externalApiResponse.getGarageQuotationNo());
+			    res.setDamageSno(""+damageSno);
+			    res.setDamageDirection(damageDirectionMap.get(data.getDamageDirection()));
+			    res.setRepairReplace("REPAIR");    
+			    res.setNoOfUnits(data.getNoUnits() != null ? data.getNoUnits().toString() : "");
+			    res.setReplacementCharge(data.getReplacementCharge() != null ? data.getReplacementCharge().toString() : "");
+			    res.setDeductablePer(data.getDeductiblePer() != null ? data.getDeductiblePer().toString():"0");
+			    res.setDeductableAmount(data.getDeductibleAmount() != null ? data.getDeductibleAmount().toString():"0");
+			    groupedDamageDetails.add(res);
+			    damageSno++;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return groupedDamageDetails;
+		}
+        return groupedDamageDetails;
+	}
+
+
+	@Override
+	public CommonResponse getGarageWorkOrder(GetGarageWorkOrderRequest requestPayload) {
+	    CommonResponse response = new CommonResponse();
+	    ApiTransactionLog transactionLog = new ApiTransactionLog();
+	    transactionLog.setRequestTime(LocalDateTime.now());
+	    transactionLog.setEntryDate(new Date());
+
+	    try {
+	        // Prepare request payload
+	        GetGarageWorkOrderRequestDto newdata = new GetGarageWorkOrderRequestDto(requestPayload.getPartyId(), "");
+
+	        // Fetch company ID from request payload
+	        String companyId = String.valueOf(requestPayload.getCompanyid());
+
+	        // Fetch API URL from the database
+	        String apiType = "WORK_ORDER"; // Match API_TYPE column value
+	        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository
+	                .findByCompanyIdAndApiTypeAndStatus(companyId, apiType, "Y");
+
+	        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+	            response.setMessage("API URL not found for company: " + companyId);
+	            response.setIsError(true);
+	            return response;
+	        }
+
+	        String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
+	        transactionLog.setEndpoint(externalApiUrlCreatefnol);
+
+	        // Authenticate user and get JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Set up headers
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Send request to external API
+	        HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(newdata), headers);
+
+	        // Configure SSL Trust Managers (if necessary)
+	        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+	            public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+	            public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) { }
+	            public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) { }
+	        }};
+
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+	        HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+
+	        transactionLog.setRequest(newdata.toString());
+
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(transactionLog.getEndpoint(), entity, String.class);
+
+	        // Parse API response
+	        WorkOrderPendingResponseDto externalApiResponse = objectMapper.readValue(apiResponse.getBody(), WorkOrderPendingResponseDto.class);
+	        List<WorkOrderDetailResponseDto> apiData = externalApiResponse.getData();
+
+	        if (apiData == null || apiData.isEmpty()) {
+	            response.setMessage("No data received from API");
+	            response.setIsError(false);
+	            return response;
+	        }
+
+	        // Collect file numbers for batch fetching
+	        List<String> fileNos = apiData.stream().map(WorkOrderDetailResponseDto::getFileNo).collect(Collectors.toList());
+	        List<SparePartsSaveDetails> sparePartsList = new ArrayList<>();
+
+	        // Handle Oracle IN clause limit with batch processing
+	        int batchSize = 400;
+	        for (int i = 0; i < fileNos.size(); i += batchSize) {
+	            int end = Math.min(i + batchSize, fileNos.size());
+	            List<String> batch = fileNos.subList(i, end);
+
+	            List<SparePartsSaveDetails> batchResults = SparePartsSaveDetailsRepo
+	                    .findByGarageCodeAndClaimNoInOrderByEntryDateDesc(requestPayload.getPartyId(), batch);
+
+	            sparePartsList.addAll(batchResults);
+	        }
+
+	        // Process the fetched spare parts data
+	        List<GetAllQuoteResponse> res = new ArrayList<>();
+	        Map<String, WorkOrderDetailResponseDto> sparePartsMap = apiData.stream()
+	                .collect(Collectors.toMap(WorkOrderDetailResponseDto::getFileNo, s -> s, (a, b) -> a));
+
+	        for (SparePartsSaveDetails spareSaved : sparePartsList) {
+
+	            if (spareSaved != null) {
+	                GetAllQuoteResponse quoteResponse = new GetAllQuoteResponse();
+	                quoteResponse.setClaimNo(spareSaved.getClaimNo());
+	                quoteResponse.setWorkOrderNo(spareSaved.getWorkOrderNo());
+	                quoteResponse.setWorkOrderType(spareSaved.getWorkOrderType());
+	                quoteResponse.setWorkOrderDate(spareSaved.getWorkOrderDate());
+	                quoteResponse.setSettlementType(spareSaved.getAccountSettlementType());
+	                quoteResponse.setSettlementTo(spareSaved.getAccountSettlementName());
+	                quoteResponse.setGarageId(spareSaved.getGarageCode().toString());
+	                quoteResponse.setQuotationNo(spareSaved.getQuotationNo());
+	                quoteResponse.setDeliveryDate(spareSaved.getDeliveryDate());
+	                quoteResponse.setJointOrderYn(spareSaved.getJointOrder());
+	                quoteResponse.setSubrogationYn(spareSaved.getSubrogation());
+	                quoteResponse.setTotalLoss(spareSaved.getTotalLoss().toString());
+	                quoteResponse.setLossType(spareSaved.getTotalLossType());
+	                quoteResponse.setRemarks(spareSaved.getRemarks());
+	                quoteResponse.setSavedStatus("ESB".equalsIgnoreCase(spareSaved.getSavedStatus()) ? "WST" : spareSaved.getSavedStatus());
+	                quoteResponse.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String::valueOf).orElse(""));
+	                quoteResponse.setTotalAfterDeductions(sparePartsMap.get(spareSaved.getClaimNo()).getNetamount());
+	                quoteResponse.setAmndVersionId(sparePartsMap.get(spareSaved.getClaimNo()).getAmndverno());
+	                res.add(quoteResponse);
+	            }
+	        }
+
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Success");
+	        response.setResponse(res);
+
+	    } catch (Exception e) {
+	        transactionLog.setStatus("FAILURE");
+	        transactionLog.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+	    } finally {
+	        transactionLog.setResponseTime(LocalDateTime.now());
+	        logger.info("get Garage WorkOrder ==> " + transactionLog);
+	    }
+
+	    return response;
+	}
+
+	
+	public CommonResponse getGarageWorkOrderV0(GetGarageWorkOrderRequest requestPayload) {
+		CommonResponse response = new CommonResponse();
+	    ApiTransactionLog transactionLog = new ApiTransactionLog();
+	    transactionLog.setRequestTime(LocalDateTime.now());
+	    transactionLog.setEntryDate(new Date());
+
+	    try {
+	    	// Prepare request payload
+	    	GetGarageWorkOrderRequestDto newdata = new GetGarageWorkOrderRequestDto(
+	            requestPayload.getPartyId(),""
+	        );
+	    	
+		    // Fetch company ID from request payload (Modify this as needed)
+	        String companyId = String.valueOf(requestPayload.getCompanyid());
+
+	        // Fetch API URL from the database
+	        String apiType = "CREATE_FNOL";  // Match API_TYPE column value
+	        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository.findByCompanyIdAndApiTypeAndStatus(companyId, apiType,"Y");
+
+	        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+	            response.setMessage("API URL not found for company: " + companyId);
+	            response.setIsError(true);
+	            return response;
+	        }
+
+	        String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
+	        transactionLog.setEndpoint(externalApiUrlCreatefnol);
+	        
+	        // Authenticate user and get JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Set up headers
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Send request to external API
+	        HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(newdata), headers);
+	        
+	        // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+            
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(transactionLog.getEndpoint(), entity, String.class);
+
+	        // Parse API response
+	        WorkOrderPendingResponseDto externalApiResponse = objectMapper.readValue(apiResponse.getBody(), WorkOrderPendingResponseDto.class);
+	        List<WorkOrderDetailResponseDto> apiData = externalApiResponse.getData();
+	        if (apiData == null || apiData.isEmpty()) {
+	            response.setMessage("No data received from API");
+	            response.setIsError(false);
+	            return response;
+	        }
+
+	        // Create a set of IDs for batch fetching
+	        Set<InsuredVehicleInfoId> insuredIds = apiData.stream()
+	            .map(insured -> new InsuredVehicleInfoId(
+	                requestPayload.getCompanyid(),
+	                insured.getPolicyNo(),
+	                insured.getClaimNo(),
+	                requestPayload.getGarageid()
+	            ))
+	            .collect(Collectors.toSet());
+
+	        // ✅ Fetch existing records in ONE bulk query
+	        Set<InsuredVehicleInfoId> existingIds = repository.findExistingIds(insuredIds);
+
+	        // Process only new records
+	        List<InsuredVehicleInfo> insuredInfoList = apiData.stream()
+	            .filter(insured -> existingIds.contains(new InsuredVehicleInfoId(
+	                requestPayload.getCompanyid(),
+	                insured.getPolicyNo(),
+	                insured.getFileNo(),
+	                requestPayload.getGarageid()
+	            )))
+	            .map(insured -> {
+	                InsuredVehicleInfo insuredVehicleInfo = new InsuredVehicleInfo();
+	                insuredVehicleInfo.setCompanyId(requestPayload.getCompanyid());
+	                insuredVehicleInfo.setPolicyNo(insured.getPolicyNo());
+	                insuredVehicleInfo.setClaimNo(insured.getFileNo());
+	                insuredVehicleInfo.setGarageId(requestPayload.getGarageid());
+	                insuredVehicleInfo.setEntryDate(new Date());
+	                insuredVehicleInfo.setStatus("WST");
+	                
+	                return insuredVehicleInfo;
+	            })
+	            .collect(Collectors.toList());
+
+	        // Save all new records in bulk
+	        if (!insuredInfoList.isEmpty()) {
+	            repository.saveAll(insuredInfoList);
+	        }
+
+	        // Success response
+	        response.setMessage("Data saved successfully");
+	        response.setIsError(false);
+	        response.setResponse(externalApiResponse);
+	    } catch (Exception e) {
+	        transactionLog.setStatus("FAILURE");
+	        transactionLog.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+	    } finally {
+	        transactionLog.setResponseTime(LocalDateTime.now());
+	        logger.info("get Garage WorkOrder " +" ==> "+ transactionLog);
+	    }
+
+	    return response;
+	}
+
+
+	@Override
+	public CommonResponse getGarageSettlement(GarageSettlementListRequest requestPayload) {
+		CommonResponse response = new CommonResponse();
+	    ApiTransactionLog transactionLog = new ApiTransactionLog();
+	    transactionLog.setRequestTime(LocalDateTime.now());
+	    transactionLog.setEntryDate(new Date());
+
+	    try {
+	        // Prepare request payload
+	    	GarageSettlementListRequestDto newdata = new GarageSettlementListRequestDto(requestPayload.getPartyId(), "");
+
+	        // Fetch company ID from request payload
+	        String companyId = String.valueOf(requestPayload.getCompanyid());
+
+	        // Fetch API URL from the database
+	        String apiType = "SETTLEMENT"; // Match API_TYPE column value
+	        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository
+	                .findByCompanyIdAndApiTypeAndStatus(companyId, apiType, "Y");
+
+	        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+	            response.setMessage("API URL not found for company: " + companyId);
+	            response.setIsError(true);
+	            return response;
+	        }
+
+	        String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
+	        transactionLog.setEndpoint(externalApiUrlCreatefnol);
+
+	        // Authenticate user and get JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Set up headers
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Send request to external API
+	        HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(newdata), headers);
+
+	        // Configure SSL Trust Managers (if necessary)
+	        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+	            public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+	            public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) { }
+	            public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) { }
+	        }};
+
+	        SSLContext sc = SSLContext.getInstance("SSL");
+	        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+	        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+	        HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+
+	        transactionLog.setRequest(newdata.toString());
+
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(transactionLog.getEndpoint(), entity, String.class);
+
+	        // Parse API response
+	        GarageSettlementResponseDto externalApiResponse = objectMapper.readValue(apiResponse.getBody(), GarageSettlementResponseDto.class);
+	        List<GarageSettlementListResponseDto> apiData = externalApiResponse.getData();
+
+	        if (apiData == null || apiData.isEmpty()) {
+	            response.setMessage("No data received from API");
+	            response.setIsError(false);
+	            return response;
+	        }
+
+	        // Collect file numbers for batch fetching
+	        List<String> fileNos = apiData.stream().map(GarageSettlementListResponseDto::getFileNo).collect(Collectors.toList());
+	        List<SparePartsSaveDetails> sparePartsList = new ArrayList<>();
+
+	        // Handle Oracle IN clause limit with batch processing
+	        int batchSize = 400;
+	        for (int i = 0; i < fileNos.size(); i += batchSize) {
+	            int end = Math.min(i + batchSize, fileNos.size());
+	            List<String> batch = fileNos.subList(i, end);
+
+	            List<SparePartsSaveDetails> batchResults = SparePartsSaveDetailsRepo
+	                    .findByGarageCodeAndClaimNoInOrderByEntryDateDesc(requestPayload.getPartyId(), batch);
+
+	            sparePartsList.addAll(batchResults);
+	        }
+
+	        // Process the fetched spare parts data
+	        List<GetAllQuoteResponse> res = new ArrayList<>();
+	        Map<String, GarageSettlementListResponseDto> sparePartsMap = apiData.stream()
+	                .collect(Collectors.toMap(GarageSettlementListResponseDto::getFileNo, s -> s, (a, b) -> a));
+
+	        for (SparePartsSaveDetails spareSaved : sparePartsList) {
+
+	            if (spareSaved != null) {
+	                GetAllQuoteResponse quoteResponse = new GetAllQuoteResponse();
+	                quoteResponse.setClaimNo(spareSaved.getClaimNo());
+	                quoteResponse.setWorkOrderNo(spareSaved.getWorkOrderNo());
+	                quoteResponse.setWorkOrderType(spareSaved.getWorkOrderType());
+	                quoteResponse.setWorkOrderDate(spareSaved.getWorkOrderDate());
+	                quoteResponse.setSettlementType(spareSaved.getAccountSettlementType());
+	                quoteResponse.setSettlementTo(spareSaved.getAccountSettlementName());
+	                quoteResponse.setGarageId(spareSaved.getGarageCode().toString());
+	                quoteResponse.setQuotationNo(spareSaved.getQuotationNo());
+	                quoteResponse.setDeliveryDate(spareSaved.getDeliveryDate());
+	                quoteResponse.setJointOrderYn(spareSaved.getJointOrder());
+	                quoteResponse.setSubrogationYn(spareSaved.getSubrogation());
+	                quoteResponse.setTotalLoss(spareSaved.getTotalLoss().toString());
+	                quoteResponse.setLossType(spareSaved.getTotalLossType());
+	                quoteResponse.setRemarks(spareSaved.getRemarks());
+	                quoteResponse.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String::valueOf).orElse(""));
+	                quoteResponse.setTotalAfterDeductions(sparePartsMap.get(spareSaved.getClaimNo()).getNetamount());
+	                if("ESB".equalsIgnoreCase(spareSaved.getSavedStatus())) {
+	                	
+	                }
+	                if("Completed".equalsIgnoreCase(sparePartsMap.get(spareSaved.getClaimNo()).getPaymentStatus())) {
+	                	quoteResponse.setSavedStatus("SCT");
+	                }else if("Pending".equalsIgnoreCase(sparePartsMap.get(spareSaved.getClaimNo()).getPaymentStatus())) {
+	                	quoteResponse.setSavedStatus("WCT");
+	                }
+	                
+	                
+	                res.add(quoteResponse);
+	            }
+	        }
+
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Success");
+	        response.setResponse(res);
+
+	    } catch (Exception e) {
+	        transactionLog.setStatus("FAILURE");
+	        transactionLog.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+	    } finally {
+	        transactionLog.setResponseTime(LocalDateTime.now());
+	        logger.info("get Garage WorkOrder ==> " + transactionLog);
+	    }
+
+	    return response;
+	}
+
+
+	@Override
+	public CommonResponse completeWorkOrder(GetGarageWorkOrderRequest req) {
+        CommonResponse response = new CommonResponse();
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setSno(apiTransactionLogRepo.findMaxSno()+1);
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+
+	    try {
+	        // Fetch company ID from request payload
+	        String companyId = String.valueOf(req.getCompanyid());
+
+	        // Fetch API URL from the database
+	        String apiType = "WORK_BASKET"; // Match API_TYPE column value
+	        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository
+	                .findByCompanyIdAndApiTypeAndStatus(companyId, apiType, "Y");
+
+	        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+	            response.setMessage("API URL not found for company: " + companyId);
+	            response.setIsError(true);
+	            return response;
+	        }
+
+	        String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
+	        log.setEndpoint(externalApiUrlCreatefnol);
+	        
+            // Step 1: Validate the request
+          List<ErrorList> errors = validation.validateCreateWorkBasket(req);
+          if (!errors.isEmpty()) {
+              // Return early if there are validation errors
+              response.setErrors(errors);
+              response.setMessage("Validation Failed");
+              response.setIsError(true);
+              response.setResponse(Collections.emptyList());
+              return response;
+          }
+          
+            String error = uplodeDocument(req);
+            
+	        // Map entities to request DTO
+            CreateWorkBasketRequestDto dto = new CreateWorkBasketRequestDto();
+	        
+	    	Optional<InsuredVehicleInfo> optionalInsuredVeh = repository.findByClaimNoAndGarageId(req.getClaimNo(),req.getGarageid());
+            if (optionalInsuredVeh.isPresent()) {
+                InsuredVehicleInfo insuredVeh = optionalInsuredVeh.get();
+                insuredVeh.setStatus(req.getQuoteStatus());
+                insuredVeh.setEntryDate(new Date());
+                insuredVeh.setAmndVerNo(req.getAmndVersionId());
+                
+                dto.setClaimNo(insuredVeh.getFileNo());
+                dto.setClcpId(insuredVeh.getClcpId());
+                dto.setFnolNo(insuredVeh.getFnolNo());
+                dto.setProdId(insuredVeh.getProdId());
+                
+                repository.save(insuredVeh);
+			}
+            
+            SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNoAndGarageCode(req.getClaimNo(),req.getPartyId());
+            
+	        
+	        // Authenticate and retrieve JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Create headers and add JWT token
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Convert DTO to JSON for request body and add headers
+	        String requestBody = objectMapper.writeValueAsString(dto);
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+	        log.setRequest(requestBody);
+	        logger.info(requestBody);
+	     // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+	        
+	        // Send request to external API
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
+	        log.setResponse(apiResponse.getBody());
+	        log.setStatus("SUCCESS");
+	        
+	        // Parse response into ExternalApiResponse object
+	        ClaimListResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), ClaimListResponse.class);
+
+	        // Process response based on external API success status
+	        if (!"true".equalsIgnoreCase(externalApiResponse.getHasError())) {
+	            //response.setMessage(externalApiResponse.getMessage());
+	        	response.setMessage("Success");
+	            response.setResponse(externalApiResponse);
+	            response.setIsError(false);
+	            spareSave.setEntryDate(new Date());
+	            spareSave.setSavedStatus(req.getQuoteStatus());
+	            SparePartsSaveDetailsRepo.save(spareSave);
+	        }
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        if(StringUtils.isNotBlank(log.getRequest())){
+	        	apiTransactionLogRepo.save(log);
+	        	logger.info(log.getEndpoint()+" ==> "+ log);
+	        }
+	    }
+
+	    return response;
+	}
+
+
+	private String uplodeDocument(GetGarageWorkOrderRequest req) {
+		 try {
+		        List<DocumentUploadDetailsReqRes> resList = new ArrayList<>();
+
+		        // Fetch documents by claim number
+		        List<VcDocumentUploadDetails> docList = documentUploadDetailsRepo.findByClaimNo(req.getClaimNo());
+		        
+		        InsuredVehicleInfo insuredVeh = new InsuredVehicleInfo();
+		        
+		        Optional<InsuredVehicleInfo> optionalInsuredVeh = repository.findByClaimNoAndGarageId(req.getClaimNo(),req.getGarageid());
+	            if (optionalInsuredVeh.isPresent()) {
+	                insuredVeh = optionalInsuredVeh.get();
+				}
+
+		        // Map each VcDocumentUploadDetails to DocumentUploadDetailsReqRes
+		        for (VcDocumentUploadDetails doc : docList) {
+		            DocumentUploadDetailsReqRes docRes = DocumentUploadDetailsReqRes.builder()
+		                .claimNo(doc.getClaimNo())
+		                .documentRef(String.valueOf(doc.getDocumentRef()))
+		                .docTypeId(doc.getDocTypeId() != null ? String.valueOf(doc.getDocTypeId()) : null)
+		                .docDesc(doc.getDescription())
+		                .companyId(String.valueOf(doc.getCompanyId()))
+		                .filePathName(doc.getFilePathName())
+		                .fileName(doc.getFileName())
+		                .uploadType(doc.getUploadType())
+		                .commonFilePath(doc.getCommonFilePath())
+		                .errorRes(doc.getErrorRes())
+		                .imgUrl(doc.getFilePathName())
+		                .uploadedBy(doc.getUploadedBy())
+		                .fileType(doc.getFileType())
+		                .build();
+
+		            resList.add(docRes);
+		        }
+
+		        // Map the DTO
+		        for (DocumentUploadDetailsReqRes res : resList) {
+		            FileUploadRequestDto dto = new FileUploadRequestDto();
+		            
+		            // Set basic details from insured vehicle and request
+		            dto.setSgsId(insuredVeh.getFnolSgsId());
+		            dto.setAmndVersionId("0");
+		            dto.setProductId(insuredVeh.getProdId());
+		            dto.setTransactionType("CLM");
+		            dto.setPartyId(insuredVeh.getClcpId());
+		            dto.setPartyName(insuredVeh.getInsuredName()); 
+		            dto.setPartyType(""); // Consider setting a valid type if applicable
+		            dto.setCreatedBy("PORTAL");
+		            dto.setDocumentTransactionType("CI"); // Ensure this is handled properly
+		            dto.setAttachmentRefNo(null); // Ensure this is handled properly
+
+		            // Create and map AttachmentDetails
+		            FileUploadRequestDto.AttachmentDetails attachmentDetails = new FileUploadRequestDto.AttachmentDetails();
+		            List<FileUploadRequestDto.DocumentDetails> documentDetailsList = new ArrayList<>();
+
+		            // Map individual document details
+		            FileUploadRequestDto.DocumentDetails documentDetails = new FileUploadRequestDto.DocumentDetails();
+		            documentDetails.setDocumentId(res.getDocTypeId()); 
+		            documentDetails.setDocumentName(res.getDocDesc());
+		            documentDetails.setDocumentType(res.getFileType());
+		            
+		            documentDetails.setDocumentData(""); 
+		            documentDetails.setDocumentFormat(res.getFileType());
+		            documentDetails.setDocumentURL("");
+		            documentDetails.setDocumentRefNo(""); 
+
+		            // Add document details to the list
+		            documentDetailsList.add(documentDetails);
+		            attachmentDetails.setDocumentDetails(documentDetailsList);
+
+		            // Attach document details to DTO
+		            dto.setAttachmentDetails(attachmentDetails);
+
+		            // Call external push document API
+		            PushDocument(req, dto, res.getImgUrl());
+		        }
+
+
+		    } catch (Exception e) {
+		        // Log and set error response details
+		        e.printStackTrace();
+
+		    }
+		return null;
+	}
+	
+	private void PushDocument(GetGarageWorkOrderRequest req, FileUploadRequestDto dto, String filePath) {
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setSno(apiTransactionLogRepo.findMaxSno() + 1);
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+
+	    try {
+
+	        String uploadDocUrl = externalApiUrlUploadDoc;
+	        log.setEndpoint(uploadDocUrl);
+
+	        // Authenticate and retrieve JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Prepare file
+	        MultipartFile file = getImageFile(filePath);
+	        if (file == null || file.isEmpty()) {
+	            throw new RuntimeException("File not found or empty.");
+	        }
+
+	        // Prepare request headers
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+	        // Convert DTO to JSON string
+	        String requestBodyJson = objectMapper.writeValueAsString(dto);
+	        log.setRequest(requestBodyJson);
+
+	        LinkedMultiValueMap body = new LinkedMultiValueMap();
+	        body.add("file", new MultipartInputStreamFileResource(file.getInputStream(), file.getOriginalFilename()));
+	        body.add("fileReqest", requestBodyJson);
+
+	        HttpEntity<LinkedMultiValueMap> requestEntity = new HttpEntity<>(body, headers);
+
+	        // Send request to external API
+	        ResponseEntity<String> apiResponse = restTemplate.exchange(
+	                log.getEndpoint(), HttpMethod.POST, requestEntity, String.class);
+	        
+	        log.setResponse(apiResponse.getBody());
+	        log.setStatus("SUCCESS");
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        if (StringUtils.isNotBlank(log.getRequest())) {
+	            apiTransactionLogRepo.save(log);
+	            logger.info(log.getEndpoint() + " ==> " + log);
+	        }
+	    }
+	}
+
+
+
+	public MultipartFile getImageFile(String path) {
+	    try {
+	        File file = new File(path);
+	        if (StringUtils.isNotBlank(path) && file.exists()) {
+	            byte[] array = FileUtils.readFileToByteArray(file);
+	            return new BASE64DecodedMultipartFile(array, file.getName());
+	        } else {
+	            System.out.println("File Not Found");
+	            return null;
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
+
+
+	@Override
+	public CommonResponse uplodDocument(GetGarageWorkOrderRequest req) {
+		 CommonResponse response = new CommonResponse();
+		try {
+	        List<DocumentUploadDetailsReqRes> resList = new ArrayList<>();
+
+	        // Fetch documents by claim number
+	        List<VcDocumentUploadDetails> docList = documentUploadDetailsRepo.findByClaimNo(req.getClaimNo());
+	        
+	        InsuredVehicleInfo insuredVeh = new InsuredVehicleInfo();
+	        
+	        Optional<InsuredVehicleInfo> optionalInsuredVeh = repository.findByClaimNoAndGarageId(req.getClaimNo(),req.getGarageid());
+            if (optionalInsuredVeh.isPresent()) {
+                insuredVeh = optionalInsuredVeh.get();
+			}
+
+	        // Map each VcDocumentUploadDetails to DocumentUploadDetailsReqRes
+	        for (VcDocumentUploadDetails doc : docList) {
+	            DocumentUploadDetailsReqRes docRes = DocumentUploadDetailsReqRes.builder()
+	                .claimNo(doc.getClaimNo())
+	                .documentRef(String.valueOf(doc.getDocumentRef()))
+	                .docTypeId(doc.getDocTypeId() != null ? String.valueOf(doc.getDocTypeId()) : null)
+	                .docDesc(doc.getDescription())
+	                .companyId(String.valueOf(doc.getCompanyId()))
+	                .filePathName(doc.getFilePathName())
+	                .fileName(doc.getFileName())
+	                .uploadType(doc.getUploadType())
+	                .commonFilePath(doc.getCommonFilePath())
+	                .errorRes(doc.getErrorRes())
+	                .imgUrl(doc.getFilePathName())
+	                .uploadedBy(doc.getUploadedBy())
+	                .fileType(doc.getFileType())
+	                .build();
+
+	            resList.add(docRes);
+	        }
+
+	        // Map the DTO
+	        for (DocumentUploadDetailsReqRes res : resList) {
+	            FileUploadRequestDto dto = new FileUploadRequestDto();
+	            
+	            // Set basic details from insured vehicle and request
+	            dto.setSgsId(insuredVeh.getFnolSgsId());
+//	            dto.setAmndVersionId(req.getAmndVersionId());
+	            dto.setAmndVersionId("0");
+	            dto.setProductId(insuredVeh.getProdId());
+	            dto.setTransactionType("CLM");
+	            dto.setPartyId(insuredVeh.getClcpId());
+	            dto.setPartyName(insuredVeh.getInsuredName()); 
+	            dto.setPartyType(""); // Consider setting a valid type if applicable
+	            dto.setCreatedBy("PORTAL");
+	            dto.setDocumentTransactionType("CI"); // Ensure this is handled properly
+	            dto.setAttachmentRefNo(null); // Ensure this is handled properly
+
+	            // Create and map AttachmentDetails
+	            FileUploadRequestDto.AttachmentDetails attachmentDetails = new FileUploadRequestDto.AttachmentDetails();
+	            List<FileUploadRequestDto.DocumentDetails> documentDetailsList = new ArrayList<>();
+
+	            // Map individual document details
+	            FileUploadRequestDto.DocumentDetails documentDetails = new FileUploadRequestDto.DocumentDetails();
+	            documentDetails.setDocumentId(res.getDocTypeId()); 
+	            documentDetails.setDocumentName(res.getDocDesc());
+	            documentDetails.setDocumentType(res.getFileType());
+	            
+	            documentDetails.setDocumentData(""); 
+	            documentDetails.setDocumentFormat(res.getFileType());
+	            documentDetails.setDocumentURL("");
+	            documentDetails.setDocumentRefNo(""); 
+
+	            // Add document details to the list
+	            documentDetailsList.add(documentDetails);
+	            attachmentDetails.setDocumentDetails(documentDetailsList);
+
+	            // Attach document details to DTO
+	            dto.setAttachmentDetails(attachmentDetails);
+
+	            // Call external push document API
+	            PushDocument(req, dto, res.getImgUrl());
+	        }
+
+	        response.setMessage("Success");
+            response.setIsError(false);
+	    } catch (Exception e) {
+	        // Log and set error response details
+	        e.printStackTrace();
+
+	    }
+	return response;
+	}
+
+
+	@Override
+	public CommonResponse getUploadFileList(DownloadDocumentRequest req) {
+		CommonResponse response = new CommonResponse();
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setSno(apiTransactionLogRepo.findMaxSno()+1);
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+
+	    try {
+	        // Fetch company ID from request payload
+	        String companyId = String.valueOf(req.getCompanyId());
+
+	        // Fetch API URL from the database
+	        String apiType = "UPLOAD_FILE_LIST"; // Match API_TYPE column value
+	        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository
+	                .findByCompanyIdAndApiTypeAndStatus(companyId, apiType, "Y");
+
+	        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+	            response.setMessage("API URL not found for company: " + companyId);
+	            response.setIsError(true);
+	            return response;
+	        }
+
+	        String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
+	        log.setEndpoint(externalApiUrlCreatefnol);
+            
+            InsuredVehicleInfo insuredVeh = new InsuredVehicleInfo();
+	        
+	        Optional<InsuredVehicleInfo> optionalInsuredVeh = repository.findByClaimNoAndGarageId(req.getClaimNo(),req.getGarageId());
+            if (optionalInsuredVeh.isPresent()) {
+                insuredVeh = optionalInsuredVeh.get();
+			}
+	        
+	        // Prepare request body as a simple map
+	        Map<String, String> requestBodyMap = new HashMap<>();
+	        requestBodyMap.put("sgsId", insuredVeh.getFnolSgsId());
+	        
+	        // Authenticate and retrieve JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Create headers and add JWT token
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Convert DTO to JSON for request body and add headers
+	        String requestBody = objectMapper.writeValueAsString(requestBodyMap);
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+	        log.setRequest(requestBody);
+	        logger.info(requestBody);
+	        
+	       // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+	        
+	        // Send request to external API
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
+	        log.setResponse(apiResponse.getBody());
+	        log.setStatus("SUCCESS");
+	        
+	        // Parse response into ExternalApiResponse object
+	        UploadedDocumentListResponseDto externalApiResponse = objectMapper.readValue(apiResponse.getBody(), UploadedDocumentListResponseDto.class);
+
+	        // Process response based on external API success status
+	        if (!"true".equalsIgnoreCase(externalApiResponse.getHasError())) {
+	            //response.setMessage(externalApiResponse.getMessage());
+	        	response.setMessage("Success");
+	            response.setResponse(externalApiResponse);
+	            response.setIsError(false);
+	        }
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        if(StringUtils.isNotBlank(log.getRequest())){
+	        	apiTransactionLogRepo.save(log);
+	        	logger.info(log.getEndpoint()+" ==> "+ log);
+	        }
+	    }
+
+	    return response;
+	}
+
 
 
 

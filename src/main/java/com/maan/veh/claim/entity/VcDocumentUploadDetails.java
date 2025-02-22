@@ -42,7 +42,7 @@ public class VcDocumentUploadDetails {
     private int companyId;
 
     @Column(name = "DOC_TYPE_ID")
-    private Integer docTypeId;
+    private String docTypeId;
 
     @Column(name = "DOC_NAME", length = 200)
     private String docName;

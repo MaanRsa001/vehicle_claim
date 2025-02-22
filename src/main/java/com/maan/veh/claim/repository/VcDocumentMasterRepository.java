@@ -12,4 +12,7 @@ public interface VcDocumentMasterRepository extends JpaRepository<VcDocumentMast
 
 	List<VcDocumentMaster> findByStatusAndCompanyIdOrderByDocumentIdAsc(String string,Integer companyId);
     // You can add custom query methods here if needed
+
+	List<VcDocumentMaster> findByStatusAndMandatoryStatusAndCompanyIdOrderByDocumentIdAsc(String string, String string2,
+			int companyid);
 }

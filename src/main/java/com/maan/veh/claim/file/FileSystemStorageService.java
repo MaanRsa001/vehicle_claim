@@ -97,7 +97,7 @@ public class FileSystemStorageService implements StorageService {
 	        data.setDocumentRef(id);
 	        data.setClaimNo(req.getClaimNo());
 	        data.setCompanyId(Integer.parseInt(req.getCompanyId()));
-	        data.setDocTypeId(req.getDocTypeId() != null ? Integer.parseInt(req.getDocTypeId()) : null);
+	        data.setDocTypeId(req.getDocTypeId() != null ? req.getDocTypeId() : null);
 	        data.setDocName(req.getDocDesc());
 	        data.setFilePathName(destinationFile.toString());
 	        data.setUploadedTime(new Date());

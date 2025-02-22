@@ -19,4 +19,8 @@ public interface SparePartsSaveDetailsRepository extends JpaRepository<SparePart
 
 	SparePartsSaveDetails findByClaimNoAndGarageCode(String claimNo, String coreAppCode);
 
+	SparePartsSaveDetails findByGarageCodeAndClaimNoOrderByEntryDateDesc(String partyId, String fileNo);
+
+	List<SparePartsSaveDetails> findByGarageCodeAndClaimNoInOrderByEntryDateDesc(String partyId, List<String> batch);
+
 }

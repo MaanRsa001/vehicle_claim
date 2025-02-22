@@ -37,5 +37,8 @@ public class VcDocumentMaster {
 
     @Column(name = "REMARKS", length = 100)
     private String remarks;
+    
+    @Column(name = "CORE_APP_CODE")
+    private String 	coreAppCode;
 }
 

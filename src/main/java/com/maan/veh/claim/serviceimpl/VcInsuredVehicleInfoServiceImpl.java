@@ -117,7 +117,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	            .map(insured -> new InsuredVehicleInfoId(
 	                requestPayload.getCompanyid(),
 	                insured.getPolicyNo(),
-	                insured.getClaimNo(),
+	                insured.getFileNo(),
 	                requestPayload.getGarageid()
 	            ))
 	            .collect(Collectors.toSet());
@@ -130,7 +130,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	            .filter(insured -> !existingIds.contains(new InsuredVehicleInfoId(
 	                requestPayload.getCompanyid(),
 	                insured.getPolicyNo(),
-	                insured.getClaimNo(),
+	                insured.getFileNo(),
 	                requestPayload.getGarageid()
 	            )))
 	            .map(insured -> {
@@ -167,7 +167,11 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	                insuredVehicleInfo.setSurveyorId("surveyor_test1");
 	                insuredVehicleInfo.setDealerId("dealer_test1");
 	                insuredVehicleInfo.setLpoId(insured.getLpoId());
-
+	                insuredVehicleInfo.setVehId(insured.getVehId());
+	                insuredVehicleInfo.setClcpId(insured.getClcpId());
+	                insuredVehicleInfo.setProdId(insured.getProdId());
+	                insuredVehicleInfo.setFnolNo(insured.getFnolNo());
+	                
 	                return insuredVehicleInfo;
 	            })
 	            .collect(Collectors.toList());

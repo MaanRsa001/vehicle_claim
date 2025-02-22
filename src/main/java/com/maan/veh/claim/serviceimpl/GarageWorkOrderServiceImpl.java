@@ -312,6 +312,8 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 				spareSave.setRemarks(workOrder.getRemarks());
 				spareSave.setSparePartsDealer(loginMaster.getCoreAppCode());		         
 				spareSave.setLpoId(insuredVehicleInfo.getLpoId());
+				spareSave.setVehId(insuredVehicleInfo.getVehId());
+				spareSave.setClcpId(insuredVehicleInfo.getClcpId());
 				
 				List<DamageSectionDetails> damageList = damageRepository.findByClaimNoAndQuotationNo(workOrder.getClaimNo(), workOrder.getQuotationNo());
 

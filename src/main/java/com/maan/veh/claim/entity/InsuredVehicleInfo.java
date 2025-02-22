@@ -2,6 +2,8 @@ package com.maan.veh.claim.entity;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -104,4 +106,19 @@ public class InsuredVehicleInfo {
 
     @Column(name = "plate_type", length = 100)
     private String plateType;
+    
+    @Column(name ="veh_id")
+    private String vehId;
+    
+    @Column(name ="clcp_id")
+    private String clcpId;
+    
+    @Column(name ="prod_id")
+    private String prodId;
+    
+    @Column(name ="fnol_no")
+    private String fnolNo;
+    
+    @Column(name ="amnd_ver_no")
+    private String amndVerNo;
 }
