@@ -380,6 +380,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            loginMaster.setUpdatedDate(new Date());
 	            loginMaster.setStatus(req.getStatus());
 	            loginMaster.setEffectiveDateStart(req.getEffectiveDate());
+	            loginMaster.setAgencyCode(req.getCatagoryId());
 				
 				if("Y".equalsIgnoreCase(req.getChangePassYN())) {
 					String password = passEnc.crypt(req.getPassWord().trim());
@@ -404,6 +405,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            userInfo.setEffectiveDateStart(req.getEffectiveDate());
 	            userInfo.setUserMobile(req.getMobileNo());
 	            userInfo.setUserMail(req.getEmailid());
+	            userInfo.setAgencyCode(req.getCatagoryId());
 	            LoginUserInfoRepo.save(userInfo);
 	        } else {
 	        	 // Generate OA Code
@@ -424,6 +426,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            loginMasterNew.setCreatedBy(req.getCreatedBy());
 	            loginMasterNew.setEntryDate(new Date());
 	            loginMasterNew.setOaCode(newOaCode);
+	            loginMasterNew.setAgencyCode(req.getCatagoryId());
 	            loginMasterNew.setEffectiveDateStart(req.getEffectiveDate());
 	         
 				loginMasterNew.setLpassDate(dateAfter);

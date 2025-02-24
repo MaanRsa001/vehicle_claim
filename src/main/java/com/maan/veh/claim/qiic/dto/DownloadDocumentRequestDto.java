@@ -10,6 +10,9 @@ public class DownloadDocumentRequestDto {
     @JsonProperty("sgsId")
     private String sgsId;
     
+    @JsonProperty("docId")
+    private String docId;
+    
     @JsonProperty("fileName")
     private String fileName;
     

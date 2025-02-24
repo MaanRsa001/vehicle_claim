@@ -79,11 +79,11 @@ public class FileSystemStorageService implements StorageService {
 	            Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 	        }
 	        
-	        // Get the file type (extension) in uppercase
+	        // Get the file type (extension)
 	        String originalFileName = file.getOriginalFilename();
 	        String fileType = "";
 	        if (originalFileName != null && originalFileName.contains(".")) {
-	            fileType = originalFileName.substring(originalFileName.lastIndexOf(".") + 1).toUpperCase();
+	            fileType = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
 	        }
 	        
 	        List<VcDocumentUploadDetails> all = documentUploadDetailsRepo.findAllByOrderByDocumentRefDesc();

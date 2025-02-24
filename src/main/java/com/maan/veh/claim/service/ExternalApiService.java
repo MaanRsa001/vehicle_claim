@@ -53,4 +53,6 @@ public interface ExternalApiService {
 
 	CommonResponse getUploadFileList(DownloadDocumentRequest requestPayload);
 
+	CommonResponse downloadDoc(DownloadDocumentRequest requestPayload);
+
 }

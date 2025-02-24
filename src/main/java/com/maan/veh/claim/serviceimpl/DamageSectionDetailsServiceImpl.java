@@ -1,6 +1,7 @@
 package com.maan.veh.claim.serviceimpl;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 //import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -472,7 +473,8 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	public CommonResponse viewGarageDamageSectionDetails(GarageSectionDetailsSaveReq req) {
 		CommonResponse response = new CommonResponse();
 	    try {
-	        
+	    	DecimalFormat df = new DecimalFormat("0.00");
+	    	
 	        List<GarageSectionDetailsSaveReq> groupedDamageDetails = new ArrayList<>();
 	        
 	        // Fetch damage section details based on ClaimNo and QuotationNo
@@ -489,14 +491,14 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            res.setDamagePart(data.getDamagePart());
 	            res.setRepairReplace(data.getRepairReplace());    
 	            res.setNoOfUnits(data.getNoOfParts() != null ? data.getNoOfParts().toString() : "");
-	            res.setReplacementCharge(data.getReplaceCost() != null ? data.getReplaceCost().toString() : "");
+	            res.setReplacementCharge(data.getReplaceCost() != null ? df.format(data.getReplaceCost()) : "");
 	            if("REPLACE".equalsIgnoreCase(data.getRepairReplace())) {
-	            	res.setUnitPrice(data.getGaragePrice() != null ? data.getGaragePrice().toString() : "");
+	            	res.setUnitPrice(data.getGaragePrice() != null ? df.format(data.getGaragePrice()) : "");
 	            }
 	            res.setGarageLoginId(data.getGarageLoginId());
 	            res.setStatus(data.getStatus());
-	            res.setDeductablePer(data.getLabourCostDeductPercentage() != null ? data.getLabourCostDeductPercentage().toString():"0");
-	            res.setDeductableAmount(data.getLabourCostDeduct() != null ? data.getLabourCostDeduct().toString():"0");
+	            res.setDeductablePer(data.getLabourCostDeductPercentage() != null ? df.format(data.getLabourCostDeductPercentage()) : "0.00");
+	            res.setDeductableAmount(data.getLabourCostDeduct() != null ? df.format(data.getLabourCostDeduct()) : "0.00");
 	            res.setAsPerInvoice(data.getAsPerInvoice());
 	            groupedDamageDetails.add(res); 
 	        }
@@ -837,12 +839,12 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            res.setDamagePart("");
 	            res.setRepairReplace("");    
 	            res.setNoOfUnits("");
-	            res.setReplacementCharge("");
-	            res.setUnitPrice("");
+	            res.setReplacementCharge("0.00");
+	            res.setUnitPrice("0.00");
 	            res.setGarageLoginId("");
 	            res.setStatus("");
-	            res.setDeductablePer("");
-	            res.setDeductableAmount("");
+	            res.setDeductablePer("0.00");
+	            res.setDeductableAmount("0.00");
 	            res.setAsPerInvoice("");
 	            groupedDamageDetails.add(res); 
 	        }

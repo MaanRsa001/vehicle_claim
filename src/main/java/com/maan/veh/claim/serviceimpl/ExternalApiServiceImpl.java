@@ -29,9 +29,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -77,6 +79,7 @@ import com.maan.veh.claim.file.DocumentUploadDetailsReqRes;
 import com.maan.veh.claim.file.MultipartInputStreamFileResource;
 import com.maan.veh.claim.qiic.dto.CreateWorkBasketRequestDto;
 import com.maan.veh.claim.qiic.dto.DownloadDocumentRequest;
+import com.maan.veh.claim.qiic.dto.DownloadDocumentRequestDto;
 import com.maan.veh.claim.qiic.dto.FileUploadRequestDto;
 import com.maan.veh.claim.qiic.dto.GarageSettlementListRequestDto;
 import com.maan.veh.claim.qiic.dto.GarageSettlementListResponseDto;
@@ -1262,7 +1265,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			request.setAccForSettlement("");
 			request.setSparePartsDealer(partsSaveDetails.getSparePartsDealer());
 			request.setGarageCode(partsSaveDetails.getGarageCode());
-			request.setGarageQuotationNo(partsSaveDetails.getQuotationNo());
+//			request.setGarageQuotationNo(partsSaveDetails.getQuotationNo());
+			request.setGarageQuotationNo(partsSaveDetails.getWorkOrderNo());
 			request.setDeliveryDate(isoDateFormat.format(partsSaveDetails.getDeliveryDate()));
 			request.setDeliveredTo(partsSaveDetails.getDeliveredTo());
 			request.setDeliveredId(partsSaveDetails.getGarageCode());
@@ -2324,6 +2328,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                quoteResponse.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String::valueOf).orElse(""));
 	                quoteResponse.setTotalAfterDeductions(sparePartsMap.get(spareSaved.getClaimNo()).getNetamount());
 	                quoteResponse.setAmndVersionId(sparePartsMap.get(spareSaved.getClaimNo()).getAmndverno());
+	                quoteResponse.setClgwSgsId(spareSaved.getClgwSgsId());
 	                res.add(quoteResponse);
 	            }
 	        }
@@ -2581,17 +2586,18 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                quoteResponse.setRemarks(spareSaved.getRemarks());
 	                quoteResponse.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String::valueOf).orElse(""));
 	                quoteResponse.setTotalAfterDeductions(sparePartsMap.get(spareSaved.getClaimNo()).getNetamount());
-	                if("ESB".equalsIgnoreCase(spareSaved.getSavedStatus())) {
-	                	
-	                }
-	                if("Completed".equalsIgnoreCase(sparePartsMap.get(spareSaved.getClaimNo()).getPaymentStatus())) {
-	                	quoteResponse.setSavedStatus("SCT");
-	                }else if("Pending".equalsIgnoreCase(sparePartsMap.get(spareSaved.getClaimNo()).getPaymentStatus())) {
-	                	quoteResponse.setSavedStatus("WCT");
+	                quoteResponse.setClgwSgsId(spareSaved.getClgwSgsId());
+	                if(!"ESB".equalsIgnoreCase(spareSaved.getSavedStatus())) {
+	                	if("Completed".equalsIgnoreCase(sparePartsMap.get(spareSaved.getClaimNo()).getPaymentStatus())) {
+		                	quoteResponse.setSavedStatus("SCT");
+		                }else if("Pending".equalsIgnoreCase(sparePartsMap.get(spareSaved.getClaimNo()).getPaymentStatus())) {
+		                	quoteResponse.setSavedStatus("WCT");
+		                }
+		                
+		                
+		                res.add(quoteResponse);
 	                }
 	                
-	                
-	                res.add(quoteResponse);
 	            }
 	        }
 
@@ -2617,131 +2623,137 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	@Override
 	public CommonResponse completeWorkOrder(GetGarageWorkOrderRequest req) {
         CommonResponse response = new CommonResponse();
-	    ApiTransactionLog log = new ApiTransactionLog();
-	    log.setSno(apiTransactionLogRepo.findMaxSno()+1);
-	    log.setRequestTime(LocalDateTime.now());
-	    log.setEntryDate(new Date());
+	    if ("WCT".equalsIgnoreCase(req.getQuoteStatus())) {
+			ApiTransactionLog log = new ApiTransactionLog();
+			log.setSno(apiTransactionLogRepo.findMaxSno() + 1);
+			log.setRequestTime(LocalDateTime.now());
+			log.setEntryDate(new Date());
+			try {
+				// Fetch company ID from request payload
+				String companyId = String.valueOf(req.getCompanyid());
 
-	    try {
-	        // Fetch company ID from request payload
-	        String companyId = String.valueOf(req.getCompanyid());
+				// Fetch API URL from the database
+				String apiType = "WORK_BASKET"; // Match API_TYPE column value
+				Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository
+						.findByCompanyIdAndApiTypeAndStatus(companyId, apiType, "Y");
 
-	        // Fetch API URL from the database
-	        String apiType = "WORK_BASKET"; // Match API_TYPE column value
-	        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository
-	                .findByCompanyIdAndApiTypeAndStatus(companyId, apiType, "Y");
+				if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+					response.setMessage("API URL not found for company: " + companyId);
+					response.setIsError(true);
+					return response;
+				}
 
-	        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
-	            response.setMessage("API URL not found for company: " + companyId);
-	            response.setIsError(true);
-	            return response;
-	        }
+				String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
+				log.setEndpoint(externalApiUrlCreatefnol);
 
-	        String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
-	        log.setEndpoint(externalApiUrlCreatefnol);
-	        
-            // Step 1: Validate the request
-          List<ErrorList> errors = validation.validateCreateWorkBasket(req);
-          if (!errors.isEmpty()) {
-              // Return early if there are validation errors
-              response.setErrors(errors);
-              response.setMessage("Validation Failed");
-              response.setIsError(true);
-              response.setResponse(Collections.emptyList());
-              return response;
-          }
-          
-            String error = uplodeDocument(req);
-            
-	        // Map entities to request DTO
-            CreateWorkBasketRequestDto dto = new CreateWorkBasketRequestDto();
-	        
-	    	Optional<InsuredVehicleInfo> optionalInsuredVeh = repository.findByClaimNoAndGarageId(req.getClaimNo(),req.getGarageid());
-            if (optionalInsuredVeh.isPresent()) {
-                InsuredVehicleInfo insuredVeh = optionalInsuredVeh.get();
-                insuredVeh.setStatus(req.getQuoteStatus());
-                insuredVeh.setEntryDate(new Date());
-                insuredVeh.setAmndVerNo(req.getAmndVersionId());
-                
-                dto.setClaimNo(insuredVeh.getFileNo());
-                dto.setClcpId(insuredVeh.getClcpId());
-                dto.setFnolNo(insuredVeh.getFnolNo());
-                dto.setProdId(insuredVeh.getProdId());
-                
-                repository.save(insuredVeh);
-			}
-            
-            SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNoAndGarageCode(req.getClaimNo(),req.getPartyId());
-            
-	        
-	        // Authenticate and retrieve JWT token
-	        String jwtToken = authenticateUserCall();
+				// Step 1: Validate the request
+				List<ErrorList> errors = validation.validateCreateWorkBasket(req);
+				if (!errors.isEmpty()) {
+					// Return early if there are validation errors
+					response.setErrors(errors);
+					response.setMessage("Validation Failed");
+					response.setIsError(true);
+					response.setResponse(Collections.emptyList());
+					return response;
+				}
 
-	        // Create headers and add JWT token
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.set("Authorization", "Bearer " + jwtToken);
-	        headers.setContentType(MediaType.APPLICATION_JSON);
+				String error = uplodeDocument(req);
 
-	        // Convert DTO to JSON for request body and add headers
-	        String requestBody = objectMapper.writeValueAsString(dto);
-	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-	        log.setRequest(requestBody);
-	        logger.info(requestBody);
-	     // Configure SSL Trust Managers (if necessary)
-            TrustManager[] trustAllCerts = new TrustManager[] {
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
+				// Map entities to request DTO
+				CreateWorkBasketRequestDto dto = new CreateWorkBasketRequestDto();
 
-                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-                    }
+				Optional<InsuredVehicleInfo> optionalInsuredVeh = repository.findByClaimNoAndGarageId(req.getClaimNo(),
+						req.getGarageid());
+				if (optionalInsuredVeh.isPresent()) {
+					InsuredVehicleInfo insuredVeh = optionalInsuredVeh.get();
+					insuredVeh.setStatus(req.getQuoteStatus());
+					insuredVeh.setEntryDate(new Date());
+					insuredVeh.setAmndVerNo(req.getAmndVersionId());
 
-                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-                }
-            };
+					dto.setClaimNo(insuredVeh.getFileNo());
+					dto.setClcpId(insuredVeh.getClcpId());
+					dto.setFnolNo(insuredVeh.getFnolNo());
+					dto.setProdId(insuredVeh.getProdId());
 
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
-	        
-	        // Send request to external API
-	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
-	        log.setResponse(apiResponse.getBody());
-	        log.setStatus("SUCCESS");
-	        
-	        // Parse response into ExternalApiResponse object
-	        ClaimListResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), ClaimListResponse.class);
+					repository.save(insuredVeh);
+				}
 
-	        // Process response based on external API success status
-	        if (!"true".equalsIgnoreCase(externalApiResponse.getHasError())) {
-	            //response.setMessage(externalApiResponse.getMessage());
-	        	response.setMessage("Success");
-	            response.setResponse(externalApiResponse);
-	            response.setIsError(false);
-	            spareSave.setEntryDate(new Date());
-	            spareSave.setSavedStatus(req.getQuoteStatus());
-	            SparePartsSaveDetailsRepo.save(spareSave);
-	        }
+				SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNoAndGarageCode(req.getClaimNo(),
+						req.getPartyId());
 
-	    } catch (Exception e) {
-	        log.setStatus("FAILURE");
-	        log.setErrorMessage(e.getMessage());
-	        response.setMessage("Failed to save data");
-	        response.setIsError(true);
-	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+				// Authenticate and retrieve JWT token
+				String jwtToken = authenticateUserCall();
 
-	    } finally {
-	        log.setResponseTime(LocalDateTime.now());
-	        if(StringUtils.isNotBlank(log.getRequest())){
-	        	apiTransactionLogRepo.save(log);
-	        	logger.info(log.getEndpoint()+" ==> "+ log);
-	        }
+				// Create headers and add JWT token
+				HttpHeaders headers = new HttpHeaders();
+				headers.set("Authorization", "Bearer " + jwtToken);
+				headers.setContentType(MediaType.APPLICATION_JSON);
+
+				// Convert DTO to JSON for request body and add headers
+				String requestBody = objectMapper.writeValueAsString(dto);
+				HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+				log.setRequest(requestBody);
+				logger.info(requestBody);
+				// Configure SSL Trust Managers (if necessary)
+				TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+						return null;
+					}
+
+					public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+					}
+
+					public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+					}
+				} };
+
+				SSLContext sc = SSLContext.getInstance("SSL");
+				sc.init(null, trustAllCerts, new java.security.SecureRandom());
+				HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+				HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+
+				// Send request to external API
+				ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity,
+						String.class);
+				log.setResponse(apiResponse.getBody());
+				log.setStatus("SUCCESS");
+
+				// Parse response into ExternalApiResponse object
+				ClaimListResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(),
+						ClaimListResponse.class);
+
+				// Process response based on external API success status
+				if (!"true".equalsIgnoreCase(externalApiResponse.getHasError())) {
+					//response.setMessage(externalApiResponse.getMessage());
+					response.setMessage("Success");
+					response.setResponse(externalApiResponse);
+					response.setIsError(false);
+					spareSave.setEntryDate(new Date());
+					spareSave.setSavedStatus(req.getQuoteStatus());
+					SparePartsSaveDetailsRepo.save(spareSave);
+				}
+
+			} catch (Exception e) {
+				log.setStatus("FAILURE");
+				log.setErrorMessage(e.getMessage());
+				response.setMessage("Failed to save data");
+				response.setIsError(true);
+				response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+
+			} finally {
+				log.setResponseTime(LocalDateTime.now());
+				if (StringUtils.isNotBlank(log.getRequest())) {
+					apiTransactionLogRepo.save(log);
+					logger.info(log.getEndpoint() + " ==> " + log);
+				}
+			} 
+		}
+	    response.setMessage("Success");
+	    if(response.getResponse()==null) {
+	    	 response.setResponse("Success");
 	    }
-
-	    return response;
+	   
+		return response;
 	}
 
 
@@ -3100,6 +3112,100 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    return response;
 	}
 
+
+	@Override
+	public CommonResponse downloadDoc(DownloadDocumentRequest req) {
+	    CommonResponse response = new CommonResponse();
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setSno(apiTransactionLogRepo.findMaxSno() + 1);
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+
+	    try {
+	        // Fetch company ID from request payload
+	        String companyId = String.valueOf(req.getCompanyId());
+
+	        // Fetch API URL from the database
+	        String apiType = "DOWNLOAD_DOC_PRINT"; // Match API_TYPE column value
+	        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository
+	                .findByCompanyIdAndApiTypeAndStatus(companyId, apiType, "Y");
+
+	        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+	            response.setMessage("API URL not found for company: " + companyId);
+	            response.setIsError(true);
+	            return response;
+	        }
+
+	        String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
+	        log.setEndpoint(externalApiUrlCreatefnol);
+
+	        // Prepare dto
+	        DownloadDocumentRequestDto dto = new DownloadDocumentRequestDto();
+	        dto.setSgsId(req.getSgsId());
+	        dto.setDocId(req.getDocId());
+	        dto.setDocPrintType("fileUpload");
+	        dto.setFileName(req.getFileName());
+
+	        // Authenticate and retrieve JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Create headers and add JWT token
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Convert DTO to JSON for request body and add headers
+	        String requestBody = objectMapper.writeValueAsString(dto);
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+	        log.setRequest(requestBody);
+	        logger.info(requestBody);
+
+	        // Send request to external API
+	        ResponseEntity<byte[]> apiResponse = restTemplate.exchange(
+	                log.getEndpoint(), HttpMethod.POST, entity, byte[].class);
+
+	        if (apiResponse.getStatusCode() == HttpStatus.OK && apiResponse.getBody() != null) {
+	            byte[] fileBytes = apiResponse.getBody();
+
+	            // Convert byte array to MultipartFile
+	            MultipartFile baseM = new BASE64DecodedMultipartFile(fileBytes, req.getFileName());
+	            String contentType = baseM.getContentType();
+	            String prefix = "data:" + contentType + ";base64,";
+
+	            // Encode file content to Base64
+	            String imgUrlEncoded = Base64Utils.encodeToString(fileBytes);
+	            String documentUrl = prefix + imgUrlEncoded;
+
+	            // Set response data
+	            response.setMessage("Success");
+	            response.setResponse(documentUrl);
+	            response.setIsError(false);
+
+	            log.setResponse("Success");
+	            log.setStatus("SUCCESS");
+	        } else {
+	            response.setMessage("Failed to download document");
+	            response.setIsError(true);
+	            response.setErrors(Collections.singletonList(new ErrorResponse("101", "Download Failed", "No content received")));
+	            log.setStatus("FAILURE");
+	        }
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        if (StringUtils.isNotBlank(log.getRequest())) {
+	            apiTransactionLogRepo.save(log);
+	            logger.info(log.getEndpoint() + " ==> " + log);
+	        }
+	    }
+
+	    return response;
+	}
 
 
 

@@ -416,6 +416,14 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
                 garage.setStatus(data.getStatus());
                 garage.setSparepartsDealerId(Optional.ofNullable(data.getSparepartsDealerId()).map(String::valueOf).orElse(null));
                 garage.setQuoteStatus(data.getQuoteStatus());
+                try {
+					SparePartsSaveDetails saveDetails = SparePartsSaveDetailsRepo.findByClaimNo(data.getClaimNo());
+					if( saveDetails!=null && "ESB".equalsIgnoreCase(saveDetails.getSavedStatus())){
+						garage.setQuoteStatus("WST");
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+				}
                 List<DamageSectionDetails> damageList = damageRepository.findByClaimNoAndQuotationNo(data.getClaimNo(), data.getQuotationNo());
 
                 boolean foundReplace = damageList.stream()
