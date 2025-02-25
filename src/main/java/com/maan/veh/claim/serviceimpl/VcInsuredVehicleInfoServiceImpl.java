@@ -466,4 +466,99 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 		}
 		return null;  // Return null if authentication fails
 	}
+
+	@Override
+	public CommonResponse assignSurveyorInsuredVehicleInfo(InsuredVehicleMasterDTO requestPayload) {
+		CommonResponse response = new CommonResponse();
+	    ApiTransactionLog transactionLog = new ApiTransactionLog();
+	    transactionLog.setRequestTime(LocalDateTime.now());
+	    transactionLog.setEntryDate(new Date());
+
+	    try {
+	        // Prepare request payload
+	        InsuredVehicleInfoDTO newdata = new InsuredVehicleInfoDTO(
+	            requestPayload.getPartyId(),
+	            requestPayload.getCategoryId(),
+	            requestPayload.getProdId()
+	        );
+
+	        // Authenticate user and get JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Set up headers
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Send request to external API
+	        HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(newdata), headers);
+	        setupSSLContext();
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(Authenticate, entity, String.class);
+
+	        // Parse API response
+	        VcinsuredVehicleResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), VcinsuredVehicleResponse.class);
+	        List<VcInuredVehicleApiReponse> apiData = externalApiResponse.getData();
+	        if (apiData == null || apiData.isEmpty()) {
+	            response.setMessage("No data received from API");
+	            response.setIsError(false);
+	            return response;
+	        }
+
+	        // Create a set of IDs for batch fetching
+	        Set<InsuredVehicleInfoId> insuredIds = apiData.stream()
+	            .map(insured -> new InsuredVehicleInfoId(
+	                requestPayload.getCompanyid(),
+	                insured.getPolicyno(),
+	                insured.getClaimno(),
+	                requestPayload.getGarageid()
+	            ))
+	            .collect(Collectors.toSet());
+
+	        // ✅ Fetch existing records in ONE bulk query
+	        Set<InsuredVehicleInfoId> existingIds = repository.findExistingIds(insuredIds);
+
+	        // Process only new records
+	        List<InsuredVehicleInfo> insuredInfoList = apiData.stream()
+	            .filter(insured -> !existingIds.contains(new InsuredVehicleInfoId(
+	                requestPayload.getCompanyid(),
+	                insured.getPolicyno(),
+	                insured.getClaimno(),
+	                requestPayload.getGarageid()
+	            )))
+	            .map(insured -> {
+	                InsuredVehicleInfo insuredVehicleInfo = new InsuredVehicleInfo();
+	                insuredVehicleInfo.setCompanyId(requestPayload.getCompanyid());
+	                insuredVehicleInfo.setPolicyNo(insured.getPolicyno());
+	                insuredVehicleInfo.setClaimNo(insured.getClaimno());
+	                insuredVehicleInfo.setGarageId(requestPayload.getGarageid());
+	                
+	                // Default values
+	                insuredVehicleInfo.setSurveyorId(requestPayload.getSurveyorId());
+	                insuredVehicleInfo.setDealerId("dealer_test1");
+	                
+	                return insuredVehicleInfo;
+	            })
+	            .collect(Collectors.toList());
+
+	        // Save all new records in bulk
+	        if (!insuredInfoList.isEmpty()) {
+	            repository.saveAll(insuredInfoList);
+	        }
+
+	        // Success response
+	        response.setMessage("Data saved successfully");
+	        response.setIsError(false);
+	        response.setResponse(externalApiResponse);
+	    } catch (Exception e) {
+	        transactionLog.setStatus("FAILURE");
+	        transactionLog.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+	    } finally {
+	        transactionLog.setResponseTime(LocalDateTime.now());
+	    }
+
+	    return response;
+	}
 }

@@ -12,4 +12,6 @@ public interface VcInsuredVehicleInfoService {
 	
 	CommonResponse saveInsuredVehicle(@RequestBody InsuredVehicleMasterDTO req);
 
+	CommonResponse assignSurveyorInsuredVehicleInfo(InsuredVehicleMasterDTO request);
+
 }

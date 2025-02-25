@@ -30,5 +30,12 @@ public class VcInsuredVehicleInfoController {
 		  CommonResponse response =service.saveInsuredVehicle(request);
 	        return new ResponseEntity<>(response, HttpStatus.OK);
 	    }
+	  
+	  @PostMapping("surveyor/save")
+	    public ResponseEntity<CommonResponse> assignSurveyorInsuredVehicleInfo(@RequestBody InsuredVehicleMasterDTO request) {
+//	        return service.saveInsuredVehicle(request);
+		  CommonResponse response =service.assignSurveyorInsuredVehicleInfo(request);
+	        return new ResponseEntity<>(response, HttpStatus.OK);
+	    }
 
 }

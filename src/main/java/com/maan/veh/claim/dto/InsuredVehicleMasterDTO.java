@@ -1,7 +1,5 @@
 package com.maan.veh.claim.dto;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
@@ -22,5 +20,8 @@ public class InsuredVehicleMasterDTO {
 	 
 	 @JsonProperty("Garageid")
 	 private String  garageid;
+	 
+	 @JsonProperty("SurveyorId")
+	 private String  surveyorId;
 
 }
