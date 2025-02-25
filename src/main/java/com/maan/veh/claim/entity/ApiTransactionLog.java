@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "qiic_api_transaction_log")
+@Table(name = "eagle_api_transaction_log")
 public class ApiTransactionLog {
 	
 	@Id
