@@ -22,8 +22,8 @@ public interface LoginMasterRepository extends JpaRepository<LoginMaster, LoginM
 
 	List<LoginMaster> findByCompanyId(String companyId);
 
-	@Query("SELECT MAX(CAST(l.oaCode AS int)) FROM LoginMaster l")
-    Integer findMaxOaCode();
+	@Query(value = "SELECT MAX(TO_NUMBER(oa_code)) FROM vc_login_master", nativeQuery = true)
+	Integer findMaxOaCode();
 
 	List<LoginMaster> findByCoreAppCode(String coreAppCode);
 }

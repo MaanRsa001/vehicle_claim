@@ -403,6 +403,8 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            userInfo.setUpdatedBy(req.getCreatedBy());
 	            userInfo.setUpdatedDate(new Date());
 	            userInfo.setEffectiveDateStart(req.getEffectiveDate());
+	            userInfo.setMobileCode(req.getMobileCode());
+	            userInfo.setMobileCodeDesc(req.getMobileCodeDesc());
 	            userInfo.setUserMobile(req.getMobileNo());
 	            userInfo.setUserMail(req.getEmailid());
 	            userInfo.setAgencyCode(req.getCatagoryId());
@@ -452,6 +454,8 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            userInfoNew.setUserMobile(req.getMobileNo());
 	            userInfoNew.setUserMail(req.getEmailid());
 	            userInfoNew.setAgencyCode(req.getCatagoryId());
+	            userInfoNew.setMobileCode(req.getMobileCode());
+	            userInfoNew.setMobileCodeDesc(req.getMobileCodeDesc());
 	            
 	            LoginUserInfoRepo.save(userInfoNew);
 	        }
@@ -504,7 +508,9 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	        }
 
 	        // Map the entity list to DTO list
-	        List<GarageLoginMasterDTO> garageLoginList = userInfoList.stream().map(userInfo -> {
+	        List<GarageLoginMasterDTO> garageLoginList = userInfoList.stream()
+	        	.sorted(Comparator.comparing(LoginUserInfo::getOaCode, Comparator.nullsLast(Comparator.reverseOrder()))) // Sort in descending order
+	            .map(userInfo -> {
 	            GarageLoginMasterDTO dto = new GarageLoginMasterDTO();
 
 	            // Populate data from LoginUserInfo

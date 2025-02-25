@@ -1542,6 +1542,8 @@ List<ErrorList> errors = new ArrayList<>();
 
 	    if (StringUtils.isBlank(req.getMobileNo())) {
 	        list.add(new ErrorList("100", "Mobileno", "Mobile number cannot be blank"));
+	    } else if (!req.getMobileNo().matches("\\d{8}")) {
+	        list.add(new ErrorList("101", "Mobileno", "Mobile number must contain exactly 8 digits and only numbers"));
 	    }
 
 	    if (StringUtils.isBlank(req.getEmailid())) {

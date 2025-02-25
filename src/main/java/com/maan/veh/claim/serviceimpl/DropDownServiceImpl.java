@@ -152,6 +152,10 @@ public class DropDownServiceImpl implements DropDownService {
 	public List<DropDownRes> getLossLocation(String companyId) {
 		return getDropdownValues("LOSS_LOCATION",companyId);
 	}
+	@Override
+	public List<DropDownRes> getMobileCode(String companyId) {
+		return getDropdownValues("MOBILE_CODE",companyId);
+	}
 	
     private List<DropDownRes> getDropdownValues(String itemType,String companyId) {
         List<DropDownRes> resList = new ArrayList<>();

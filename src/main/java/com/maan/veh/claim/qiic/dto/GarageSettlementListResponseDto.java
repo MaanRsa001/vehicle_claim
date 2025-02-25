@@ -111,6 +111,12 @@ public class GarageSettlementListResponseDto {
 
     @JsonProperty("netamount")
     private String netamount;
+    
+    @JsonProperty("outstanding")
+    private String outstanding;
+    
+    @JsonProperty("paidamount")
+    private String paidamount;
 
     @JsonProperty("amndverno")
     private String amndVerNo;

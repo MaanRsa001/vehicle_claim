@@ -143,4 +143,10 @@ public class GetAllQuoteResponse {
  	
  	@JsonProperty("AmndVersionId")
  	private String AmndVersionId;
+ 	
+ 	@JsonProperty("outstanding")
+    private String outstanding;
+    
+    @JsonProperty("paidamount")
+    private String paidamount;
 }

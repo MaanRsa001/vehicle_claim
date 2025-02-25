@@ -93,6 +93,23 @@ public class DropDownController {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	@GetMapping("/getmobilecode/{companyId}")
+	public ResponseEntity<CommonRes> getMobileCode(@PathVariable String companyId) {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getMobileCode(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
 
 	@GetMapping("/getlosstype/{companyId}")
 	public ResponseEntity<CommonRes> getLossType(@PathVariable String companyId) {

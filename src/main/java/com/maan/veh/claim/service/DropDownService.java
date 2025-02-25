@@ -53,4 +53,6 @@ public interface DropDownService {
 	String getbodyPartCodeByValue(String value);
 
 	List<DropDownRes> getLossLocation(String companyId);
+
+	List<DropDownRes> getMobileCode(String companyId);
 }

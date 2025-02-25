@@ -3,6 +3,8 @@ package com.maan.veh.claim.serviceimpl;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -23,6 +25,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +36,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -198,6 +200,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
     @Value("${auth.password}")
     private String apipassword;
+    
+    @Value("${common.path}")
+	private Path rootLocation;
     
     @Autowired
     private InputValidationUtil validation;
@@ -2194,31 +2199,46 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	private List<GarageSectionDetailsSaveReq> mapToGroupedDamageDetails(LpoApprovalSyncResponse externalApiResponse,Map<String, String> damageDirectionMap) {
 		
 		List<GarageSectionDetailsSaveReq> groupedDamageDetails = new ArrayList<>();
-		
-		try {
-			int damageSno = 1;
-			for (LpoApprovalSyncDamageResponse data : externalApiResponse.getVehicleDamageDetails()) {
-			    GarageSectionDetailsSaveReq res = new GarageSectionDetailsSaveReq();
-			    // Populate the fields from the retrieved data
-			    res.setClaimNo(externalApiResponse.getClaimNo());
-			    res.setQuotationNo(externalApiResponse.getGarageQuotationNo());
-			    res.setDamageSno(""+damageSno);
-			    res.setDamageDirection(damageDirectionMap.get(data.getDamageDirection()));
-			    res.setRepairReplace("REPAIR");    
-			    res.setNoOfUnits(data.getNoUnits() != null ? data.getNoUnits().toString() : "");
-			    res.setReplacementCharge(data.getReplacementCharge() != null ? data.getReplacementCharge().toString() : "");
-			    res.setDeductablePer(data.getDeductiblePer() != null ? data.getDeductiblePer().toString():"0");
-			    res.setDeductableAmount(data.getDeductibleAmount() != null ? data.getDeductibleAmount().toString():"0");
-			    groupedDamageDetails.add(res);
-			    damageSno++;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return groupedDamageDetails;
-		}
-        return groupedDamageDetails;
-	}
+	    DecimalFormat df = new DecimalFormat("0.00"); // Ensure two decimal places
 
+	    try {
+	        int damageSno = 1;
+
+	        for (LpoApprovalSyncDamageResponse data : externalApiResponse.getVehicleDamageDetails()) {
+	            GarageSectionDetailsSaveReq res = new GarageSectionDetailsSaveReq();
+
+	            // Populate fields
+	            res.setClaimNo(externalApiResponse.getClaimNo());
+	            res.setQuotationNo(externalApiResponse.getGarageQuotationNo());
+	            res.setDamageSno(String.valueOf(damageSno));
+	            res.setDamageDirection(damageDirectionMap.getOrDefault(data.getDamageDirection(), ""));
+	            res.setRepairReplace("REPAIR");
+	            res.setNoOfUnits(data.getNoUnits() != null ? data.getNoUnits() : "0");
+
+	            // Convert and format numerical fields
+	            res.setReplacementCharge(formatNumber(data.getReplacementCharge(), df));
+	            res.setDeductablePer(formatNumber(data.getDeductiblePer(), df));
+	            res.setDeductableAmount(formatNumber(data.getDeductibleAmount(), df));
+
+	            groupedDamageDetails.add(res);
+	            damageSno++;
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return groupedDamageDetails;
+	}
+	
+	private String formatNumber(String value, DecimalFormat df) {
+	    if (value == null || value.trim().isEmpty()) {
+	        return "0.00"; // Default value
+	    }
+	    try {
+	        return df.format(Double.parseDouble(value));
+	    } catch (NumberFormatException e) {
+	        return "0.00"; // Handle invalid number inputs
+	    }
+	}
 
 	@Override
 	public CommonResponse getGarageWorkOrder(GetGarageWorkOrderRequest requestPayload) {
@@ -2587,6 +2607,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                quoteResponse.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String::valueOf).orElse(""));
 	                quoteResponse.setTotalAfterDeductions(sparePartsMap.get(spareSaved.getClaimNo()).getNetamount());
 	                quoteResponse.setClgwSgsId(spareSaved.getClgwSgsId());
+	                quoteResponse.setPaidamount(sparePartsMap.get(spareSaved.getClaimNo()).getPaidamount());
+	                quoteResponse.setOutstanding(sparePartsMap.get(spareSaved.getClaimNo()).getOutstanding());
 	                if(!"ESB".equalsIgnoreCase(spareSaved.getSavedStatus())) {
 	                	if("Completed".equalsIgnoreCase(sparePartsMap.get(spareSaved.getClaimNo()).getPaymentStatus())) {
 		                	quoteResponse.setSavedStatus("SCT");
@@ -3126,7 +3148,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        String companyId = String.valueOf(req.getCompanyId());
 
 	        // Fetch API URL from the database
-	        String apiType = "DOWNLOAD_DOC_PRINT"; // Match API_TYPE column value
+	        String apiType = "DOWNLOAD_DOC_PRINT";
 	        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository
 	                .findByCompanyIdAndApiTypeAndStatus(companyId, apiType, "Y");
 
@@ -3136,10 +3158,10 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	            return response;
 	        }
 
-	        String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
-	        log.setEndpoint(externalApiUrlCreatefnol);
+	        String externalApiUrl = apiConfig.get().getApiUrl();
+	        log.setEndpoint(externalApiUrl);
 
-	        // Prepare dto
+	        // Prepare DTO
 	        DownloadDocumentRequestDto dto = new DownloadDocumentRequestDto();
 	        dto.setSgsId(req.getSgsId());
 	        dto.setDocId(req.getDocId());
@@ -3154,33 +3176,27 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        headers.set("Authorization", "Bearer " + jwtToken);
 	        headers.setContentType(MediaType.APPLICATION_JSON);
 
-	        // Convert DTO to JSON for request body and add headers
+	        // Convert DTO to JSON for request body
 	        String requestBody = objectMapper.writeValueAsString(dto);
 	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 	        log.setRequest(requestBody);
-	        logger.info(requestBody);
+	        logger.info("Request Payload: " + requestBody);
 
-	        // Send request to external API
-	        ResponseEntity<byte[]> apiResponse = restTemplate.exchange(
-	                log.getEndpoint(), HttpMethod.POST, entity, byte[].class);
+	        // Call external API expecting a Base64 string as response
+	        ResponseEntity<String> apiResponse = restTemplate.exchange(
+	                log.getEndpoint(), HttpMethod.POST, entity, String.class);
 
 	        if (apiResponse.getStatusCode() == HttpStatus.OK && apiResponse.getBody() != null) {
-	            byte[] fileBytes = apiResponse.getBody();
+	            String base64EncodedFile = apiResponse.getBody();
 
-	            // Convert byte array to MultipartFile
-	            MultipartFile baseM = new BASE64DecodedMultipartFile(fileBytes, req.getFileName());
-	            String contentType = baseM.getContentType();
-	            String prefix = "data:" + contentType + ";base64,";
+	            // ✅ Get content type from file extension
+	            String contentType = determineContentType(req.getFileName());
+	            String base64WithPrefix = "data:" + contentType + ";base64," + base64EncodedFile;
 
-	            // Encode file content to Base64
-	            String imgUrlEncoded = Base64Utils.encodeToString(fileBytes);
-	            String documentUrl = prefix + imgUrlEncoded;
-
-	            // Set response data
-	            response.setMessage("Success");
-	            response.setResponse(documentUrl);
+	            // ✅ Return response with prefixed Base64
+	            response.setMessage("File retrieved successfully");
+	            response.setResponse(base64WithPrefix);
 	            response.setIsError(false);
-
 	            log.setResponse("Success");
 	            log.setStatus("SUCCESS");
 	        } else {
@@ -3193,19 +3209,48 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    } catch (Exception e) {
 	        log.setStatus("FAILURE");
 	        log.setErrorMessage(e.getMessage());
-	        response.setMessage("Failed to save data");
+	        response.setMessage("Failed to retrieve file");
 	        response.setIsError(true);
 	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
 	        if (StringUtils.isNotBlank(log.getRequest())) {
 	            apiTransactionLogRepo.save(log);
-	            logger.info(log.getEndpoint() + " ==> " + log);
+	            logger.info("Transaction Log: " + log.getEndpoint() + " ==> " + log);
 	        }
 	    }
 
 	    return response;
 	}
+	
+	private String determineContentType(String fileName) {
+	    String extension = FilenameUtils.getExtension(fileName).toLowerCase();
+
+	    switch (extension) {
+	        case "pdf":
+	            return "application/pdf";
+	        case "jpg":
+	        case "jpeg":
+	            return "image/jpeg";
+	        case "png":
+	            return "image/png";
+	        case "gif":
+	            return "image/gif";
+	        case "doc":
+	            return "application/msword";
+	        case "docx":
+	            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+	        case "xls":
+	            return "application/vnd.ms-excel";
+	        case "xlsx":
+	            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+	        case "txt":
+	            return "text/plain";
+	        default:
+	            return "application/octet-stream"; // Default binary file type
+	    }
+	}
+
 
 
 
