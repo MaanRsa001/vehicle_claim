@@ -106,6 +106,9 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
                         veh.setFileNo(vehicle.getFileNo());
                         veh.setGarageAddress(vehicle.getGarageAddress());
                         veh.setPlateType(vehicle.getPlateType());
+                        veh.setMobileCode(vehicle.getMobileCode());
+                        veh.setMobileNo(vehicle.getMobileNo());
+                        veh.setDeductible(vehicle.getDeductible());
                         
                         return veh;
                     }).collect(Collectors.toList());
@@ -126,6 +129,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 
 
     public CommonResponse getVehicleInfoByCompanyIdV0(VehicleGarageViewRequest request) {
+    	
     	CommonResponse response = new CommonResponse(); 	
     	List<VehicleInfoResponse> vehList = new ArrayList<>();
         

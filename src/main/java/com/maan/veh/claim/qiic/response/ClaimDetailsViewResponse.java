@@ -1,19 +1,20 @@
-package com.maan.veh.claim.response;
+package com.maan.veh.claim.qiic.response;
+
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VehicleInfoResponse {
-
-    @JsonProperty("CompanyId")
+public class ClaimDetailsViewResponse {
+	
+	@JsonProperty("CompanyId")
     private String companyId;
 
     @JsonProperty("PolicyNo")

@@ -114,5 +114,14 @@ public class WorkOrderDetailResponseDto {
     
     @JsonProperty("amndverno")
     private String amndverno;
+
+    @JsonProperty("deductible")
+    private String deductible;
     
+    @JsonProperty("mobileCode")
+    private String mobileCode;
+    
+    @JsonProperty("mobileNo")
+    private String mobileNo;
+
 }

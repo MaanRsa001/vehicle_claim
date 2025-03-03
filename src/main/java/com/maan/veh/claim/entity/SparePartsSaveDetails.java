@@ -45,7 +45,6 @@ public class SparePartsSaveDetails {
     private String workOrderNo;
 
     @Column(name = "work_order_date")
-    @Temporal(TemporalType.DATE)
     private Date workOrderDate;
 
     @Column(name = "account_settlement_type", length = 50)
@@ -61,7 +60,6 @@ public class SparePartsSaveDetails {
     private String garageQuotationNo;
 
     @Column(name = "delivery_date")
-    @Temporal(TemporalType.DATE)
     private Date deliveryDate;
 
     @Column(name = "delivered_to", length = 255)
@@ -153,4 +151,14 @@ public class SparePartsSaveDetails {
     
     @Column(name ="prod_id")
     private String prodId;
+    
+    @Column(name ="mobile_no")
+    private String mobileNo;
+    
+    @Column(name ="mobile_code")
+    private String mobileCode;
+    
+    @Column(name ="deductible")
+    private String deductible;
+
 }

@@ -107,4 +107,14 @@ public class VcInuredVehicleApiResponseQIIC {
     
     @JsonProperty("createddate")
     private String createdDate;
+    
+    @JsonProperty("mobileNo")
+    private String mobileNo;
+    
+    @JsonProperty("mobileCode")
+    private String mobileCode;
+    
+    @JsonProperty("deductible")
+    private String deductible;
+
 }

@@ -121,4 +121,13 @@ public class InsuredVehicleInfo {
     
     @Column(name ="amnd_ver_no")
     private String amndVerNo;
+    
+    @Column(name ="mobile_no")
+    private String mobileNo;
+    
+    @Column(name ="mobile_code")
+    private String mobileCode;
+    
+    @Column(name ="deductible")
+    private String deductible;
 }

@@ -123,4 +123,14 @@ public class GarageSettlementListResponseDto {
 
     @JsonProperty("paymentstatus")
     private String paymentStatus;
+
+    @JsonProperty("deductible")
+    private String deductible;
+    
+    @JsonProperty("mobileNo")
+    private String mobileNo;
+    
+    @JsonProperty("mobileCode")
+    private String mobileCode;
+
 }

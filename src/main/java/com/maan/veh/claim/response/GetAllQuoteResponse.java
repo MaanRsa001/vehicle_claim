@@ -88,9 +88,8 @@ public class GetAllQuoteResponse {
  	 @JsonProperty("WorkOrderTypeDesc")
      private String workOrderTypeDesc;
  	 
- 	@JsonFormat(pattern="dd/MM/yyyy")
  	@JsonProperty("WorkOrderDate")
-    private Date workOrderDate;
+    private String workOrderDate;
 
  	@JsonProperty("SettlementType")
     private String settlementType;
@@ -110,9 +109,8 @@ public class GetAllQuoteResponse {
  	@JsonProperty("RepairType")
     private String repairType;
  	
- 	@JsonFormat(pattern="dd/MM/yyyy")
  	@JsonProperty("DeliveryDate")
-    private Date deliveryDate;
+    private String deliveryDate;
  	
  	@JsonProperty("JointOrderYn")
     private String jointOrderYn;
@@ -143,10 +141,20 @@ public class GetAllQuoteResponse {
  	
  	@JsonProperty("AmndVersionId")
  	private String AmndVersionId;
- 	
- 	@JsonProperty("outstanding")
+
+ 	@JsonProperty("Outstanding")
     private String outstanding;
     
-    @JsonProperty("paidamount")
+    @JsonProperty("Paidamount")
     private String paidamount;
+    
+    @JsonProperty("MobileNo")
+    private String mobileNo;
+    
+    @JsonProperty("MobileCode")
+    private String mobileCode;
+    
+    @JsonProperty("Deductible")
+    private String deductible;
+
 }

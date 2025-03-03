@@ -1486,6 +1486,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	@Override
 	public CommonResponse getSavedSpareParts(SaveSparePartsDTO requestPayload) {
 		CommonResponse comResponse = new CommonResponse(); 
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         try {
         	List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findAll();
 			
@@ -1496,19 +1497,21 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			         response.setClaimNo(spareSaved.getClaimNo());
 			         response.setWorkOrderNo(spareSaved.getWorkOrderNo());
 			         response.setWorkOrderType(spareSaved.getWorkOrderType());
-			         response.setWorkOrderDate(spareSaved.getWorkOrderDate());
 			         response.setSettlementType(spareSaved.getAccountSettlementType());
 			         response.setSettlementTo(spareSaved.getAccountSettlementName());
 			         response.setGarageId(spareSaved.getGarageCode().toString());
 			         response.setQuotationNo(spareSaved.getQuotationNo());
-			         response.setDeliveryDate(spareSaved.getDeliveryDate());
 			         response.setJointOrderYn(spareSaved.getJointOrder());
 			         response.setSubrogationYn(spareSaved.getSubrogation());
 			         response.setTotalLoss(spareSaved.getTotalLoss().toString());
 			         response.setLossType(spareSaved.getTotalLossType());
 			         response.setRemarks(spareSaved.getRemarks());
 			         response.setSavedStatus(spareSaved.getSavedStatus());
-			         response.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String ::valueOf).orElse(""));		         
+			         response.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String ::valueOf).orElse(""));	
+			         
+			         //Format dates inline
+			         response.setWorkOrderDate(spareSaved.getWorkOrderDate() != null ? dateFormat.format(spareSaved.getWorkOrderDate()) : "");
+			         response.setDeliveryDate(spareSaved.getDeliveryDate() != null ? dateFormat.format(spareSaved.getDeliveryDate()) : "");
 			         
 						response.setReplacementCost(
 								spareSaved.getReplacementCost() != null ? spareSaved.getReplacementCost().toString()
@@ -1584,6 +1587,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	@Override
 	public CommonResponse getSavedGarageSpareParts(SaveSparePartsDTO requestPayload) {
 		CommonResponse comResponse = new CommonResponse(); 
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         try {
         	LoginMaster loginMaster = loginRepo.findByLoginId(requestPayload.getGarageLoginId());
         	//List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByGarageCode(loginMaster.getCoreAppCode());
@@ -1596,12 +1600,10 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			         response.setClaimNo(spareSaved.getClaimNo());
 			         response.setWorkOrderNo(spareSaved.getWorkOrderNo());
 			         response.setWorkOrderType(spareSaved.getWorkOrderType());
-			         response.setWorkOrderDate(spareSaved.getWorkOrderDate());
 			         response.setSettlementType(spareSaved.getAccountSettlementType());
 			         response.setSettlementTo(spareSaved.getAccountSettlementName());
 			         response.setGarageId(spareSaved.getGarageCode().toString());
 			         response.setQuotationNo(spareSaved.getQuotationNo());
-			         response.setDeliveryDate(spareSaved.getDeliveryDate());
 			         response.setJointOrderYn(spareSaved.getJointOrder());
 			         response.setSubrogationYn(spareSaved.getSubrogation());
 			         response.setTotalLoss(spareSaved.getTotalLoss().toString());
@@ -1610,8 +1612,15 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			         response.setSavedStatus(spareSaved.getSavedStatus());
 			         response.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String ::valueOf).orElse(""));	
 			         response.setClgwSgsId(spareSaved.getClgwSgsId());
+			         response.setMobileCode(spareSaved.getMobileCode());
+			         response.setMobileNo(spareSaved.getMobileNo());
+			         response.setDeductible(spareSaved.getDeductible());
 			         
-						response.setReplacementCost(
+			         // Format dates inline
+			         response.setWorkOrderDate(spareSaved.getWorkOrderDate() != null ? dateFormat.format(spareSaved.getWorkOrderDate()) : "");
+			         response.setDeliveryDate(spareSaved.getDeliveryDate() != null ? dateFormat.format(spareSaved.getDeliveryDate()) : "");
+			            
+			         response.setReplacementCost(
 								spareSaved.getReplacementCost() != null ? spareSaved.getReplacementCost().toString()
 										: "0.00");
 						response.setReplacementCostDeductible(spareSaved.getReplacementCostDeductible() != null
@@ -2243,6 +2252,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	@Override
 	public CommonResponse getGarageWorkOrder(GetGarageWorkOrderRequest requestPayload) {
 	    CommonResponse response = new CommonResponse();
+	    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 	    ApiTransactionLog transactionLog = new ApiTransactionLog();
 	    transactionLog.setRequestTime(LocalDateTime.now());
 	    transactionLog.setEntryDate(new Date());
@@ -2333,12 +2343,10 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                quoteResponse.setClaimNo(spareSaved.getClaimNo());
 	                quoteResponse.setWorkOrderNo(spareSaved.getWorkOrderNo());
 	                quoteResponse.setWorkOrderType(spareSaved.getWorkOrderType());
-	                quoteResponse.setWorkOrderDate(spareSaved.getWorkOrderDate());
 	                quoteResponse.setSettlementType(spareSaved.getAccountSettlementType());
 	                quoteResponse.setSettlementTo(spareSaved.getAccountSettlementName());
 	                quoteResponse.setGarageId(spareSaved.getGarageCode().toString());
 	                quoteResponse.setQuotationNo(spareSaved.getQuotationNo());
-	                quoteResponse.setDeliveryDate(spareSaved.getDeliveryDate());
 	                quoteResponse.setJointOrderYn(spareSaved.getJointOrder());
 	                quoteResponse.setSubrogationYn(spareSaved.getSubrogation());
 	                quoteResponse.setTotalLoss(spareSaved.getTotalLoss().toString());
@@ -2349,6 +2357,14 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                quoteResponse.setTotalAfterDeductions(sparePartsMap.get(spareSaved.getClaimNo()).getNetamount());
 	                quoteResponse.setAmndVersionId(sparePartsMap.get(spareSaved.getClaimNo()).getAmndverno());
 	                quoteResponse.setClgwSgsId(spareSaved.getClgwSgsId());
+	                quoteResponse.setDeductible(sparePartsMap.get(spareSaved.getClaimNo()).getDeductible());
+	                quoteResponse.setMobileCode(sparePartsMap.get(spareSaved.getClaimNo()).getMobileCode());
+	                quoteResponse.setMobileNo(sparePartsMap.get(spareSaved.getClaimNo()).getMobileNo());
+	                
+	                //Format dates inline
+	                quoteResponse.setWorkOrderDate(spareSaved.getWorkOrderDate() != null ? dateFormat.format(spareSaved.getWorkOrderDate()) : "");
+	                quoteResponse.setDeliveryDate(spareSaved.getDeliveryDate() != null ? dateFormat.format(spareSaved.getDeliveryDate()) : "");
+	                
 	                res.add(quoteResponse);
 	            }
 	        }
@@ -2503,6 +2519,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	@Override
 	public CommonResponse getGarageSettlement(GarageSettlementListRequest requestPayload) {
 		CommonResponse response = new CommonResponse();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 	    ApiTransactionLog transactionLog = new ApiTransactionLog();
 	    transactionLog.setRequestTime(LocalDateTime.now());
 	    transactionLog.setEntryDate(new Date());
@@ -2593,12 +2610,10 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                quoteResponse.setClaimNo(spareSaved.getClaimNo());
 	                quoteResponse.setWorkOrderNo(spareSaved.getWorkOrderNo());
 	                quoteResponse.setWorkOrderType(spareSaved.getWorkOrderType());
-	                quoteResponse.setWorkOrderDate(spareSaved.getWorkOrderDate());
 	                quoteResponse.setSettlementType(spareSaved.getAccountSettlementType());
 	                quoteResponse.setSettlementTo(spareSaved.getAccountSettlementName());
 	                quoteResponse.setGarageId(spareSaved.getGarageCode().toString());
 	                quoteResponse.setQuotationNo(spareSaved.getQuotationNo());
-	                quoteResponse.setDeliveryDate(spareSaved.getDeliveryDate());
 	                quoteResponse.setJointOrderYn(spareSaved.getJointOrder());
 	                quoteResponse.setSubrogationYn(spareSaved.getSubrogation());
 	                quoteResponse.setTotalLoss(spareSaved.getTotalLoss().toString());
@@ -2609,6 +2624,14 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                quoteResponse.setClgwSgsId(spareSaved.getClgwSgsId());
 	                quoteResponse.setPaidamount(sparePartsMap.get(spareSaved.getClaimNo()).getPaidamount());
 	                quoteResponse.setOutstanding(sparePartsMap.get(spareSaved.getClaimNo()).getOutstanding());
+	                quoteResponse.setDeductible(sparePartsMap.get(spareSaved.getClaimNo()).getDeductible());
+	                quoteResponse.setMobileCode(sparePartsMap.get(spareSaved.getClaimNo()).getMobileCode());
+	                quoteResponse.setMobileNo(sparePartsMap.get(spareSaved.getClaimNo()).getMobileNo());
+	                
+	                //Format dates inline
+	                quoteResponse.setWorkOrderDate(spareSaved.getWorkOrderDate() != null ? dateFormat.format(spareSaved.getWorkOrderDate()) : "");
+	                quoteResponse.setDeliveryDate(spareSaved.getDeliveryDate() != null ? dateFormat.format(spareSaved.getDeliveryDate()) : "");
+	                
 	                if(!"ESB".equalsIgnoreCase(spareSaved.getSavedStatus())) {
 	                	if("Completed".equalsIgnoreCase(sparePartsMap.get(spareSaved.getClaimNo()).getPaymentStatus())) {
 		                	quoteResponse.setSavedStatus("SCT");

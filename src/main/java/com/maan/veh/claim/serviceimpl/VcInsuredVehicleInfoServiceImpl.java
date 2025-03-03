@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,8 @@ import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.entity.InsuredVehicleInfoId;
 import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.external.VcInuredVehicleApiReponse;
+import com.maan.veh.claim.qiic.request.ClaimDetailsViewRequest;
+import com.maan.veh.claim.qiic.response.ClaimDetailsViewResponse;
 import com.maan.veh.claim.repository.ApiTransactionLogRepository;
 import com.maan.veh.claim.repository.CoreInsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
@@ -41,6 +44,7 @@ import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.VcInuredVehicleApiResponseQIIC;
 import com.maan.veh.claim.response.VcinsuredVehicleResponse;
 import com.maan.veh.claim.response.VcinsuredVehicleResponseQIIC;
+import com.maan.veh.claim.response.VehicleInfoResponse;
 import com.maan.veh.claim.service.VcInsuredVehicleInfoService;
 
 @Service
@@ -171,6 +175,9 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	                insuredVehicleInfo.setClcpId(insured.getClcpId());
 	                insuredVehicleInfo.setProdId(insured.getProdId());
 	                insuredVehicleInfo.setFnolNo(insured.getFnolNo());
+	                insuredVehicleInfo.setMobileNo(insured.getMobileNo());
+	                insuredVehicleInfo.setMobileCode(insured.getMobileCode());
+	                insuredVehicleInfo.setDeductible(insured.getDeductible());
 	                
 	                return insuredVehicleInfo;
 	            })
@@ -465,5 +472,70 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 			logger.info(externalApiUrlAuthenticate + " ====> " +transactionLog);
 		}
 		return null;  // Return null if authentication fails
+	}
+
+	@Override
+	public CommonResponse getVehicleInfo(ClaimDetailsViewRequest request) {
+	    CommonResponse response = new CommonResponse();
+
+	    try {
+	        // Fetch vehicle info using Optional to avoid NullPointerException
+	        Optional<InsuredVehicleInfo> vehicleInfoOpt = repository.findByCompanyIdAndGarageIdAndClaimNo(
+	                Integer.parseInt(request.getCompanyId()), request.getGarageId(), request.getClaimNo());
+
+	        if (!vehicleInfoOpt.isPresent()) {
+	            response.setMessage("Vehicle info not found");
+	            response.setIsError(true);
+	            response.setErrors(Collections.singletonList("No data available for the given parameters"));
+	            return response;
+	        }
+
+	        InsuredVehicleInfo vehicle = vehicleInfoOpt.get();
+
+	        // Create response object
+	        ClaimDetailsViewResponse veh = new ClaimDetailsViewResponse();
+
+	        veh.setCompanyId(vehicle.getCompanyId() != null ? String.valueOf(vehicle.getCompanyId()) : null);
+	        veh.setPolicyNo(vehicle.getPolicyNo());
+	        veh.setClaimNo(vehicle.getClaimNo());
+	        veh.setVehicleMake(vehicle.getVehicleMake());
+	        veh.setVehicleModel(vehicle.getVehicleModel());
+	        veh.setMakeYear(vehicle.getMakeYear() != null ? String.valueOf(vehicle.getMakeYear()) : null);
+	        veh.setChassisNo(vehicle.getChassisNo());
+	        veh.setInsuredName(vehicle.getInsuredName());
+	        veh.setType(vehicle.getType());
+	        veh.setVehicleRegNo(vehicle.getVehicleRegNo());
+	        veh.setEntryDate(vehicle.getEntryDate());
+	        veh.setFnolSgsId(vehicle.getFnolSgsId());
+	        veh.setLossLocation(vehicle.getLossLocation());
+	        veh.setQuotationNo(vehicle.getQuotationNo());
+	        veh.setWorkOrderType(vehicle.getWorkOrderType());
+	        veh.setEngineNo(vehicle.getEngineNo());
+	        veh.setClaimantType(vehicle.getClaimantType());
+	        veh.setLossLocationDesc(vehicle.getLossLocationDesc());
+	        veh.setClaimStatus(vehicle.getClaimStatus());
+	        veh.setFileNo(vehicle.getFileNo());
+	        veh.setGarageAddress(vehicle.getGarageAddress());
+	        veh.setPlateType(vehicle.getPlateType());
+	        veh.setMobileCode(vehicle.getMobileCode());
+	        veh.setMobileNo(vehicle.getMobileNo());
+	        veh.setDeductible(vehicle.getDeductible());
+
+	        // Simplify quote status conversion
+	        veh.setQuoteStatus("Y".equalsIgnoreCase(vehicle.getStatus()) ? "PFG" : vehicle.getStatus());
+
+	        // Return success response
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Success");
+	        response.setResponse(veh);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.setMessage("Error occurred while fetching vehicle info");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(e.getMessage()));
+	    }
+
+	    return response;
 	}
 }

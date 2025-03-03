@@ -366,6 +366,9 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 	        	 spareSave.setEntryDate(new Date());
 	        	 spareSave.setSavedStatus(insuredVehicleInfo.getStatus());
 	        	 spareSave.setFileNo(insuredVehicleInfo.getFileNo());
+	        	 spareSave.setMobileCode(insuredVehicleInfo.getMobileCode());
+	        	 spareSave.setMobileNo(insuredVehicleInfo.getMobileNo());
+	        	 spareSave.setDeductible(insuredVehicleInfo.getDeductible());
 	        	 System.out.println("claim number ==> "+ insuredVehicleInfo.getClaimNo() + ", file number == > "+insuredVehicleInfo.getFileNo());
 			     SparePartsSaveDetailsRepo.save(spareSave);	
 			
@@ -642,6 +645,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 	@Override
 	public CommonResponse getAllQuoteByClaimNo(GarageWorkOrderRequest req) {
 		CommonResponse comResponse = new CommonResponse(); 
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         try {
 			List<GarageWorkOrder> data = garageWorkOrderRepository.findByClaimNo(req.getClaimNo());
 			
@@ -653,7 +657,6 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 			         response.setWorkOrderNo(workOrder.getWorkOrderNo());
 			         response.setWorkOrderType(workOrder.getWorkOrderType());
 			         response.setWorkOrderTypeDesc(workOrder.getWorkOrderTypeDesc());
-			         response.setWorkOrderDate(workOrder.getWorkOrderDate());
 			         response.setSettlementType(workOrder.getSettlementType());
 			         response.setSettlementTypeDesc(workOrder.getSettlementTypeDesc());
 			         response.setSettlementTo(workOrder.getSettlementTo());
@@ -663,7 +666,6 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 			         response.setLocation(workOrder.getLocation());
 			         response.setRepairType(workOrder.getRepairType());
 			         response.setQuotationNo(workOrder.getQuotationNo());
-			         response.setDeliveryDate(workOrder.getDeliveryDate());
 			         response.setJointOrderYn(workOrder.getJointOrderYn());
 			         response.setSubrogationYn(workOrder.getSubrogationYn());
 			         response.setTotalLoss(workOrder.getTotalLoss().toString());
@@ -671,6 +673,10 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 			         response.setRemarks(workOrder.getRemarks());
 			         response.setSparepartsDealerId(Optional.ofNullable(workOrder.getSparepartsDealerId()).map(String ::valueOf).orElse(""));
 			         response.setQuoteStatus(workOrder.getQuoteStatus());			         
+			         
+			         //Format dates inline
+			         response.setWorkOrderDate(workOrder.getWorkOrderDate() != null ? dateFormat.format(workOrder.getWorkOrderDate()) : "");
+			         response.setDeliveryDate(workOrder.getDeliveryDate() != null ? dateFormat.format(workOrder.getDeliveryDate()) : "");
 			         
 			         VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumberAndQuotationNo(workOrder.getClaimNo(),workOrder.getQuotationNo());
 			         
