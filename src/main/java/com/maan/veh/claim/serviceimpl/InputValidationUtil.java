@@ -243,8 +243,8 @@ public class InputValidationUtil {
 
 	    if (StringUtils.isBlank(req.getWorkOrderNo())) {
 	        list.add(new ErrorList("100", "QuotationNo", "Quotation number cannot be blank"));
-	    } else if (!req.getWorkOrderNo().matches("^[a-zA-Z0-9 ]{1,50}$")) { 
-	        list.add(new ErrorList("101", "QuotationNo", "Quotation number must be alphanumeric, without special characters, and up to 50 characters long"));
+	    } else if (!req.getWorkOrderNo().matches("^[a-zA-Z0-9][a-zA-Z0-9 _-]{0,49}$")) { 
+	        list.add(new ErrorList("101", "QuotationNo", "Quotation number must be start with alphanumeric, without special characters like (@,#,$,%,^,&,*,!,~,+,=), and up to 50 characters long"));
 	    }
 
 	    if (StringUtils.isBlank(req.getWorkOrderType())) {
