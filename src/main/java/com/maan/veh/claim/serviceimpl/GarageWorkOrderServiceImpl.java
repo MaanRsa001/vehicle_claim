@@ -312,8 +312,6 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 				spareSave.setRemarks(workOrder.getRemarks());
 				spareSave.setSparePartsDealer(loginMaster.getCoreAppCode());		         
 				spareSave.setLpoId(insuredVehicleInfo.getLpoId());
-				spareSave.setVehId(insuredVehicleInfo.getVehId());
-				spareSave.setClcpId(insuredVehicleInfo.getClcpId());
 				
 				List<DamageSectionDetails> damageList = damageRepository.findByClaimNoAndQuotationNo(workOrder.getClaimNo(), workOrder.getQuotationNo());
 
@@ -365,7 +363,6 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 	        	 spareSave.setTotalWithVat(netAmount.subtract(deductAmount));   
 	        	 spareSave.setEntryDate(new Date());
 	        	 spareSave.setSavedStatus(insuredVehicleInfo.getStatus());
-	        	 spareSave.setFileNo(insuredVehicleInfo.getFileNo());
 	        	 System.out.println("claim number ==> "+ insuredVehicleInfo.getClaimNo() + ", file number == > "+insuredVehicleInfo.getFileNo());
 			     SparePartsSaveDetailsRepo.save(spareSave);	
 			
@@ -740,7 +737,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 				spareSave.setAccountSettlementType(workOrder.getSettlementType());
 				spareSave.setAccountSettlementName(workOrder.getSettlementTo());
 				spareSave.setGarageQuotationNo(workOrder.getQuotationNo());
-				spareSave.setGarageCode(workOrder.getGarageId().toString());
+				spareSave.setGarageCode(loginMaster.getCoreAppCode());
 				spareSave.setDeliveredTo(workOrder.getGarageName());
 				spareSave.setQuotationNo(workOrder.getQuotationNo());
 				spareSave.setDeliveryDate(workOrder.getDeliveryDate());

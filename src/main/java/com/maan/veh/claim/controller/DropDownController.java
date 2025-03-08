@@ -180,11 +180,11 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping(value = "/vehiclebodyparts/{companyId}")
-	public ResponseEntity<CommonRes> getbodyPart(@PathVariable String companyId) {
+	@GetMapping(value = "/vehiclebodyparts/{companyId}/{direction}")
+	public ResponseEntity<CommonRes> getbodyPart(@PathVariable String companyId,@PathVariable String direction) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = dropDownService.getbodyPart(companyId);
+		List<DropDownRes> res = dropDownService.getbodyPart(companyId,direction);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);

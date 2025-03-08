@@ -26,25 +26,25 @@ public class ClaimStatusServiceImpl implements ClaimStatusService{
     private VcFlowMasterRepository flowMasterRepo;
 
 	@Override
-	public List<DropDownRes> getGarageStatus(String currentStatus) {
-		return getStatus("Garage",currentStatus);
+	public List<DropDownRes> getGarageStatus(String currentStatus,String companyId) {
+		return getStatus("Garage",currentStatus,companyId);
 	}
 
 	@Override
-	public List<DropDownRes> getSurveyorStatus(String currentStatus) {
-		return getStatus("Surveyor",currentStatus);
+	public List<DropDownRes> getSurveyorStatus(String currentStatus,String companyId) {
+		return getStatus("Surveyor",currentStatus,companyId);
 	}
 	
 	@Override
-	public List<DropDownRes> getDealerStatus(String currentStatus) {
-		return getStatus("Dealer",currentStatus);
+	public List<DropDownRes> getDealerStatus(String currentStatus,String companyId) {
+		return getStatus("Dealer",currentStatus,companyId);
 	}
 	
-	private List<DropDownRes> getStatus(String usertype, String currentStatus) {
+	private List<DropDownRes> getStatus(String usertype, String currentStatus,String companyId) {
 		List<DropDownRes> resList = new ArrayList<>();
 	    try {
 	        // Retrieve list of VcFlowMaster with usertype "Garage"
-	        List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndStatusIdAndCompanyId(usertype,currentStatus,"100030");
+	        List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndStatusIdAndCompanyId(usertype,currentStatus,companyId);
 
 	        // Convert the list to a map with subStatus as the key and subStatusDescription as the value
 	        Map<String, String> statusMap = flowList.stream()

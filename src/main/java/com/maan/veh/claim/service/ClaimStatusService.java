@@ -6,11 +6,11 @@ import com.maan.veh.claim.response.DropDownRes;
 
 public interface ClaimStatusService {
 
-	List<DropDownRes> getGarageStatus(String currentStatus);
+	List<DropDownRes> getGarageStatus(String currentStatus,String companyId);
 
-	List<DropDownRes> getSurveyorStatus(String currentStatus);
+	List<DropDownRes> getSurveyorStatus(String currentStatus,String companyId);
 
-	List<DropDownRes> getDealerStatus(String currentStatus);
+	List<DropDownRes> getDealerStatus(String currentStatus,String companyId);
 
 	List<DropDownRes> getGridStatus(String usertype,String companyId,String flowId);
 

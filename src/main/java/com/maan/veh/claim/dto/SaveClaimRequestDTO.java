@@ -31,11 +31,11 @@ public class SaveClaimRequestDTO {
     @JsonProperty("lossLocation")
     private String lossLocation;
 
-    @JsonProperty("policeStation")
-    private String policeStation;
-
-    @JsonProperty("policeReportNo")
-    private String policeReportNo;
+//    @JsonProperty("policeStation")
+//    private String policeStation;
+//
+//    @JsonProperty("policeReportNo")
+//    private String policeReportNo;
 
     @JsonProperty("lossDescription")
     private String lossDescription;

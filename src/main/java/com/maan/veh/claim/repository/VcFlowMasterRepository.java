@@ -22,5 +22,7 @@ public interface VcFlowMasterRepository extends JpaRepository<VcFlowMaster, VcFl
 
 	List<VcFlowMaster> findByUsertypeAndStatusIdAndCompanyId(String usertype, String currentStatus, String string);
 
+	List<VcFlowMaster> findByCompanyIdAndSubStatus(String companyId, String status);
+
 }
 

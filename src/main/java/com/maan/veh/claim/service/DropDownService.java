@@ -20,7 +20,7 @@ public interface DropDownService {
 
 	List<DropDownRes> getLosstype(String companyId);
 
-	List<DropDownRes> getbodyPart(String companyId);
+	List<DropDownRes> getbodyPart(String companyId,String direction);
 
 	List<DropDownRes> getVatPercentage(String companyId);
 

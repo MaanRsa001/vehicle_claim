@@ -21,11 +21,11 @@ public class ClaimStatusController {
 	@Autowired
 	private ClaimStatusService service;
 
-	@GetMapping("/garage/status/{currentStatus}")
-	public ResponseEntity<CommonRes> getGarageStatus(@PathVariable String currentStatus) {
+	@GetMapping("/garage/status/{currentStatus}/{companyId}")
+	public ResponseEntity<CommonRes> getGarageStatus(@PathVariable String currentStatus,@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = service.getGarageStatus(currentStatus);
+		List<DropDownRes> res = service.getGarageStatus(currentStatus,companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -39,11 +39,11 @@ public class ClaimStatusController {
 
 	}
 	
-	@GetMapping("/surveyor/status/{currentStatus}")
-	public ResponseEntity<CommonRes> getSurveyorStatus(@PathVariable String currentStatus) {
+	@GetMapping("/surveyor/status/{currentStatus}/{companyId}")
+	public ResponseEntity<CommonRes> getSurveyorStatus(@PathVariable String currentStatus,@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = service.getSurveyorStatus(currentStatus);
+		List<DropDownRes> res = service.getSurveyorStatus(currentStatus,companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -57,11 +57,11 @@ public class ClaimStatusController {
 
 	}
 	
-	@GetMapping("/dealer/status/{currentStatus}")
-	public ResponseEntity<CommonRes> getDealerStatus(@PathVariable String currentStatus) {
+	@GetMapping("/dealer/status/{currentStatus}/{companyId}")
+	public ResponseEntity<CommonRes> getDealerStatus(@PathVariable String currentStatus,@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = service.getDealerStatus(currentStatus);
+		List<DropDownRes> res = service.getDealerStatus(currentStatus,companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -75,11 +75,11 @@ public class ClaimStatusController {
 
 	}
 	
-	@GetMapping("/grid/status/{usertype}/{companyId}/{flowId}")
-	public ResponseEntity<CommonRes> getGridStatus(@PathVariable String usertype,@PathVariable String companyId,@PathVariable String flowId) {
+	@GetMapping("/grid/status/{usertype}/{companyId}")
+	public ResponseEntity<CommonRes> getGridStatus(@PathVariable String usertype,@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
-		List<DropDownRes> res = service.getGridStatus(usertype,companyId,flowId);
+		List<DropDownRes> res = service.getGridStatus(usertype,companyId,"1");
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);

@@ -1,4 +1,6 @@
 package com.maan.veh.claim.request;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -21,10 +23,17 @@ public class SaveClaimRequest {
 
     @JsonProperty("InsuredId")
     private String insuredId;
-
+    
+    @JsonProperty("UserName")
+    private String userName;
+    
     @JsonProperty("LossDate")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    private Date lossDate;
+    private LocalDate lossDate;
+    
+    @JsonProperty("LossTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    private LocalTime lossTime;
 
     @JsonProperty("IntimatedDate")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")

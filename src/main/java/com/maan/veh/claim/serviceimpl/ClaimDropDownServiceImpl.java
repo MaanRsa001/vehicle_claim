@@ -30,15 +30,15 @@ public class ClaimDropDownServiceImpl implements ClaimDropDownService {
 	private EntityManager entityManager;
 
 	@Override
-	public List<DropDownRes> getPoliceStation() {
-		return getDropdownValues("POLICE_STATION");
+	public List<DropDownRes> getPoliceStation(String companyId) {
+		return getDropdownValues("POLICE_STATION",companyId);
 	}
 	
-	private List<DropDownRes> getDropdownValues(String itemType) {
+	private List<DropDownRes> getDropdownValues(String itemType,String companyId) {
         List<DropDownRes> resList = new ArrayList<>();
         try {
             //List<ListItemValue> getList = listRepo.findByItemTypeAndStatusOrderByItemCodeAsc(itemType, "Y");
-        	List<ListItemValue> getList = getFromListItemValue(itemType);
+        	List<ListItemValue> getList = getFromListItemValue(itemType,companyId);
             for (ListItemValue data : getList) {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getItemCode());
@@ -54,7 +54,7 @@ public class ClaimDropDownServiceImpl implements ClaimDropDownService {
     }
 	
 	@Transactional
-	public List<ListItemValue> getFromListItemValue(String itemType) {
+	public List<ListItemValue> getFromListItemValue(String itemType,String companyId) {
 		try {
 			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 			CriteriaQuery<ListItemValue> cq = cb.createQuery(ListItemValue.class);
@@ -71,10 +71,11 @@ public class ClaimDropDownServiceImpl implements ClaimDropDownService {
 			// Predicate for the main query
 			Predicate itemTypePredicate = cb.equal(root.get("itemType"), itemType);
 			Predicate statusPredicate = cb.equal(root.get("status"), "Y");
+			Predicate companyIdPredicate = cb.equal(root.get("companyId"),companyId);
 			Predicate amendIdPredicate = cb.equal(root.get("amendId"), subquery);
 
 			// Combine the predicates
-			cq.where(cb.and(itemTypePredicate, statusPredicate, amendIdPredicate));
+			cq.where(cb.and(itemTypePredicate, statusPredicate, companyIdPredicate, amendIdPredicate));
 
 			// Order by itemCode ascending
 			cq.orderBy(cb.asc(root.get("itemCode")));
@@ -91,12 +92,12 @@ public class ClaimDropDownServiceImpl implements ClaimDropDownService {
 	}
 
 	@Override
-	public List<DropDownRes> getLossLocation() {
-		return getDropdownValues("LOSS_LOCATION");
+	public List<DropDownRes> getLossLocation(String companyId) {
+		return getDropdownValues("LOSS_LOCATION",companyId);
 	}
 
 	@Override
-	public List<DropDownRes> getNatureOfLoss() {
-		return getDropdownValues("NATURE_OF_LOSS");
+	public List<DropDownRes> getNatureOfLoss(String companyId) {
+		return getDropdownValues("NATURE_OF_LOSS",companyId);
 	}
 }

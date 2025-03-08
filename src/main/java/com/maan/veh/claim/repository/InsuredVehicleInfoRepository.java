@@ -42,6 +42,10 @@ public interface InsuredVehicleInfoRepository extends JpaRepository<InsuredVehic
 	@Query("SELECT i.id FROM InsuredVehicleInfo i WHERE i.id IN :insuredIds")
 	Set<InsuredVehicleInfoId> findExistingIds(@Param("insuredIds") Set<InsuredVehicleInfoId> insuredIds);
 
+	List<InsuredVehicleInfo> findByClaimNoInAndSurveyorId(List<String> batch, String string);
+
+	List<InsuredVehicleInfo> findByCompanyIdAndSurveyorId(Integer companyId, String surveyorLoginId);
+
 
    
 }

@@ -101,6 +101,9 @@ private static final long serialVersionUID = 1L;
     
     @Column(name="core_app_code")
     private String  coreAppCode ;
+    
+    @Column(name="direction_id")
+    private String directionId ;
 
 
     //--- ENTITY LINKS ( RELATIONSHIP )

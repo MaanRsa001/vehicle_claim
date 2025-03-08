@@ -6,10 +6,10 @@ import com.maan.veh.claim.response.DropDownRes;
 
 public interface ClaimDropDownService {
 
-	List<DropDownRes> getPoliceStation();
+	List<DropDownRes> getPoliceStation(String companyId);
 
-	List<DropDownRes> getLossLocation();
+	List<DropDownRes> getLossLocation(String companyId);
 
-	List<DropDownRes> getNatureOfLoss();
+	List<DropDownRes> getNatureOfLoss(String companyId);
 
 }

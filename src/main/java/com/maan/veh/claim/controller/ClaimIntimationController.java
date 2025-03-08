@@ -149,4 +149,10 @@ public class ClaimIntimationController {
         	CommonResponse res = externalApiService.downloadDoc(requestPayload);
             return ResponseEntity.ok(res);
     }
+    
+    @PostMapping("/getPolicyDetails")
+    public ResponseEntity<CommonResponse> getPolicyDetails(@RequestBody GetClaimRequest request) {
+        CommonResponse res = externalApiService.getPolicyDetails(request);
+        return ResponseEntity.ok(res);
+    }
 }

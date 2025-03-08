@@ -139,18 +139,4 @@ public class SparePartsSaveDetails {
     @Column(name = "entry_date")
     private Date entryDate;
     
-    @Column(name = "file_no")
-    private String fileNo;
-    
-    @Column(name = "clgw_sgs_id")
-    private String clgwSgsId;
-    
-    @Column(name ="veh_id")
-    private String vehId;
-    
-    @Column(name ="clcp_id")
-    private String clcpId;
-    
-    @Column(name ="prod_id")
-    private String prodId;
 }

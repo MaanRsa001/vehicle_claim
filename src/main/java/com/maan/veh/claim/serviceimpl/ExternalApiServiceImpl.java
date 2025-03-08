@@ -4,15 +4,22 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
+import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -59,6 +66,8 @@ import com.maan.veh.claim.dto.FnolRequestDTO;
 import com.maan.veh.claim.dto.FnolRequestDTOMetaData;
 import com.maan.veh.claim.dto.GarageClaimListDto;
 import com.maan.veh.claim.dto.GarageClaimListResponseDTO;
+import com.maan.veh.claim.dto.GetPolicyDetailsRequestDto;
+import com.maan.veh.claim.dto.PolicyResponseDTO;
 import com.maan.veh.claim.dto.SaveClaimRequestDTO;
 import com.maan.veh.claim.dto.SaveSparePartsDTO;
 import com.maan.veh.claim.entity.ApiIntegMaster;
@@ -131,6 +140,7 @@ import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DropDownRes;
 import com.maan.veh.claim.response.ErrorList;
 import com.maan.veh.claim.response.GetAllQuoteResponse;
+import com.maan.veh.claim.response.PolicyResponseUI;
 import com.maan.veh.claim.service.ExternalApiService;
 
 @Service
@@ -226,10 +236,11 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     public CommonResponse createFnol(SaveClaimRequest requestPayload) {
         CommonResponse response = new CommonResponse();
         ApiTransactionLog log = new ApiTransactionLog();
+        log.setSno(apiTransactionLogRepo.findMaxSno() + 1);
         log.setRequestTime(LocalDateTime.now());
         log.setEntryDate(new Date());
         log.setEndpoint(externalApiUrlCreatefnol);
-
+        String reportSeries = "";
         // Validate requestPayload
         List<ErrorList> validationErrors = validation.validateClaimIntemationDetails(requestPayload);
         if (!validationErrors.isEmpty()) {
@@ -246,23 +257,42 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			if(optional.isPresent()){
 				newData = optional.get();
 			}
-    // Set fields from requestPayload into newData
+           // Set fields from requestPayload into newData
 			newData.setPolicyNo(requestPayload.getPolicyNo());
 			newData.setRequestOrigin("API");
 			newData.setCurrentBranch(requestPayload.getRequestMetaData().getCurrentBranch());
 			newData.setOriginBranch(requestPayload.getRequestMetaData().getOriginBranch());
-			newData.setUserName(requestPayload.getRequestMetaData().getUserName());
+			newData.setUserName(requestPayload.getUserName());
 			newData.setIpAddress(requestPayload.getRequestMetaData().getIpAddress());
 			newData.setRequestGeneratedDateTime(new Date()); // Assuming this is the current date and time
 			newData.setConsumerTrackingId(requestPayload.getRequestMetaData().getConsumerTrackingID());
 			newData.setLanguageCode(requestPayload.getLanguageCode());
 			newData.setInsuredId(requestPayload.getInsuredId());
-			newData.setLossDate(requestPayload.getLossDate());
+//			newData.setLossDate(requestPayload.getLossDate());
+			try{
+				// Combine LocalDate and LocalTime into LocalDateTime
+				LocalDateTime combinedLossDateTime = LocalDateTime.of(requestPayload.getLossDate(), requestPayload.getLossTime());
+
+				// Convert LocalDateTime to Date (if your entity requires Date instead of LocalDateTime)
+				Date finalLossDateTime = Date.from(combinedLossDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+				// Set the combined loss date and time in the entity
+				newData.setLossDate(finalLossDateTime);
+
+			}catch(Exception ex) {
+            	
+            }
 			newData.setIntimatedDate(requestPayload.getIntimatedDate());
 			newData.setLossLocation(requestPayload.getLossLocation());
 			newData.setNatureOfLoss(requestPayload.getNatureOfLoss());
 			newData.setPoliceStation(requestPayload.getPoliceStation());
-			newData.setPoliceReportNo(requestPayload.getPoliceReportNo());
+			if(StringUtils.isBlank(requestPayload.getPoliceReportNo())) {
+				reportSeries = "PNR-" + (claimIntimationDetailsRepository.count() + 1);
+			}else {
+				reportSeries = requestPayload.getPoliceReportNo();
+			}
+			
+			newData.setPoliceReportNo(reportSeries);
 			newData.setLossDescription(requestPayload.getLossDescription());
 			newData.setAtFault(requestPayload.getAtFault());
 			claimIntimationDetailsRepository.save(newData);
@@ -318,7 +348,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             try{
             	ClaimIntimationDetails oldData = new ClaimIntimationDetails();
     			
-            	Optional<ClaimIntimationDetails> optional = claimIntimationDetailsRepository.findByPolicyNoAndPoliceReportNo(requestPayload.getPolicyNo(),requestPayload.getPoliceReportNo());
+            	Optional<ClaimIntimationDetails> optional = claimIntimationDetailsRepository.findByPolicyNoAndPoliceReportNo(requestPayload.getPolicyNo(),reportSeries);
     			if(optional.isPresent()){
     				oldData = optional.get();
     				oldData.setFnolNo(externalApiResponse.getData().getFnolNo());
@@ -358,7 +388,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage()))); // API Error error
         } finally {
             log.setResponseTime(LocalDateTime.now());
-            //apiTransactionLogRepo.save(log);
+            apiTransactionLogRepo.save(log);
             logger.info(externalApiUrlCreatefnol +" ==> "+ log);
         }
 
@@ -573,12 +603,25 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    dto.setLanguageCode(request.getLanguageCode());
 	    dto.setPolicyNo(request.getPolicyNo());
 	    dto.setInsuredId(request.getInsuredId());
-	    dto.setLossDate(isoDateFormat.format(request.getLossDate()));
+//	    dto.setLossDate(isoDateFormat.format(request.getLossDate()));
+	    try{
+			// Combine LocalDate and LocalTime into LocalDateTime
+			LocalDateTime combinedLossDateTime = LocalDateTime.of(request.getLossDate(), request.getLossTime());
+
+			// Convert LocalDateTime to Date (if your entity requires Date instead of LocalDateTime)
+			Date finalLossDateTime = Date.from(combinedLossDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+			// Set the combined loss date and time in the entity
+			dto.setLossDate(isoDateFormat.format(finalLossDateTime));
+
+		}catch(Exception ex) {
+        	
+        }
 	    dto.setIntimatedDate(isoDateFormat.format(request.getIntimatedDate()));
 	    dto.setNatureOfLoss(request.getNatureOfLoss());
 	    dto.setLossLocation(request.getLossLocation());
-	    dto.setPoliceStation(request.getPoliceStation());
-	    dto.setPoliceReportNo(request.getPoliceReportNo());
+//	    dto.setPoliceStation(request.getPoliceStation());
+//	    dto.setPoliceReportNo(request.getPoliceReportNo());
 	    dto.setLossDescription(request.getLossDescription());
 	    dto.setAtFault(request.getAtFault());
 	    dto.setPolicyPeriod(request.getPolicyPeriod());
@@ -843,7 +886,20 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             claimIntimationDetails.setLanguageCode(saveClaimRequestDTO.getLanguageCode());
             claimIntimationDetails.setInsuredId(saveClaimRequestDTO.getInsuredId());
 
-            claimIntimationDetails.setLossDate(saveClaimRequestDTO.getLossDate());
+//            claimIntimationDetails.setLossDate(saveClaimRequestDTO.getLossDate());
+            try{
+            	// Combine LocalDate and LocalTime into LocalDateTime
+            	LocalDateTime combinedLossDateTime = LocalDateTime.of(saveClaimRequestDTO.getLossDate(), saveClaimRequestDTO.getLossTime());
+
+            	// Convert LocalDateTime to Date (if your entity requires Date instead of LocalDateTime)
+            	Date finalLossDateTime = Date.from(combinedLossDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+            	// Set the combined loss date and time in the entity
+            	claimIntimationDetails.setLossDate(finalLossDateTime);
+
+            }catch(Exception ex) {
+            	
+            }
             claimIntimationDetails.setIntimatedDate(saveClaimRequestDTO.getIntimatedDate());
 
             claimIntimationDetails.setLossLocation(saveClaimRequestDTO.getLossLocation());
@@ -916,13 +972,22 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        response.setPolicyNo(data.getPolicyNo());
 	        response.setFnolNo(data.getFnolNo());
 	        response.setInsuredId(data.getInsuredId());
+	        response.setUserName(data.getUserName());
 
 			SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+			SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.ENGLISH);
+			timeFormat.setDateFormatSymbols(new DateFormatSymbols(Locale.ENGLISH) {
+			    @Override
+			    public String[] getAmPmStrings() {
+			        return new String[]{"AM", "PM"}; // Ensure uppercase AM/PM
+			    }
+			});
 
 			// Convert and set the Loss Date
 			Date lossDate = data.getLossDate();
 			if (lossDate != null) {
 				response.setLossDate(dateFormat.format(lossDate));
+				response.setLossTime(timeFormat.format(lossDate)); // Set time part
 			}
 
 			// Convert and set the Intimated Date
@@ -1147,6 +1212,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	    CommonResponse response = new CommonResponse();
 	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setSno(apiTransactionLogRepo.findMaxSno() + 1);
 	    log.setRequestTime(LocalDateTime.now());
 	    log.setEntryDate(new Date());
 	    log.setEndpoint(externalApiUrlSaveSpareparts);
@@ -1231,7 +1297,6 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	            response.setIsError(false);
 	            response.setResponse(externalApiResponse);
 	            partsSaveDetails.setSavedStatus("ESB");
-	            partsSaveDetails.setClgwSgsId(externalApiResponse.getClgwSgsId());
 	            SparePartsSaveDetailsRepo.save(partsSaveDetails);
 	        }
 
@@ -1245,7 +1310,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
 	        if(StringUtils.isNotBlank(log.getRequest())){
-	        	//apiTransactionLogRepo.save(log);
+	        	apiTransactionLogRepo.save(log);
 	        	logger.info(externalApiUrlSaveSpareparts +" ==> "+ log);
 	        }
 	    }
@@ -1275,18 +1340,14 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			request.setDeliveryDate(isoDateFormat.format(partsSaveDetails.getDeliveryDate()));
 			request.setDeliveredTo(partsSaveDetails.getDeliveredTo());
 			request.setDeliveredId(partsSaveDetails.getGarageCode());
-			request.setSubrogation(partsSaveDetails.getSubrogation());
-			request.setJointOrder(partsSaveDetails.getJointOrder());
+			request.setSubrogation("Y".equalsIgnoreCase(partsSaveDetails.getSubrogation())?"true":"false");
+			request.setJointOrder("Y".equalsIgnoreCase(partsSaveDetails.getJointOrder())?"true":"false");
 			//request.setTotalLoss(partsSaveDetails.getTotalLoss().toString());
 			request.setTotalLoss("N");
 			//request.setTotalLossType(partsSaveDetails.getTotalLossType());
 			request.setTotalLossType("");
 			request.setRemarks(partsSaveDetails.getRemarks());
-//			request.setClaimNo(partsSaveDetails.getClaimNo());
-			request.setClaimNo(partsSaveDetails.getFileNo());
-			request.setLpoId(partsSaveDetails.getLpoId());
-			request.setVehId(partsSaveDetails.getVehId());
-			request.setClcpId(partsSaveDetails.getClcpId());
+			request.setClaimNo(partsSaveDetails.getClaimNo());
 
 			List<VehicleDamageDetailRequest> vehicleDamageDetails = new ArrayList<>();
 
@@ -1485,101 +1546,87 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	@Override
 	public CommonResponse getSavedSpareParts(SaveSparePartsDTO requestPayload) {
-		CommonResponse comResponse = new CommonResponse(); 
-        try {
-        	List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findAll();
-			
-			if(spareSavedList != null && spareSavedList.size()>0) {
-		    	List<GetAllQuoteResponse> res = new ArrayList<>();
-				for(SparePartsSaveDetails spareSaved : spareSavedList ) {
-					 GetAllQuoteResponse response = new GetAllQuoteResponse();
-			         response.setClaimNo(spareSaved.getClaimNo());
-			         response.setWorkOrderNo(spareSaved.getWorkOrderNo());
-			         response.setWorkOrderType(spareSaved.getWorkOrderType());
-			         response.setWorkOrderDate(spareSaved.getWorkOrderDate());
-			         response.setSettlementType(spareSaved.getAccountSettlementType());
-			         response.setSettlementTo(spareSaved.getAccountSettlementName());
-			         response.setGarageId(spareSaved.getGarageCode().toString());
-			         response.setQuotationNo(spareSaved.getQuotationNo());
-			         response.setDeliveryDate(spareSaved.getDeliveryDate());
-			         response.setJointOrderYn(spareSaved.getJointOrder());
-			         response.setSubrogationYn(spareSaved.getSubrogation());
-			         response.setTotalLoss(spareSaved.getTotalLoss().toString());
-			         response.setLossType(spareSaved.getTotalLossType());
-			         response.setRemarks(spareSaved.getRemarks());
-			         response.setSavedStatus(spareSaved.getSavedStatus());
-			         response.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String ::valueOf).orElse(""));		         
-			         
-						response.setReplacementCost(
-								spareSaved.getReplacementCost() != null ? spareSaved.getReplacementCost().toString()
-										: "0.00");
-						response.setReplacementCostDeductible(spareSaved.getReplacementCostDeductible() != null
-								? spareSaved.getReplacementCostDeductible().toString()
-								: "0.00");
-						response.setSparePartDepreciation(spareSaved.getSparePartDepreciation() != null
-								? spareSaved.getSparePartDepreciation().toString()
-								: "0.00");
-						response.setDiscountOnSpareParts(spareSaved.getDiscountOnSpareParts() != null
-								? spareSaved.getDiscountOnSpareParts().toString()
-								: "0.00");
-						response.setTotalAmountReplacement(spareSaved.getTotalAmountReplacement() != null
-								? spareSaved.getTotalAmountReplacement().toString()
-								: "0.00");
-						response.setRepairLabour(
-								spareSaved.getRepairLabour() != null ? spareSaved.getRepairLabour().toString()
-										: "0.00");
-						response.setRepairLabourDeductible(spareSaved.getRepairLabourDeductible() != null
-								? spareSaved.getRepairLabourDeductible().toString()
-								: "0.00");
-						response.setRepairLabourDiscountAmount(spareSaved.getRepairLabourDiscountAmount() != null
-								? spareSaved.getRepairLabourDiscountAmount().toString()
-								: "0.00");
-						response.setTotalAmountRepairLabour(spareSaved.getTotalAmountRepairLabour() != null
-								? spareSaved.getTotalAmountRepairLabour().toString()
-								: "0.00");
-						response.setNetAmount(
-								spareSaved.getNetAmount() != null ? spareSaved.getNetAmount().toString() : "0.00");
-						response.setUnknownAccidentDeduction(spareSaved.getUnknownAccidentDeduction() != null
-								? spareSaved.getUnknownAccidentDeduction().toString()
-								: "0.00");
-						response.setAmountToBeRecovered(spareSaved.getAmountToBeRecovered() != null
-								? spareSaved.getAmountToBeRecovered().toString()
-								: "0.00");
-						response.setTotalAfterDeductions(spareSaved.getTotalAfterDeductions() != null
-								? spareSaved.getTotalAfterDeductions().toString()
-								: "0.00");
-						response.setVatRatePer(
-								spareSaved.getVatRatePercentage() != null ? spareSaved.getVatRatePercentage().toString()
-										: "0.00");
-						response.setVatRate(
-								spareSaved.getVatRate() != null ? spareSaved.getVatRate().toString() : "0.00");
-						response.setVatAmount(
-								spareSaved.getVatAmount() != null ? spareSaved.getVatAmount().toString() : "0.00");
-						response.setTotalWithVAT(
-								spareSaved.getTotalWithVat() != null ? spareSaved.getTotalWithVat().toString()
-										: "0.00");
+	    CommonResponse comResponse = new CommonResponse();
+	    
+	    try {
+	        // Fetch insured vehicle info based on company and surveyor ID
+	        List<InsuredVehicleInfo> insuredList = repository.findByCompanyIdAndSurveyorId(
+	                Integer.valueOf(requestPayload.getCompanyId()), requestPayload.getSurveyorLoginId());
 
-			         
-			         
-			         res.add(response);
-				}
-				
-				comResponse.setErrors(Collections.emptyList());
-				comResponse.setMessage("Success");
-				comResponse.setResponse(res);
-			
-			}else {
-				
-				comResponse.setErrors(Collections.emptyList());
-				comResponse.setMessage("Failed");
-				comResponse.setResponse(Collections.emptyList());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-                   
-         return comResponse;
+	        // Extract claim numbers from the insured vehicle list
+	        List<String> claimNumbers = insuredList.stream()
+	                .map(InsuredVehicleInfo::getClaimNo)
+	                .collect(Collectors.toList());
+
+	        // Retrieve saved spare parts details
+	        List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByClaimNoIn(claimNumbers);
+
+	        // Check if there are saved spare parts
+	        if (!spareSavedList.isEmpty()) {
+	            List<GetAllQuoteResponse> responseList = new ArrayList<>();
+
+	            for (SparePartsSaveDetails spareSaved : spareSavedList) {
+	                GetAllQuoteResponse response = new GetAllQuoteResponse();
+	                response.setClaimNo(spareSaved.getClaimNo());
+	                response.setWorkOrderNo(spareSaved.getWorkOrderNo());
+	                response.setWorkOrderType(spareSaved.getWorkOrderType());
+	                response.setWorkOrderDate(spareSaved.getWorkOrderDate());
+	                response.setSettlementType(spareSaved.getAccountSettlementType());
+	                response.setSettlementTo(spareSaved.getAccountSettlementName());
+	                response.setGarageId(String.valueOf(spareSaved.getGarageCode()));
+	                response.setQuotationNo(spareSaved.getQuotationNo());
+	                response.setDeliveryDate(spareSaved.getDeliveryDate());
+	                response.setJointOrderYn(spareSaved.getJointOrder());
+	                response.setSubrogationYn(spareSaved.getSubrogation());
+	                response.setTotalLoss(String.valueOf(spareSaved.getTotalLoss()));
+	                response.setLossType(spareSaved.getTotalLossType());
+	                response.setRemarks(spareSaved.getRemarks());
+	                response.setSavedStatus(spareSaved.getSavedStatus());
+	                response.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String::valueOf).orElse(""));
+
+	                // Financial details with default values
+	                response.setReplacementCost(Optional.ofNullable(spareSaved.getReplacementCost()).map(String::valueOf).orElse("0.00"));
+	                response.setReplacementCostDeductible(Optional.ofNullable(spareSaved.getReplacementCostDeductible()).map(String::valueOf).orElse("0.00"));
+	                response.setSparePartDepreciation(Optional.ofNullable(spareSaved.getSparePartDepreciation()).map(String::valueOf).orElse("0.00"));
+	                response.setDiscountOnSpareParts(Optional.ofNullable(spareSaved.getDiscountOnSpareParts()).map(String::valueOf).orElse("0.00"));
+	                response.setTotalAmountReplacement(Optional.ofNullable(spareSaved.getTotalAmountReplacement()).map(String::valueOf).orElse("0.00"));
+	                response.setRepairLabour(Optional.ofNullable(spareSaved.getRepairLabour()).map(String::valueOf).orElse("0.00"));
+	                response.setRepairLabourDeductible(Optional.ofNullable(spareSaved.getRepairLabourDeductible()).map(String::valueOf).orElse("0.00"));
+	                response.setRepairLabourDiscountAmount(Optional.ofNullable(spareSaved.getRepairLabourDiscountAmount()).map(String::valueOf).orElse("0.00"));
+	                response.setTotalAmountRepairLabour(Optional.ofNullable(spareSaved.getTotalAmountRepairLabour()).map(String::valueOf).orElse("0.00"));
+	                response.setNetAmount(Optional.ofNullable(spareSaved.getNetAmount()).map(String::valueOf).orElse("0.00"));
+	                response.setUnknownAccidentDeduction(Optional.ofNullable(spareSaved.getUnknownAccidentDeduction()).map(String::valueOf).orElse("0.00"));
+	                response.setAmountToBeRecovered(Optional.ofNullable(spareSaved.getAmountToBeRecovered()).map(String::valueOf).orElse("0.00"));
+	                response.setTotalAfterDeductions(Optional.ofNullable(spareSaved.getTotalAfterDeductions()).map(String::valueOf).orElse("0.00"));
+	                response.setVatRatePer(Optional.ofNullable(spareSaved.getVatRatePercentage()).map(String::valueOf).orElse("0.00"));
+	                response.setVatRate(Optional.ofNullable(spareSaved.getVatRate()).map(String::valueOf).orElse("0.00"));
+	                response.setVatAmount(Optional.ofNullable(spareSaved.getVatAmount()).map(String::valueOf).orElse("0.00"));
+	                response.setTotalWithVAT(Optional.ofNullable(spareSaved.getTotalWithVat()).map(String::valueOf).orElse("0.00"));
+
+	                responseList.add(response);
+	            }
+
+	            comResponse.setErrors(Collections.emptyList());
+	            comResponse.setMessage("Success");
+	            comResponse.setResponse(responseList);
+	        } else {
+	            comResponse.setErrors(Collections.emptyList());
+	            comResponse.setMessage("Failed");
+	            comResponse.setResponse(Collections.emptyList());
+	        }
+	    } catch (Exception e) {
+	        // Proper logging instead of just printing the stack trace
+	        System.err.println("Error fetching saved spare parts: " + e.getMessage());
+	        e.printStackTrace();
+	        
+	        comResponse.setErrors(Collections.singletonList("An unexpected error occurred."));
+	        comResponse.setMessage("Error");
+	        comResponse.setResponse(Collections.emptyList());
+	    }
+
+	    return comResponse;
 	}
+
 	
 	@Override
 	public CommonResponse getSavedGarageSpareParts(SaveSparePartsDTO requestPayload) {
@@ -1609,7 +1656,6 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			         response.setRemarks(spareSaved.getRemarks());
 			         response.setSavedStatus(spareSaved.getSavedStatus());
 			         response.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String ::valueOf).orElse(""));	
-			         response.setClgwSgsId(spareSaved.getClgwSgsId());
 			         
 						response.setReplacementCost(
 								spareSaved.getReplacementCost() != null ? spareSaved.getReplacementCost().toString()
@@ -2348,7 +2394,6 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                quoteResponse.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String::valueOf).orElse(""));
 	                quoteResponse.setTotalAfterDeductions(sparePartsMap.get(spareSaved.getClaimNo()).getNetamount());
 	                quoteResponse.setAmndVersionId(sparePartsMap.get(spareSaved.getClaimNo()).getAmndverno());
-	                quoteResponse.setClgwSgsId(spareSaved.getClgwSgsId());
 	                res.add(quoteResponse);
 	            }
 	        }
@@ -2606,7 +2651,6 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                quoteResponse.setRemarks(spareSaved.getRemarks());
 	                quoteResponse.setSparepartsDealerId(Optional.ofNullable(spareSaved.getSparePartsDealer()).map(String::valueOf).orElse(""));
 	                quoteResponse.setTotalAfterDeductions(sparePartsMap.get(spareSaved.getClaimNo()).getNetamount());
-	                quoteResponse.setClgwSgsId(spareSaved.getClgwSgsId());
 	                quoteResponse.setPaidamount(sparePartsMap.get(spareSaved.getClaimNo()).getPaidamount());
 	                quoteResponse.setOutstanding(sparePartsMap.get(spareSaved.getClaimNo()).getOutstanding());
 	                if(!"ESB".equalsIgnoreCase(spareSaved.getSavedStatus())) {
@@ -2690,12 +2734,6 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 					InsuredVehicleInfo insuredVeh = optionalInsuredVeh.get();
 					insuredVeh.setStatus(req.getQuoteStatus());
 					insuredVeh.setEntryDate(new Date());
-					insuredVeh.setAmndVerNo(req.getAmndVersionId());
-
-					dto.setClaimNo(insuredVeh.getFileNo());
-					dto.setClcpId(insuredVeh.getClcpId());
-					dto.setFnolNo(insuredVeh.getFnolNo());
-					dto.setProdId(insuredVeh.getProdId());
 
 					repository.save(insuredVeh);
 				}
@@ -2821,9 +2859,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 		            // Set basic details from insured vehicle and request
 		            dto.setSgsId(insuredVeh.getFnolSgsId());
 		            dto.setAmndVersionId("0");
-		            dto.setProductId(insuredVeh.getProdId());
 		            dto.setTransactionType("CLM");
-		            dto.setPartyId(insuredVeh.getClcpId());
 		            dto.setPartyName(insuredVeh.getInsuredName()); 
 		            dto.setPartyType(""); // Consider setting a valid type if applicable
 		            dto.setCreatedBy("PORTAL");
@@ -2983,9 +3019,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	            dto.setSgsId(insuredVeh.getFnolSgsId());
 //	            dto.setAmndVersionId(req.getAmndVersionId());
 	            dto.setAmndVersionId("0");
-	            dto.setProductId(insuredVeh.getProdId());
 	            dto.setTransactionType("CLM");
-	            dto.setPartyId(insuredVeh.getClcpId());
 	            dto.setPartyName(insuredVeh.getInsuredName()); 
 	            dto.setPartyType(""); // Consider setting a valid type if applicable
 	            dto.setCreatedBy("PORTAL");
@@ -3249,6 +3283,158 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        default:
 	            return "application/octet-stream"; // Default binary file type
 	    }
+	}
+
+
+	@Override
+	public CommonResponse getPolicyDetails(GetClaimRequest req) {
+	    CommonResponse response = new CommonResponse();
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setSno(apiTransactionLogRepo.findMaxSno() + 1);
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+
+	    try {
+	        // Fetch company ID from request payload
+	        String companyId = String.valueOf(req.getCompanyId());
+
+	        // Fetch API URL from the database
+	        String apiType = "GET_POLICY";
+	        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository
+	                .findByCompanyIdAndApiTypeAndStatus(companyId, apiType, "Y");
+
+	        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+	            response.setMessage("API URL not found for company: " + companyId);
+	            response.setIsError(true);
+	            return response;
+	        }
+
+	        String externalApiUrl = apiConfig.get().getApiUrl();
+	        log.setEndpoint(externalApiUrl);
+
+	        // Extract JWT token from request
+	        String jwtToken = authenticateUserCall();
+
+	        // Create headers with JWT token
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Convert requestPayload to JSON and add headers
+	        GetPolicyDetailsRequestDto dto = mapToGetPolicyDetailsRequestDto(req);
+	        String requestBody = objectMapper.writeValueAsString(dto);
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+	        log.setRequest(requestBody);
+	        logger.info(requestBody);
+
+	        // Send request to external API with JWT in Authorization header
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
+	        log.setResponse(apiResponse.getBody());
+	        log.setStatus("SUCCESS");
+
+	        // Parse the raw response into ExternalApiResponse object
+	        PolicyResponseDTO externalApiResponse = objectMapper.readValue(apiResponse.getBody(), PolicyResponseDTO.class);
+
+	        if (externalApiResponse.isHasError()) {
+	            response.setMessage(externalApiResponse.getMessage());
+	            response.setResponse(Collections.emptyMap());
+	            response.setIsError(true);
+	        } else {
+	            // ✅ Convert API response to UI-friendly response
+	            PolicyResponseUI policyResponseUI = mapToUIResponse(externalApiResponse);
+	            response.setMessage("Data saved successfully");
+	            response.setIsError(false);
+	            response.setResponse(policyResponseUI);
+	        }
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        apiTransactionLogRepo.save(log);
+	        logger.info(log.getEndpoint() + " ==> " + log);
+	    }
+
+	    return response;
+	}
+
+
+
+	private GetPolicyDetailsRequestDto mapToGetPolicyDetailsRequestDto(GetClaimRequest request) {
+	    SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+	    GetPolicyDetailsRequestDto dto = new GetPolicyDetailsRequestDto();
+
+	    // Hardcoded values
+	    dto.setPolicyNo(request.getPolicyNo());
+	    dto.setProductId("1100");
+	    dto.setTransactionType("P");
+	    dto.setCobCode("10");
+
+	    GetPolicyDetailsRequestDto.RequestMetaDataDTO metaData = new GetPolicyDetailsRequestDto.RequestMetaDataDTO();
+
+	    metaData.setRequestOrigin("API");
+	    metaData.setCurrentBranch("2222");
+	    metaData.setOriginBranch("2222");
+	    metaData.setUserName("eb7372@eagle");
+	    metaData.setIpAddress("");
+	    metaData.setRequestGeneratedDateTime(isoDateFormat.format(new Date()));
+	    metaData.setConsumerTrackingID("101");
+
+	    dto.setRequestMetaData(metaData);
+
+	    return dto;
+	}
+
+
+	private PolicyResponseUI mapToUIResponse(PolicyResponseDTO externalApiResponse) {
+	    PolicyResponseUI policyResponseUI = new PolicyResponseUI();
+	    policyResponseUI.setPolicyNumber(externalApiResponse.getData().getPolicyNumber());
+	    policyResponseUI.setInsuredId(externalApiResponse.getData().getInsuredId());
+
+	    // ✅ Format Dates from `yyyy-MM-dd'T'HH:mm:ss` to `dd/MM/yyyy`
+	    DateTimeFormatter inputFormatter = new DateTimeFormatterBuilder()
+	            .appendPattern("yyyy-MM-dd'T'HH:mm")  // Handles "yyyy-MM-dd'T'HH:mm"
+	            .optionalStart()
+	            .appendPattern(":ss")  // Optionally handle seconds if present
+	            .optionalEnd()
+	            .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0) // Defaults seconds to 0 if missing
+	            .toFormatter();
+	    //DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+	    DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+	    try {
+			LocalDate policyFromDate = LocalDate.parse(externalApiResponse.getData().getPolicyFromDate(), inputFormatter);
+			LocalDate policyToDate = LocalDate.parse(externalApiResponse.getData().getPolicyToDate(), inputFormatter);
+
+			policyResponseUI.setPolicyFromDate(policyFromDate.format(outputFormatter));
+			policyResponseUI.setPolicyToDate(policyToDate.format(outputFormatter));
+		} catch (Exception e) {
+
+		}
+
+	    // ✅ Map Customer Details
+	    PolicyResponseUI.CustomerDetailsUI customerDetails = new PolicyResponseUI.CustomerDetailsUI();
+	    List<PolicyResponseUI.PolicyHolderUI> policyHolders = externalApiResponse.getData()
+	            .getCustomerDetails()
+	            .getPolicyHolder()
+	            .stream()
+	            .map(holder -> {
+	                PolicyResponseUI.PolicyHolderUI uiHolder = new PolicyResponseUI.PolicyHolderUI();
+	                uiHolder.setEngFullName(holder.getEngFullName());
+	                policyResponseUI.setEngFullName(holder.getEngFullName());
+	                return uiHolder;
+	            })
+	            .collect(Collectors.toList());
+
+	    customerDetails.setPolicyHolder(policyHolders);
+	    policyResponseUI.setCustomerDetails(customerDetails);
+
+	    return policyResponseUI;
 	}
 
 

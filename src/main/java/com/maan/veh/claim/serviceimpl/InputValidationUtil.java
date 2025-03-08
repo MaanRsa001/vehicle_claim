@@ -259,9 +259,9 @@ public class InputValidationUtil {
 	       // list.add(new ErrorList("100", "SettlementTo", "Settlement to cannot be blank"));
 	    }
 
-	    if (StringUtils.isBlank(req.getLocation())) {
-	        list.add(new ErrorList("100", "Location", "Location cannot be blank"));
-	    }
+//	    if (StringUtils.isBlank(req.getLocation())) {
+//	        list.add(new ErrorList("100", "Location", "Location cannot be blank"));
+//	    }
 
 	    if (StringUtils.isBlank(req.getRepairType())) {
 	        list.add(new ErrorList("100", "RepairType", "Repair type cannot be blank"));
@@ -298,14 +298,14 @@ public class InputValidationUtil {
 	    }
 
 	    // Validate Delivery Date
-	    if (deliveryDate == null) {
-	        list.add(new ErrorList("100", "DeliveryDate", "Delivery date is required and must be in the format (dd/MM/yyyy)."));
-	    }
+//	    if (deliveryDate == null) {
+//	        list.add(new ErrorList("100", "DeliveryDate", "Delivery date is required and must be in the format (dd/MM/yyyy)."));
+//	    }
 
 	    // Validate logical order of dates
 	    if (workOrderDate != null && deliveryDate != null) {
 	        if (deliveryDate.before(workOrderDate)) {
-	            list.add(new ErrorList("101", "DeliveryDate", "Delivery date cannot be earlier than the work order date."));
+	            list.add(new ErrorList("101", "DeliveryDate", "Delivery date cannot be earlier than the quotation date."));
 	        }
 	    }
 
@@ -1102,6 +1102,13 @@ public class InputValidationUtil {
 	    if (StringUtils.isBlank(request.getInsuredId())) {
 	        errors.add(new ErrorList("100", "InsuredId", "InsuredId cannot be blank"));
 	    }
+	    if (request.getLossDate() == null) {
+	        errors.add(new ErrorList("100", "LossDate", "LossDate cannot be blank"));
+	    }
+
+	    if (request.getLossTime() == null) {
+	        errors.add(new ErrorList("100", "LossTime", "LossTime cannot be blank"));
+	    }
 //	    if (StringUtils.isBlank(request.getLossDate())) {
 //	        errors.add(new ErrorList("100", "LossDate", "LossDate cannot be blank"));
 //	    }
@@ -1111,12 +1118,9 @@ public class InputValidationUtil {
 	    if (StringUtils.isBlank(request.getLossLocation())) {
 	        errors.add(new ErrorList("100", "LossLocation", "LossLocation cannot be blank"));
 	    }
-	    if (StringUtils.isBlank(request.getPoliceStation())) {
-	        errors.add(new ErrorList("100", "PoliceStation", "PoliceStation cannot be blank"));
-	    }
-	    if (StringUtils.isBlank(request.getPoliceReportNo())) {
-	        errors.add(new ErrorList("100", "PoliceReportNo", "PoliceReportNo cannot be blank"));
-	    }
+//	    if (StringUtils.isBlank(request.getPoliceReportNo())) {
+//	        errors.add(new ErrorList("100", "PoliceReportNo", "PoliceReportNo cannot be blank"));
+//	    }
 	    if (StringUtils.isBlank(request.getLossDescription())) {
 	        errors.add(new ErrorList("100", "LossDescription", "LossDescription cannot be blank"));
 	    }

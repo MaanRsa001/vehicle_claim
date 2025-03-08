@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -130,11 +131,11 @@ public class TempDropDownController {
 	        return new ResponseEntity<>(data, HttpStatus.OK);
 	    }
 	    
-	    @GetMapping(value = "/policeStation")
-	    public ResponseEntity<CommonRes> getPoliceStation() {
+	    @GetMapping(value = "/policeStation/{companyId}")
+	    public ResponseEntity<CommonRes> getPoliceStation(@PathVariable String companyId) {
 	    	CommonRes data = new CommonRes();
 
-			List<DropDownRes> res = dropDownService.getPoliceStation();
+			List<DropDownRes> res = dropDownService.getPoliceStation(companyId);
 			data.setCommonResponse(res);
 			data.setIsError(false);
 			data.setErrorMessage(null);
@@ -147,11 +148,11 @@ public class TempDropDownController {
 			}
 	    }
 	    
-	    @GetMapping(value = "/losslocation")
-	    public ResponseEntity<CommonRes> getLossLocation() {
+	    @GetMapping(value = "/losslocation/{companyId}")
+	    public ResponseEntity<CommonRes> getLossLocation(@PathVariable String companyId) {
 	    	CommonRes data = new CommonRes();
 
-			List<DropDownRes> res = dropDownService.getLossLocation();
+			List<DropDownRes> res = dropDownService.getLossLocation(companyId);
 			data.setCommonResponse(res);
 			data.setIsError(false);
 			data.setErrorMessage(null);
@@ -164,11 +165,11 @@ public class TempDropDownController {
 			}
 	    }
 	    
-	    @GetMapping(value = "/natureofloss")
-	    public ResponseEntity<CommonRes> getNatureOfLoss() {
+	    @GetMapping(value = "/natureofloss/{companyId}")
+	    public ResponseEntity<CommonRes> getNatureOfLoss(@PathVariable String companyId) {
 	    	CommonRes data = new CommonRes();
 
-			List<DropDownRes> res = dropDownService.getNatureOfLoss();
+			List<DropDownRes> res = dropDownService.getNatureOfLoss(companyId);
 			data.setCommonResponse(res);
 			data.setIsError(false);
 			data.setErrorMessage(null);

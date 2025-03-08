@@ -196,10 +196,10 @@ public class DropDownServiceImpl implements DropDownService {
 	}
 
 	@Override
-	public List<DropDownRes> getbodyPart(String companyId) {
+	public List<DropDownRes> getbodyPart(String companyId,String direction) {
 		List<DropDownRes> resList = new ArrayList<>();
         try {
-            List<VehicleBodypartsMaster> getList = bodyPartRepo.findByStatusAndCompanyIdOrderByPartIdAsc("Y",new BigDecimal(companyId));
+            List<VehicleBodypartsMaster> getList = bodyPartRepo.findByStatusAndCompanyIdAndDirectionIdOrderByPartIdAsc("Y",new BigDecimal(companyId),direction);
             for (VehicleBodypartsMaster data : getList) {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getPartId().toString());

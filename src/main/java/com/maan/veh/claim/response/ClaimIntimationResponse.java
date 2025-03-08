@@ -29,9 +29,15 @@ public class ClaimIntimationResponse {
 
 	@JsonProperty("InsuredId")
 	private String insuredId;
+	
+	@JsonProperty("UserName")
+	private String userName;
 
 	@JsonProperty("LossDate")
 	private String lossDate;
+	
+	@JsonProperty("LossTime")
+	private String lossTime;
 
 	@JsonProperty("IntimatedDate")
 	private String intimatedDate;

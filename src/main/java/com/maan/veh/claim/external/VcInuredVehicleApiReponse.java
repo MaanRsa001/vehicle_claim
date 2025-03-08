@@ -1,7 +1,6 @@
 package com.maan.veh.claim.external;
 
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -42,8 +41,8 @@ public class VcInuredVehicleApiReponse {
 		 @JsonProperty("lossLocation")
 		 private String losslocation ;
 		 
-		 @JsonProperty("vehicleregno")
-		 private String vehicleregno ;
+		 @JsonProperty("vehRegNo")
+		 private String vehRegNo ;
 		 
 		 @JsonProperty("entrydate")
 		 private Date entrydate ;

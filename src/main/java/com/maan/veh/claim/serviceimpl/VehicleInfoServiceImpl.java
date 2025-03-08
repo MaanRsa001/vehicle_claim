@@ -19,9 +19,11 @@ import com.maan.veh.claim.dto.GarageClaimListDataDto;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
+import com.maan.veh.claim.entity.VcFlowMaster;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
+import com.maan.veh.claim.repository.VcFlowMasterRepository;
 import com.maan.veh.claim.request.ExternalVehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleInfoRequest;
@@ -44,6 +46,9 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
     
     @Autowired
     private ExternalApiServiceImpl ExternalApiServiceImpl;
+    
+	@Autowired
+    private VcFlowMasterRepository flowMasterRepo;
 
     @Override
     public CommonResponse getVehicleInfoByCompanyId(VehicleGarageViewRequest request) {
@@ -95,6 +100,10 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
                         veh.setLossLocation(vehicle.getLossLocation());
                         veh.setQuoteStatus("Y".equalsIgnoreCase(vehicle.getStatus()) ? "PFG" : vehicle.getStatus());
 
+                        List<VcFlowMaster> statusList = flowMasterRepo.findByCompanyIdAndSubStatus(request.getCompanyId(),"Y".equalsIgnoreCase(vehicle.getStatus()) ? "PFG" : vehicle.getStatus());
+                        if(statusList!=null && statusList.size()>0) {
+                        	veh.setStatus(statusList.get(0).getSubStatusDescription());
+                        }
                         // Set quotation number from pre-fetched workOrderMap
                         veh.setQuotationNo(workOrderMap.getOrDefault(vehicle.getClaimNo(), ""));
                         
@@ -106,6 +115,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
                         veh.setFileNo(vehicle.getFileNo());
                         veh.setGarageAddress(vehicle.getGarageAddress());
                         veh.setPlateType(vehicle.getPlateType());
+                        veh.setGarageLoginId(request.getGarageId());
                         
                         return veh;
                     }).collect(Collectors.toList());
@@ -370,7 +380,8 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
                     veh.setQuoteStatus(vehicle.getStatus());
                     veh.setStatus(quotationToStatusMap.get(vehicle.getQuotationNo()));
                     veh.setQuotationNo(vehicle.getQuotationNo());
-                    
+                    veh.setGarageLoginId(vehicle.getGarageId());
+                    veh.setDealerLogin(request.getSparepartsDealerId());
                     // Add the populated response to the list
                     vehList.add(veh);
                 }

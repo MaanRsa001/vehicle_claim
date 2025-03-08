@@ -104,8 +104,8 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(Authenticate, entity, String.class);
 
 	        // Parse API response
-	        VcinsuredVehicleResponseQIIC externalApiResponse = objectMapper.readValue(apiResponse.getBody(), VcinsuredVehicleResponseQIIC.class);
-	        List<VcInuredVehicleApiResponseQIIC> apiData = externalApiResponse.getData();
+	        VcinsuredVehicleResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), VcinsuredVehicleResponse.class);
+	        List<VcInuredVehicleApiReponse> apiData = externalApiResponse.getData();
 	        if (apiData == null || apiData.isEmpty()) {
 	            response.setMessage("No data received from API");
 	            response.setIsError(false);
@@ -116,8 +116,8 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	        Set<InsuredVehicleInfoId> insuredIds = apiData.stream()
 	            .map(insured -> new InsuredVehicleInfoId(
 	                requestPayload.getCompanyid(),
-	                insured.getPolicyNo(),
-	                insured.getFileNo(),
+	                insured.getPolicyno(),
+	                insured.getClaimno(),
 	                requestPayload.getGarageid()
 	            ))
 	            .collect(Collectors.toSet());
@@ -129,48 +129,33 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	        List<InsuredVehicleInfo> insuredInfoList = apiData.stream()
 	            .filter(insured -> !existingIds.contains(new InsuredVehicleInfoId(
 	                requestPayload.getCompanyid(),
-	                insured.getPolicyNo(),
-	                insured.getFileNo(),
+	                insured.getPolicyno(),
+	                insured.getClaimno(),
 	                requestPayload.getGarageid()
 	            )))
 	            .map(insured -> {
 	                InsuredVehicleInfo insuredVehicleInfo = new InsuredVehicleInfo();
 	                insuredVehicleInfo.setCompanyId(requestPayload.getCompanyid());
-	                insuredVehicleInfo.setPolicyNo(insured.getPolicyNo());
+	                insuredVehicleInfo.setPolicyNo(insured.getPolicyno());
 	                //insuredVehicleInfo.setClaimNo(insured.getClaimNo());
-	                insuredVehicleInfo.setClaimNo(insured.getFileNo());
+	                insuredVehicleInfo.setClaimNo(insured.getClaimno());
 	                insuredVehicleInfo.setGarageId(requestPayload.getGarageid());
 	                insuredVehicleInfo.setVehicleMake(insured.getMake());
 	                insuredVehicleInfo.setVehicleModel(insured.getModel());
 	                insuredVehicleInfo.setMakeYear(insured.getYear());
-	                insuredVehicleInfo.setChassisNo(insured.getChassisNo());
-	                insuredVehicleInfo.setInsuredName(insured.getInsuredName());
-	                insuredVehicleInfo.setType(insured.getBodyType());
-	                insuredVehicleInfo.setLossLocation(insured.getLossLocation());
+	                insuredVehicleInfo.setChassisNo(insured.getChassisno());
+	                insuredVehicleInfo.setInsuredName(insured.getInsuredname());
+	                insuredVehicleInfo.setType(insured.getBodytype());
+	                insuredVehicleInfo.setLossLocation(insured.getLosslocation());
 	                insuredVehicleInfo.setVehicleRegNo(insured.getVehRegNo());
 	                insuredVehicleInfo.setEntryDate(new Date());
 	                insuredVehicleInfo.setStatus("Y");
-	                insuredVehicleInfo.setFnolSgsId(insured.getFnolSgsId());
-	                
-	                // Newly added fields
-	                insuredVehicleInfo.setWorkOrderType(insured.getWorkOrderType());
-	                insuredVehicleInfo.setEngineNo(insured.getEngineNo());
-	                insuredVehicleInfo.setClaimantType(insured.getClaimantType());
-	                insuredVehicleInfo.setLossLocationDesc(insured.getLossLocationDesc());
-	                insuredVehicleInfo.setClaimStatus(insured.getClaimStatus());
-	                //insuredVehicleInfo.setFileNo(insured.getFileNo());
-	                insuredVehicleInfo.setFileNo(insured.getClaimNo());
-	                insuredVehicleInfo.setGarageAddress(insured.getGarageAddress());
-	                insuredVehicleInfo.setPlateType(insured.getPlateType());
+	                insuredVehicleInfo.setFnolSgsId(insured.getFnolsgsid());
 	                
 	                // Default values
 	                insuredVehicleInfo.setSurveyorId("surveyor_test1");
 	                insuredVehicleInfo.setDealerId("dealer_test1");
 	                insuredVehicleInfo.setLpoId(insured.getLpoId());
-	                insuredVehicleInfo.setVehId(insured.getVehId());
-	                insuredVehicleInfo.setClcpId(insured.getClcpId());
-	                insuredVehicleInfo.setProdId(insured.getProdId());
-	                insuredVehicleInfo.setFnolNo(insured.getFnolNo());
 	                
 	                return insuredVehicleInfo;
 	            })
@@ -326,7 +311,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 				    insuredVehicleInfo.setInsuredName(insured.getInsuredname());
 				    insuredVehicleInfo.setType(insured.getBodytype());
 				    insuredVehicleInfo.setLossLocation(insured.getLosslocation());
-				    insuredVehicleInfo.setVehicleRegNo(insured.getVehregno());
+				    insuredVehicleInfo.setVehicleRegNo(insured.getVehRegNo());
 				    insuredVehicleInfo.setEntryDate(new Date());
 				    insuredVehicleInfo.setStatus("Y");
 				    insuredVehicleInfo.setFnolSgsId(insured.getFnolsgsid());
@@ -386,7 +371,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 				insuredVehicleInfo.setType(insured.getBodytype());
 //				System.out.println(insured.getBodytype());
 				insuredVehicleInfo.setLossLocation(insured.getLosslocation());
-				insuredVehicleInfo.setVehicleRegNo(insured.getVehregno());
+				insuredVehicleInfo.setVehicleRegNo(insured.getVehRegNo());
 //				System.out.println(insured.getVehregno());
 				insuredVehicleInfo.setEntryDate(new Date());
 				insuredVehicleInfo.setStatus(insured.getClaimstatus());
@@ -469,7 +454,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 
 	@Override
 	public CommonResponse assignSurveyorInsuredVehicleInfo(InsuredVehicleMasterDTO requestPayload) {
-		CommonResponse response = new CommonResponse();
+	    CommonResponse response = new CommonResponse();
 	    ApiTransactionLog transactionLog = new ApiTransactionLog();
 	    transactionLog.setRequestTime(LocalDateTime.now());
 	    transactionLog.setEntryDate(new Date());
@@ -487,7 +472,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 
 	        // Set up headers
 	        HttpHeaders headers = new HttpHeaders();
-	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setBearerAuth(jwtToken);
 	        headers.setContentType(MediaType.APPLICATION_JSON);
 
 	        // Send request to external API
@@ -498,49 +483,30 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	        // Parse API response
 	        VcinsuredVehicleResponse externalApiResponse = objectMapper.readValue(apiResponse.getBody(), VcinsuredVehicleResponse.class);
 	        List<VcInuredVehicleApiReponse> apiData = externalApiResponse.getData();
+	        
 	        if (apiData == null || apiData.isEmpty()) {
 	            response.setMessage("No data received from API");
 	            response.setIsError(false);
 	            return response;
 	        }
 
-	        // Create a set of IDs for batch fetching
-	        Set<InsuredVehicleInfoId> insuredIds = apiData.stream()
-	            .map(insured -> new InsuredVehicleInfoId(
-	                requestPayload.getCompanyid(),
-	                insured.getPolicyno(),
-	                insured.getClaimno(),
-	                requestPayload.getGarageid()
-	            ))
-	            .collect(Collectors.toSet());
-
-	        // ✅ Fetch existing records in ONE bulk query
-	        Set<InsuredVehicleInfoId> existingIds = repository.findExistingIds(insuredIds);
-
-	        // Process only new records
-	        List<InsuredVehicleInfo> insuredInfoList = apiData.stream()
-	            .filter(insured -> !existingIds.contains(new InsuredVehicleInfoId(
-	                requestPayload.getCompanyid(),
-	                insured.getPolicyno(),
-	                insured.getClaimno(),
-	                requestPayload.getGarageid()
-	            )))
-	            .map(insured -> {
-	                InsuredVehicleInfo insuredVehicleInfo = new InsuredVehicleInfo();
-	                insuredVehicleInfo.setCompanyId(requestPayload.getCompanyid());
-	                insuredVehicleInfo.setPolicyNo(insured.getPolicyno());
-	                insuredVehicleInfo.setClaimNo(insured.getClaimno());
-	                insuredVehicleInfo.setGarageId(requestPayload.getGarageid());
-	                
-	                // Default values
-	                insuredVehicleInfo.setSurveyorId(requestPayload.getSurveyorId());
-	                insuredVehicleInfo.setDealerId("dealer_test1");
-	                
-	                return insuredVehicleInfo;
-	            })
+	        // Collect claim numbers from API response
+	        List<String> claimNumbers = apiData.stream()
+	            .map(VcInuredVehicleApiReponse::getClaimno)
 	            .collect(Collectors.toList());
 
-	        // Save all new records in bulk
+	        List<InsuredVehicleInfo> insuredInfoList = new ArrayList<>();
+	        int batchSize = 1000;
+	        
+	        for (int i = 0; i < claimNumbers.size(); i += batchSize) {
+	            List<String> batch = claimNumbers.subList(i, Math.min(i + batchSize, claimNumbers.size()));
+	            insuredInfoList.addAll(repository.findByClaimNoInAndSurveyorId(batch, "surveyor_test1"));
+	        }
+	        
+	        // Update surveyor ID for each record
+	        insuredInfoList.forEach(insured -> insured.setSurveyorId(requestPayload.getSurveyorId()));
+	        
+	        // Save all updated records in bulk
 	        if (!insuredInfoList.isEmpty()) {
 	            repository.saveAll(insuredInfoList);
 	        }
@@ -549,6 +515,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	        response.setMessage("Data saved successfully");
 	        response.setIsError(false);
 	        response.setResponse(externalApiResponse);
+	        
 	    } catch (Exception e) {
 	        transactionLog.setStatus("FAILURE");
 	        transactionLog.setErrorMessage(e.getMessage());
@@ -561,4 +528,5 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 
 	    return response;
 	}
+
 }
