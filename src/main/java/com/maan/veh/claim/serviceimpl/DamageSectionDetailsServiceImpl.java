@@ -21,11 +21,13 @@ import org.springframework.stereotype.Service;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
+import com.maan.veh.claim.entity.SparePartsSaveDetails;
 import com.maan.veh.claim.entity.TotalAmountDetails;
 import com.maan.veh.claim.entity.VcSparePartsDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
+import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
 import com.maan.veh.claim.repository.TotalAmountDetailsRepository;
 import com.maan.veh.claim.repository.VcSparePartsDetailsRepository;
 import com.maan.veh.claim.request.DamageSectionDetailsRequest;
@@ -37,6 +39,7 @@ import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DamageSectionDetailsResponse;
 import com.maan.veh.claim.response.DropDownRes;
 import com.maan.veh.claim.response.ErrorList;
+import com.maan.veh.claim.response.TotalAmountViewResponse;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
 
 @Service
@@ -46,6 +49,9 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	
 	@Autowired
 	private DamageSectionDetailsRepository repository;
+	
+	@Autowired
+	private SparePartsSaveDetailsRepository sparePartsSaveRepo;
 	
 	@Autowired
     private TotalAmountDetailsRepository totalAmountDetailsRepository;
@@ -690,34 +696,45 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	        List<ErrorList> errors = validation.validateSaveSpareParts(req);
 	        
 	        if (errors.isEmpty()) {
-	            VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumberAndQuotationNo(req.getClaimNo(),req.getQuotationNo());
+	            VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumberAndQuotationNoAndDamageSnoAndGarageId(
+	                req.getClaimNo(), req.getQuotationNo(), req.getDamageSno(), req.getGarageId());
+	            
 	            if (spareParts == null) {
 	                spareParts = new VcSparePartsDetails();
 	            }
 	            
-	            // Mapping fields from request to entity, with necessary type conversions
+	            // Mapping all fields from request to entity, with type conversions where necessary
 	            spareParts.setClaimNumber(req.getClaimNo());
 	            spareParts.setQuotationNo(req.getQuotationNo());
 	            spareParts.setGarageId(req.getGarageId());
-	            spareParts.setReplacementCost(parseBigDecimal(req.getReplacementCost()));
-	            spareParts.setReplacementCostDeductible(parseBigDecimal(req.getReplacementCostDeductible()));
-	            spareParts.setSparePartDepreciation(parseBigDecimal(req.getSparePartDepreciation()));
-	            spareParts.setDiscountOnSpareParts(parseBigDecimal(req.getDiscountOnSpareParts()));
-	            spareParts.setTotalAmountReplacement(parseBigDecimal(req.getTotalAmountReplacement()));
-	            spareParts.setRepairLabour(parseBigDecimal(req.getRepairLabour()));
-	            spareParts.setRepairLabourDeductible(parseBigDecimal(req.getRepairLabourDeductible()));
-	            spareParts.setRepairLabourDiscountAmount(parseBigDecimal(req.getRepairLabourDiscountAmount()));
-	            spareParts.setTotalAmountRepairLabour(parseBigDecimal(req.getTotalAmountRepairLabour()));
-	            spareParts.setNetAmount(parseBigDecimal(req.getNetAmount()));
-	            spareParts.setUnknownAccidentDeduction(parseBigDecimal(req.getUnknownAccidentDeduction()));
-	            spareParts.setAmountToBeRecovered(parseBigDecimal(req.getAmountToBeRecovered()));
-	            spareParts.setTotalAfterDeductions(parseBigDecimal(req.getTotalAfterDeductions()));
-	            spareParts.setVatRatePer(parseBigDecimal(req.getVatRatePer()));
-	            spareParts.setVatRate(parseBigDecimal(req.getVatRate()));
-	            spareParts.setVatAmount(parseBigDecimal(req.getVatAmount()));
-	            spareParts.setTotalWithVAT(parseBigDecimal(req.getTotalWithVAT()));
-	            spareParts.setSalvageDeduction(parseBigDecimal(req.getSalvageDeduction()));
-	            
+	            spareParts.setSparePartType(req.getSparePartType());
+	            spareParts.setSparePartTypeDesc(req.getSparePartTypeDesc());
+	            spareParts.setOriginalDiscount(toBigDecimal(req.getOriginalDiscount()));
+	            spareParts.setDiscountPercentage(toBigDecimal(req.getDiscountPercentage()));
+	            spareParts.setDiscountAmount(toBigDecimal(req.getDiscountAmount()));
+	            spareParts.setReplacementCostDeductible(toBigDecimal(req.getReplacementCostDeductible()));
+	            spareParts.setDamageType(req.getDamageType());
+	            spareParts.setDepreciationType(req.getDepreciationType());
+	            spareParts.setDepreciationTypeDesc(req.getDepreciationTypeDesc());
+	            spareParts.setDepreciation(toBigDecimal(req.getDepreciation()));
+	            spareParts.setReferralStatus(req.getReferralStatus());
+	            spareParts.setRepairLabour(toBigDecimal(req.getRepairLabour()));
+	            spareParts.setRepairLabourDiscount(toBigDecimal(req.getRepairLabourDiscount()));
+	            spareParts.setRepairLabourDiscountAmount(toBigDecimal(req.getRepairLabourDiscountAmount()));
+	            spareParts.setRepairLabourDeductible(toBigDecimal(req.getRepairLabourDeductible()));
+	            spareParts.setTotalAmountRepairLabour(toBigDecimal(req.getTotalAmountRepairLabour()));
+	            spareParts.setRemarks(req.getRemarks());
+	            spareParts.setDamageDirection(req.getDamageDirection());
+	            spareParts.setDamageDirectionDesc(req.getDamageDirectionDesc());
+	            spareParts.setPartType(req.getPartType());
+	            spareParts.setPartTypeDesc(req.getPartTypeDesc());
+	            spareParts.setReplaceRepair(req.getReplaceRepair());
+	            spareParts.setNoOfUnits(toInteger(req.getNoOfUnits()));
+	            spareParts.setSparePartsCost(toBigDecimal(req.getSparePartsCost()));
+	            spareParts.setLabourCharge(toBigDecimal(req.getLabourCharge()));
+	            spareParts.setTotalCost(toBigDecimal(req.getTotalCost()));
+	            spareParts.setDamageSno(req.getDamageSno());
+
 	            // Save the updated spare parts details
 	            sparePartsDetailsRepo.save(spareParts);
 	            
@@ -742,80 +759,106 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    return response;
 	}
 
-	private BigDecimal parseBigDecimal(String value) {
-	    if (StringUtils.isBlank(value)) {
-	        return BigDecimal.ZERO; // default value, if blank or null
+	/**
+	 * Converts a string to BigDecimal safely, returning null if invalid.
+	 */
+	private BigDecimal toBigDecimal(String value) {
+	    if (StringUtils.isNotBlank(value)) {
+	        try {
+	            return new BigDecimal(value);
+	        } catch (NumberFormatException e) {
+	            return null;
+	        }
 	    }
-	    try {
-	        return new BigDecimal(value);
-	    } catch (NumberFormatException e) {
-	        e.printStackTrace();
-	        return BigDecimal.ZERO; // or handle error as needed
-	    }
+	    return null;
 	}
+
+	/**
+	 * Converts a string to Integer safely, returning null if invalid.
+	 */
+	private Integer toInteger(String value) {
+	    if (StringUtils.isNotBlank(value)) {
+	        try {
+	            return Integer.parseInt(value);
+	        } catch (NumberFormatException e) {
+	            return null;
+	        }
+	    }
+	    return null;
+	}
+
 
 	@Override
 	public CommonResponse viewsaveSpareParts(GarageSectionDetailsSaveReq req) {
 	    CommonResponse response = new CommonResponse();
-	    
 	    try {
-	        // Retrieve claim number from request
 	        String claimNo = req.getClaimNo();
-	        
-	        // Retrieve spare parts details from the database using claim number
-	        VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumberAndQuotationNo(claimNo,req.getQuotationNo());
-	        
-	        // Check if record exists for the provided claim number
-	        if (spareParts != null) {
-	            // Map entity data to VcSparePartsDetailsRequest
-	            VcSparePartsDetailsRequest sparePartsResponse = new VcSparePartsDetailsRequest();
-	            sparePartsResponse.setClaimNo(spareParts.getClaimNumber());
-	            sparePartsResponse.setQuotationNo(spareParts.getQuotationNo());
-	            sparePartsResponse.setGarageId(spareParts.getGarageId());
-	            sparePartsResponse.setReplacementCost(spareParts.getReplacementCost().toString());
-	            sparePartsResponse.setReplacementCostDeductible(spareParts.getReplacementCostDeductible().toString());
-	            sparePartsResponse.setSparePartDepreciation(spareParts.getSparePartDepreciation().toString());
-	            sparePartsResponse.setDiscountOnSpareParts(spareParts.getDiscountOnSpareParts().toString());
-	            sparePartsResponse.setTotalAmountReplacement(spareParts.getTotalAmountReplacement().toString());
-	            sparePartsResponse.setRepairLabour(spareParts.getRepairLabour().toString());
-	            sparePartsResponse.setRepairLabourDeductible(spareParts.getRepairLabourDeductible().toString());
-	            sparePartsResponse.setRepairLabourDiscountAmount(spareParts.getRepairLabourDiscountAmount().toString());
-	            sparePartsResponse.setTotalAmountRepairLabour(spareParts.getTotalAmountRepairLabour().toString());
-	            sparePartsResponse.setNetAmount(spareParts.getNetAmount().toString());
-	            sparePartsResponse.setUnknownAccidentDeduction(spareParts.getUnknownAccidentDeduction() != null 
-	                ? spareParts.getUnknownAccidentDeduction().toString() : "0.00");
-	            sparePartsResponse.setAmountToBeRecovered(spareParts.getAmountToBeRecovered() != null 
-	                ? spareParts.getAmountToBeRecovered().toString() : "0.00");
-	            sparePartsResponse.setTotalAfterDeductions(spareParts.getTotalAfterDeductions().toString());
-	            sparePartsResponse.setVatRatePer(spareParts.getVatRatePer() != null 
-	                ? spareParts.getVatRatePer().toString() : "0.00");
-	            sparePartsResponse.setVatRate(spareParts.getVatRate() != null 
-	                ? spareParts.getVatRate().toString() : "0.00");
-	            sparePartsResponse.setVatAmount(spareParts.getVatAmount().toString());
-	            sparePartsResponse.setTotalWithVAT(spareParts.getTotalWithVAT().toString());
-	            sparePartsResponse.setSalvageDeduction(spareParts.getSalvageDeduction().toString());
-	            
-	            // Set the response with the mapped data
-	            response.setResponse(sparePartsResponse);
+	        String quotationNo = req.getQuotationNo();
+	        String garageId = req.getGarageLoginId();
+
+	        List<VcSparePartsDetails> sparePartsList = 
+	            sparePartsDetailsRepo.findByClaimNumberAndQuotationNoAndGarageId(claimNo, quotationNo, garageId);
+
+	        if (sparePartsList != null && !sparePartsList.isEmpty()) {
+	            List<VcSparePartsDetailsRequest> sparePartsResponses = sparePartsList.stream().map(spareParts -> {
+	                VcSparePartsDetailsRequest sparePartsResponse = new VcSparePartsDetailsRequest();
+	                
+	                sparePartsResponse.setClaimNo(spareParts.getClaimNumber());
+	                sparePartsResponse.setQuotationNo(spareParts.getQuotationNo());
+	                sparePartsResponse.setGarageId(spareParts.getGarageId());
+	                sparePartsResponse.setSparePartType(spareParts.getSparePartType());
+	                sparePartsResponse.setSparePartTypeDesc(spareParts.getSparePartTypeDesc());
+	                sparePartsResponse.setOriginalDiscount(convertBigDecimalToString(spareParts.getOriginalDiscount()));
+	                sparePartsResponse.setDiscountPercentage(convertBigDecimalToString(spareParts.getDiscountPercentage()));
+	                sparePartsResponse.setDiscountAmount(convertBigDecimalToString(spareParts.getDiscountAmount()));
+	                sparePartsResponse.setReplacementCostDeductible(convertBigDecimalToString(spareParts.getReplacementCostDeductible()));
+	                sparePartsResponse.setDamageType(spareParts.getDamageType());
+	                sparePartsResponse.setDepreciationType(spareParts.getDepreciationType());
+	                sparePartsResponse.setDepreciationTypeDesc(spareParts.getDepreciationTypeDesc());
+	                sparePartsResponse.setDepreciation(convertBigDecimalToString(spareParts.getDepreciation()));
+	                sparePartsResponse.setReferralStatus(spareParts.getReferralStatus());
+	                sparePartsResponse.setRepairLabour(convertBigDecimalToString(spareParts.getRepairLabour()));
+	                sparePartsResponse.setRepairLabourDiscount(convertBigDecimalToString(spareParts.getRepairLabourDiscount()));
+	                sparePartsResponse.setRepairLabourDiscountAmount(convertBigDecimalToString(spareParts.getRepairLabourDiscountAmount()));
+	                sparePartsResponse.setRepairLabourDeductible(convertBigDecimalToString(spareParts.getRepairLabourDeductible()));
+	                sparePartsResponse.setTotalAmountRepairLabour(convertBigDecimalToString(spareParts.getTotalAmountRepairLabour()));
+	                sparePartsResponse.setRemarks(spareParts.getRemarks());
+	                sparePartsResponse.setDamageDirection(spareParts.getDamageDirection());
+	                sparePartsResponse.setDamageDirectionDesc(spareParts.getDamageDirectionDesc());
+	                sparePartsResponse.setPartType(spareParts.getPartType());
+	                sparePartsResponse.setPartTypeDesc(spareParts.getPartTypeDesc());
+	                sparePartsResponse.setReplaceRepair(spareParts.getReplaceRepair());
+	                sparePartsResponse.setNoOfUnits(spareParts.getNoOfUnits() != null ? spareParts.getNoOfUnits().toString() : null);
+	                sparePartsResponse.setSparePartsCost(convertBigDecimalToString(spareParts.getSparePartsCost()));
+	                sparePartsResponse.setLabourCharge(convertBigDecimalToString(spareParts.getLabourCharge()));
+	                sparePartsResponse.setTotalCost(convertBigDecimalToString(spareParts.getTotalCost()));
+	                sparePartsResponse.setDamageSno(spareParts.getDamageSno());
+	                return sparePartsResponse;
+	            }).collect(Collectors.toList());
+
+	            response.setResponse(sparePartsResponses);
 	            response.setMessage("Success");
 	            response.setErrors(Collections.emptyList());
 	            response.setIsError(false);
-	        } 
-//	        else {
-//	            // If no record found, set appropriate error message
-//	            response.setMessage("Failed: No record found for claim number " + claimNo);
-//	            response.setErrors(Collections.singletonList(new ErrorList("102", "ClaimNumber", "No data found for claim number " + claimNo)));
-//	            response.setIsError(true);
-//	        }
+	        } else {
+	            response.setMessage("Failed: No records found for ClaimNo: " + claimNo);
+	            response.setErrors(Collections.singletonList(new ErrorList("102", "ClaimNo", "No data found for claim number " + claimNo)));
+	            response.setIsError(true);
+	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        response.setMessage("Failed: An error occurred while retrieving spare parts details");
 	        response.setErrors(Collections.singletonList(new ErrorList("500", "Exception", e.getMessage())));
 	        response.setIsError(true);
 	    }
-	    
 	    return response;
 	}
+
+	private String convertBigDecimalToString(BigDecimal value) {
+	    return value != null ? value.toString() : null;
+	}
+
+
 
 	@Override
 	public CommonResponse getDamageDetails(String companyId) {
@@ -864,6 +907,135 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    }
 	    return response;
 	}
+
+	@Override
+	public CommonResponse viewSurveyorTotalAmount(GarageSectionDetailsSaveReq req) {
+	    CommonResponse response = new CommonResponse();
+	    try {
+	        String claimNo = req.getClaimNo();
+	        String quotationNo = req.getQuotationNo();
+
+	        List<SparePartsSaveDetails> sparePartsList = sparePartsSaveRepo.findByClaimNoAndQuotationNo(claimNo, quotationNo);
+
+	        if (sparePartsList != null && !sparePartsList.isEmpty()) {
+	            List<TotalAmountViewResponse> sparePartsResponses = sparePartsList.stream().map(spareParts -> {
+	                TotalAmountViewResponse sparePartsResponse = new TotalAmountViewResponse();
+
+	                // Basic Details
+	                sparePartsResponse.setClaimNo(spareParts.getClaimNo());
+	                sparePartsResponse.setQuotationNo(spareParts.getQuotationNo());
+
+	                // Replacement (Spare Parts) Costs
+	                sparePartsResponse.setSparePartsCost(convertBigDecimalToString(spareParts.getReplacementCost()));
+	                sparePartsResponse.setSparePartsDepreciation(convertBigDecimalToString(spareParts.getSparePartDepreciation()));
+	                sparePartsResponse.setSparePartsDiscount(convertBigDecimalToString(spareParts.getDiscountOnSpareParts()));
+	                sparePartsResponse.setSparePartsDeductible(convertBigDecimalToString(spareParts.getReplacementCostDeductible()));
+	                sparePartsResponse.setTotalAmountSpareParts(convertBigDecimalToString(spareParts.getTotalAmountReplacement()));
+
+	                // Repair Labour Costs
+	                sparePartsResponse.setRepairLabourCost(convertBigDecimalToString(spareParts.getRepairLabour()));
+	                sparePartsResponse.setRepairLabourDiscount(convertBigDecimalToString(spareParts.getRepairLabourDiscountAmount()));
+	                sparePartsResponse.setRepairLabourDeductible(convertBigDecimalToString(spareParts.getRepairLabourDeductible()));
+	                sparePartsResponse.setTotalAmountRepairLabour(convertBigDecimalToString(spareParts.getTotalAmountRepairLabour()));
+
+	                // Other Amounts
+	                sparePartsResponse.setNetAmount(convertBigDecimalToString(spareParts.getNetAmount()));
+	                sparePartsResponse.setUnknownAccidentDeduction(convertBigDecimalToString(spareParts.getUnknownAccidentDeduction()));
+	                sparePartsResponse.setAmountToBeRecovered(convertBigDecimalToString(spareParts.getAmountToBeRecovered()));
+	                sparePartsResponse.setTotalAfterDeduction(convertBigDecimalToString(spareParts.getTotalAfterDeductions()));
+
+	                // VAT Details
+	                sparePartsResponse.setVatRate(convertBigDecimalToString(spareParts.getVatRatePercentage()));
+	                sparePartsResponse.setVatAmount(convertBigDecimalToString(spareParts.getVatAmount()));
+	                sparePartsResponse.setTotalAmountWithVAT(convertBigDecimalToString(spareParts.getTotalWithVat()));
+
+	                return sparePartsResponse;
+	            }).collect(Collectors.toList());
+
+	            response.setResponse(sparePartsResponses);
+	            response.setMessage("Success");
+	            response.setErrors(Collections.emptyList());
+	            response.setIsError(false);
+	        } else {
+	            response.setMessage("Failed: No records found for ClaimNo: " + claimNo);
+	            response.setErrors(Collections.singletonList(new ErrorList("102", "ClaimNo", "No data found for claim number " + claimNo)));
+	            response.setIsError(true);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.setMessage("Failed: An error occurred while retrieving spare parts details");
+	        response.setErrors(Collections.singletonList(new ErrorList("500", "Exception", e.getMessage())));
+	        response.setIsError(true);
+	    }
+	    return response;
+	}
+
+	@Override
+	public CommonResponse saveSurveyorTotalAmount(TotalAmountViewResponse req) {
+	    CommonResponse response = new CommonResponse();
+	    try {
+	        // Perform validation
+	        List<ErrorList> errors = validation.validateSaveSurveyorTotalAmount(req);
+
+	        if (errors.isEmpty()) {
+	            // Check if record already exists in DB
+	            List<SparePartsSaveDetails> sparePartsList = sparePartsSaveRepo.findByClaimNoAndQuotationNo(
+	                req.getClaimNo(), req.getQuotationNo());
+
+	            SparePartsSaveDetails spareParts = new SparePartsSaveDetails();
+
+	            if (sparePartsList != null && !sparePartsList.isEmpty()) {
+	                spareParts = sparePartsList.get(0);
+	            }
+
+	            // Mapping request fields to entity
+	            spareParts.setClaimNo(req.getClaimNo());
+	            spareParts.setQuotationNo(req.getQuotationNo());
+
+	            // Mapping numeric fields safely
+	            spareParts.setReplacementCost(toBigDecimal(req.getSparePartsCost()));
+	            spareParts.setSparePartDepreciation(toBigDecimal(req.getSparePartsDepreciation()));
+	            spareParts.setDiscountOnSpareParts(toBigDecimal(req.getSparePartsDiscount()));
+	            spareParts.setReplacementCostDeductible(toBigDecimal(req.getSparePartsDeductible()));
+	            spareParts.setTotalAmountReplacement(toBigDecimal(req.getTotalAmountSpareParts()));
+
+	            spareParts.setRepairLabour(toBigDecimal(req.getRepairLabourCost()));
+	            spareParts.setRepairLabourDiscountAmount(toBigDecimal(req.getRepairLabourDiscount()));
+	            spareParts.setRepairLabourDeductible(toBigDecimal(req.getRepairLabourDeductible()));
+	            spareParts.setTotalAmountRepairLabour(toBigDecimal(req.getTotalAmountRepairLabour()));
+
+	            spareParts.setNetAmount(toBigDecimal(req.getNetAmount()));
+	            spareParts.setUnknownAccidentDeduction(toBigDecimal(req.getUnknownAccidentDeduction()));
+	            spareParts.setAmountToBeRecovered(toBigDecimal(req.getAmountToBeRecovered()));
+	            spareParts.setTotalAfterDeductions(toBigDecimal(req.getTotalAfterDeduction()));
+
+	            spareParts.setVatRatePercentage(toBigDecimal(req.getVatRate()));
+	            spareParts.setVatAmount(toBigDecimal(req.getVatAmount()));
+	            spareParts.setTotalWithVat(toBigDecimal(req.getTotalAmountWithVAT()));
+
+	            // Save the entity to the repository
+	            sparePartsSaveRepo.save(spareParts);
+
+	            response.setErrors(Collections.emptyList());
+	            response.setMessage("Success: Surveyor total amount saved successfully.");
+	            response.setResponse(Collections.singletonList("Surveyor total amount saved successfully."));
+	            response.setIsError(false);
+	        } else {
+	            response.setErrors(errors);
+	            response.setMessage("Validation Failed");
+	            response.setResponse(Collections.emptyList());
+	            response.setIsError(true);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.setErrors(Collections.singletonList(new ErrorList("500", "Exception", e.getMessage())));
+	        response.setMessage("Failed: Error occurred while saving surveyor total amount.");
+	        response.setResponse(Collections.emptyList());
+	        response.setIsError(true);
+	    }
+	    return response;
+	}
+
 
 
 }

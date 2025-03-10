@@ -90,6 +90,16 @@ public class DropDownServiceImpl implements DropDownService {
         return getDropdownValues("WORK_ORDER_TYPE",companyId);
     }
     
+    @Override
+    public List<DropDownRes> getSparePartsType(String companyId) {
+        return getDropdownValues("SPARE_PARTS_TYPE",companyId);
+    }
+    
+    @Override
+    public List<DropDownRes> getDepressionType(String companyId) {
+        return getDropdownValues("DEPRESSION_TYPE",companyId);
+    }
+    
     @Transactional
     @Override
     public String getItemCodeByItemValue(String value,String type) {

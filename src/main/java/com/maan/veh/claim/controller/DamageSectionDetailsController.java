@@ -17,10 +17,9 @@ import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
 import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.VcSparePartsDetailsRequest;
-import com.maan.veh.claim.response.CommonRes;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DamageSectionDetailsResponse;
-import com.maan.veh.claim.response.DropDownRes;
+import com.maan.veh.claim.response.TotalAmountViewResponse;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
 
 @RestController
@@ -107,7 +106,19 @@ public class DamageSectionDetailsController {
     @PostMapping("/surveyor/view/spareparts")
     public ResponseEntity<CommonResponse> viewsaveSpareParts(@RequestBody GarageSectionDetailsSaveReq req) {
         CommonResponse response = service.viewsaveSpareParts(req);
-        
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
+    
+    @PostMapping("/surveyor/view/totalamount")
+    public ResponseEntity<CommonResponse> viewSurveyorTotalAmount(@RequestBody GarageSectionDetailsSaveReq req) {
+        CommonResponse response = service.viewSurveyorTotalAmount(req);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
+    @PostMapping("/surveyor/save/totalamount")
+    public ResponseEntity<CommonResponse> saveSurveyorTotalAmount(@RequestBody TotalAmountViewResponse req) {
+        CommonResponse response = service.saveSurveyorTotalAmount(req);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

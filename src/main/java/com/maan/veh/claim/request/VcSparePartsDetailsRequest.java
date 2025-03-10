@@ -1,6 +1,6 @@
 package com.maan.veh.claim.request;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,69 +9,94 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VcSparePartsDetailsRequest {
-	
+
     @JsonProperty("ClaimNo")
     private String claimNo;
-    
+
     @JsonProperty("QuotationNo")
     private String quotationNo;
-    
+
     @JsonProperty("GarageId")
     private String garageId;
 
-    @JsonProperty("ReplacementCost")
-    private String replacementCost;
+    @JsonProperty("SparePartType")
+    private String sparePartType;
+
+    @JsonProperty("SparePartTypeDesc")
+    private String sparePartTypeDesc;
+
+    @JsonProperty("OriginalDiscount")
+    private String originalDiscount;
+
+    @JsonProperty("DiscountPercentage")
+    private String discountPercentage;
+
+    @JsonProperty("DiscountAmount")
+    private String discountAmount;
 
     @JsonProperty("ReplacementCostDeductible")
     private String replacementCostDeductible;
 
-    @JsonProperty("SparePartDepreciation")
-    private String sparePartDepreciation;
+    @JsonProperty("DamageType")
+    private String damageType;
 
-    @JsonProperty("DiscountOnSpareParts")
-    private String discountOnSpareParts;
+    @JsonProperty("DepreciationType")
+    private String depreciationType;
 
-    @JsonProperty("TotalAmountReplacement")
-    private String totalAmountReplacement;
+    @JsonProperty("DepreciationTypeDesc")
+    private String depreciationTypeDesc;
+
+    @JsonProperty("Depreciation")
+    private String depreciation;
+
+    @JsonProperty("ReferralStatus")
+    private String referralStatus;
 
     @JsonProperty("RepairLabour")
     private String repairLabour;
 
-    @JsonProperty("RepairLabourDeductible")
-    private String repairLabourDeductible;
+    @JsonProperty("RepairLabourDiscount")
+    private String repairLabourDiscount;
 
     @JsonProperty("RepairLabourDiscountAmount")
     private String repairLabourDiscountAmount;
 
+    @JsonProperty("RepairLabourDeductible")
+    private String repairLabourDeductible;
+
     @JsonProperty("TotalAmountRepairLabour")
     private String totalAmountRepairLabour;
 
-    @JsonProperty("NetAmount")
-    private String netAmount;
+    @JsonProperty("Remarks")
+    private String remarks;
 
-    @JsonProperty("UnknownAccidentDeduction")
-    private String unknownAccidentDeduction;
+    @JsonProperty("DamageDirection")
+    private String damageDirection;
 
-    @JsonProperty("AmountToBeRecovered")
-    private String amountToBeRecovered;
+    @JsonProperty("DamageDirectionDesc")
+    private String damageDirectionDesc;
 
-    @JsonProperty("TotalAfterDeductions")
-    private String totalAfterDeductions;
+    @JsonProperty("PartType")
+    private String partType;
 
-    @JsonProperty("VatRatePer")
-    private String vatRatePer;
+    @JsonProperty("PartTypeDesc")
+    private String partTypeDesc;
 
-    @JsonProperty("VatRate")
-    private String vatRate;
+    @JsonProperty("ReplaceRepair")
+    private String replaceRepair;
 
-    @JsonProperty("VatAmount")
-    private String vatAmount;
+    @JsonProperty("NoOfUnits")
+    private String noOfUnits;
 
-    @JsonProperty("TotalWithVAT")
-    private String totalWithVAT;
-    
-    @JsonProperty("SalvageDeduction")
-    private String salvageDeduction;
+    @JsonProperty("SparePartsCost")
+    private String sparePartsCost;
 
+    @JsonProperty("LabourCharge")
+    private String labourCharge;
+
+    @JsonProperty("TotalCost")
+    private String totalCost;
+
+    @JsonProperty("DamageSno")
+    private String damageSno;
 }
-

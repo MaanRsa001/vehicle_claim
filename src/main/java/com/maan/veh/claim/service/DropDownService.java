@@ -55,4 +55,8 @@ public interface DropDownService {
 	List<DropDownRes> getLossLocation(String companyId);
 
 	List<DropDownRes> getMobileCode(String companyId);
+
+	List<DropDownRes> getSparePartsType(String companyId);
+
+	List<DropDownRes> getDepressionType(String companyId);
 }

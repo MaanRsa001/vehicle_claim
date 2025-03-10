@@ -1,9 +1,11 @@
 package com.maan.veh.claim.entity;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,69 +16,112 @@ import java.math.BigDecimal;
 public class VcSparePartsDetails {
 
     @Id
-    @Column(name = "claim_number", nullable = false, length = 255)
+    @Column(name = "claim_no", nullable = false, length = 100)
     private String claimNumber;
+
+    @Id
+    @Column(name = "quotation_no", nullable = false, length = 100)
+    private String quotationNo;
+
+    @Id
+    @Column(name = "damage_sno", nullable = false, length = 50)
+    private String damageSno;
     
     @Id
-    @Column(name = "quotation_no", nullable = false)
-    private String quotationNo;
-    
-    @Column(name = "garage_id", nullable = false)
+    @Column(name = "garage_id", nullable = false, length = 100) // Newly added primary key field
     private String garageId;
 
-    @Column(name = "replacement_cost", precision = 10, scale = 2)
-    private BigDecimal replacementCost = BigDecimal.ZERO;
+    @Column(name = "spare_part_type", length = 100)
+    private String sparePartType;
 
-    @Column(name = "replacement_cost_deductible", precision = 10, scale = 2)
-    private BigDecimal replacementCostDeductible = BigDecimal.ZERO;
+    @Column(name = "spare_part_type_desc", length = 100)
+    private String sparePartTypeDesc;
 
-    @Column(name = "spare_part_depreciation", precision = 10, scale = 2)
-    private BigDecimal sparePartDepreciation = BigDecimal.ZERO;
+    @Column(name = "original_discount")
+    private BigDecimal originalDiscount;
 
-    @Column(name = "discount_on_spare_parts", precision = 10, scale = 2)
-    private BigDecimal discountOnSpareParts = BigDecimal.ZERO;
+    @Column(name = "discount_percentage")
+    private BigDecimal discountPercentage;
 
-    @Column(name = "total_amount_replacement", precision = 10, scale = 2)
-    private BigDecimal totalAmountReplacement = BigDecimal.ZERO;
+    @Column(name = "discount_amount")
+    private BigDecimal discountAmount;
 
-    @Column(name = "repair_labour", precision = 10, scale = 2)
-    private BigDecimal repairLabour = BigDecimal.ZERO;
+    @Column(name = "replacement_cost_deductible")
+    private BigDecimal replacementCostDeductible;
 
-    @Column(name = "repair_labour_deductible", precision = 10, scale = 2)
-    private BigDecimal repairLabourDeductible = BigDecimal.ZERO;
+    @Column(name = "damage_type", length = 100)
+    private String damageType;
 
-    @Column(name = "repair_labour_discount_amount", precision = 10, scale = 2)
-    private BigDecimal repairLabourDiscountAmount = BigDecimal.ZERO;
+    @Column(name = "depreciation_type", length = 50)
+    private String depreciationType;
 
-    @Column(name = "total_amount_repair_labour", precision = 10, scale = 2)
-    private BigDecimal totalAmountRepairLabour = BigDecimal.ZERO;
+    @Column(name = "depreciation_type_desc", length = 100)
+    private String depreciationTypeDesc;
 
-    @Column(name = "net_amount", precision = 10, scale = 2)
-    private BigDecimal netAmount = BigDecimal.ZERO;
+    @Column(name = "depreciation")
+    private BigDecimal depreciation;
 
-    @Column(name = "unknown_accident_deduction", precision = 10, scale = 2)
-    private BigDecimal unknownAccidentDeduction = BigDecimal.ZERO;
+    @Column(name = "referral_status", length = 100)
+    private String referralStatus;
 
-    @Column(name = "amount_to_be_recovered", precision = 10, scale = 2)
-    private BigDecimal amountToBeRecovered;
+    @Column(name = "REPAIR_LABOUR")
+    private BigDecimal repairLabour;
 
-    @Column(name = "total_after_deductions", precision = 10, scale = 2)
-    private BigDecimal totalAfterDeductions = BigDecimal.ZERO;
+    @Column(name = "repair_labour_discount")
+    private BigDecimal repairLabourDiscount;
 
-    @Column(name = "vat_rate_Per", precision = 5, scale = 2)
-    private BigDecimal vatRatePer;
+    @Column(name = "repair_labour_discount_amount")
+    private BigDecimal repairLabourDiscountAmount;
 
-    @Column(name = "vat_rate", precision = 5, scale = 2)
-    private BigDecimal vatRate;
+    @Column(name = "repair_labour_deductible")
+    private BigDecimal repairLabourDeductible;
 
-    @Column(name = "vat_amount", precision = 10, scale = 2)
-    private BigDecimal vatAmount = BigDecimal.ZERO;
+    @Column(name = "total_amount_repair_labour")
+    private BigDecimal totalAmountRepairLabour;
 
-    @Column(name = "total_with_vat", precision = 10, scale = 2)
-    private BigDecimal totalWithVAT = BigDecimal.ZERO;
-    
-    @Column(name = "salvage_deduction", precision = 10, scale = 2)
-    private BigDecimal salvageDeduction = BigDecimal.ZERO;
+    @Column(name = "remarks", length = 500)
+    private String remarks;
 
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "damage_direction", length = 50)
+    private String damageDirection;
+
+    @Column(name = "damage_direction_desc", length = 50)
+    private String damageDirectionDesc;
+
+    @Column(name = "part_type", length = 100)
+    private String partType;
+
+    @Column(name = "part_type_desc", length = 100)
+    private String partTypeDesc;
+
+    @Column(name = "replace_repair", length = 50)
+    private String replaceRepair;
+
+    @Column(name = "no_of_units")
+    private Integer noOfUnits;
+
+    @Column(name = "spare_parts_cost")
+    private BigDecimal sparePartsCost;
+
+    @Column(name = "labour_charge")
+    private BigDecimal labourCharge;
+
+    @Column(name = "total_cost")
+    private BigDecimal totalCost;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
-

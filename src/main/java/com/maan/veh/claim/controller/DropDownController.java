@@ -197,6 +197,23 @@ public class DropDownController {
 		}
 	}
 	
+	@GetMapping(value = "/vehiclebodyparts/{companyId}")
+	public ResponseEntity<CommonRes> getbodyPart(@PathVariable String companyId) {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getbodyPart(companyId," ");
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+	
 	@GetMapping(value = "/vatpercentage/{companyId}")
 	public ResponseEntity<CommonRes> getVatPercentage(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
@@ -440,5 +457,38 @@ public class DropDownController {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
 	}
+    @GetMapping(value = "/sparepartstype/{companyId}")
+	public ResponseEntity<CommonRes> getSparePartsType(@PathVariable String companyId) {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getSparePartsType(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+	}
+    
+    @GetMapping(value = "/depressiontype/{companyId}")
+   	public ResponseEntity<CommonRes> getDepressionType(@PathVariable String companyId) {
+   		CommonRes data = new CommonRes();
+
+   		List<DropDownRes> res = dropDownService.getDepressionType(companyId);
+   		data.setCommonResponse(res);
+   		data.setIsError(false);
+   		data.setErrorMessage(null);
+   		data.setMessage("Success");
+
+   		if (res != null) {
+   			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+   		} else {
+   			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+   		}
+   	}
 
 }
