@@ -1,6 +1,10 @@
 package com.maan.veh.claim.serviceimpl;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -33,6 +37,7 @@ import com.maan.veh.claim.entity.ApiTransactionLog;
 import com.maan.veh.claim.entity.CoreInsuredVehicleInfo;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.entity.InsuredVehicleInfoId;
+import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.external.VcInuredVehicleApiReponse;
 import com.maan.veh.claim.qiic.request.ClaimDetailsViewRequest;
@@ -40,11 +45,11 @@ import com.maan.veh.claim.qiic.response.ClaimDetailsViewResponse;
 import com.maan.veh.claim.repository.ApiTransactionLogRepository;
 import com.maan.veh.claim.repository.CoreInsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
+import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.VcInuredVehicleApiResponseQIIC;
 import com.maan.veh.claim.response.VcinsuredVehicleResponse;
 import com.maan.veh.claim.response.VcinsuredVehicleResponseQIIC;
-import com.maan.veh.claim.response.VehicleInfoResponse;
 import com.maan.veh.claim.service.VcInsuredVehicleInfoService;
 
 @Service
@@ -64,6 +69,9 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	private ObjectMapper objectMapper;
 	@Autowired
 	private ApiTransactionLogRepository apiTransactionLogRepo;
+	
+	@Autowired
+	private LoginMasterRepository loginMasterRepo;
      
 	@Value("${auth.username}")
 	private String apiusername;
@@ -87,13 +95,16 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	    transactionLog.setEntryDate(new Date());
 
 	    try {
+	    	
+	    	LoginMaster loginMaster = loginMasterRepo.findByLoginId(requestPayload.getGarageid());
+	    	
 	        // Prepare request payload
 	        InsuredVehicleInfoDTO newdata = new InsuredVehicleInfoDTO(
 	            requestPayload.getPartyId(),
 	            requestPayload.getCategoryId(),
 	            requestPayload.getProdId()
 	        );
-
+          
 	        // Authenticate user and get JWT token
 	        String jwtToken = authenticateUserCall();
 
@@ -129,19 +140,48 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	        // ✅ Fetch existing records in ONE bulk query
 	        Set<InsuredVehicleInfoId> existingIds = repository.findExistingIds(insuredIds);
 
-	        // Process only new records
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
+
 	        List<InsuredVehicleInfo> insuredInfoList = apiData.stream()
-	            .filter(insured -> !existingIds.contains(new InsuredVehicleInfoId(
-	                requestPayload.getCompanyid(),
-	                insured.getPolicyNo(),
-	                insured.getFileNo(),
-	                requestPayload.getGarageid()
-	            )))
+	            .filter(insured -> {
+	                try {
+	                    if (insured.getCreatedDate() == null || insured.getCreatedDate().trim().isEmpty()) {
+	                        return false;
+	                    }
+
+	                    OffsetDateTime insuredCreatedDate = OffsetDateTime.parse(insured.getCreatedDate(), formatter);
+
+	                    InsuredVehicleInfoId newId = new InsuredVehicleInfoId(
+	                        requestPayload.getCompanyid(),
+	                        insured.getPolicyNo(),
+	                        insured.getFileNo(),
+	                        requestPayload.getGarageid()
+	                    );
+
+	                    // ✅ Convert Date to OffsetDateTime for correct comparison
+	                    return !existingIds.contains(newId) &&
+	                           insuredCreatedDate.isAfter(loginMaster.getEffectiveDateStart().toInstant().atOffset(ZoneOffset.UTC));
+
+	                } catch (DateTimeParseException e) {
+	                    System.err.println("Error parsing createdDate: " + insured.getCreatedDate());
+	                    return false;
+	                }
+	            })
 	            .map(insured -> {
+	            	
 	                InsuredVehicleInfo insuredVehicleInfo = new InsuredVehicleInfo();
+	            	
+	            	try {
+	                    OffsetDateTime insuredCreatedDate = OffsetDateTime.parse(insured.getCreatedDate(), formatter);
+		                // ✅ Convert OffsetDateTime to Date
+		                insuredVehicleInfo.setEntryDate(Date.from(insuredCreatedDate.toInstant()));
+		                System.out.println(insuredCreatedDate.isAfter(loginMaster.getEffectiveDateStart().toInstant().atOffset(ZoneOffset.UTC))+" == "+insured.getFileNo() +" ==> "+insuredVehicleInfo.getEntryDate() +" ===> "+loginMaster.getEffectiveDateStart());
+	                } catch (DateTimeParseException e) {
+	                    System.err.println("Error parsing createdDate: " + insured.getCreatedDate());
+	                }
+	            	
 	                insuredVehicleInfo.setCompanyId(requestPayload.getCompanyid());
 	                insuredVehicleInfo.setPolicyNo(insured.getPolicyNo());
-	                //insuredVehicleInfo.setClaimNo(insured.getClaimNo());
 	                insuredVehicleInfo.setClaimNo(insured.getFileNo());
 	                insuredVehicleInfo.setGarageId(requestPayload.getGarageid());
 	                insuredVehicleInfo.setVehicleMake(insured.getMake());
@@ -152,21 +192,20 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	                insuredVehicleInfo.setType(insured.getBodyType());
 	                insuredVehicleInfo.setLossLocation(insured.getLossLocation());
 	                insuredVehicleInfo.setVehicleRegNo(insured.getVehRegNo());
-	                insuredVehicleInfo.setEntryDate(new Date());
+//	                insuredVehicleInfo.setEntryDate(new Date());
 	                insuredVehicleInfo.setStatus("Y");
 	                insuredVehicleInfo.setFnolSgsId(insured.getFnolSgsId());
-	                
+
 	                // Newly added fields
 	                insuredVehicleInfo.setWorkOrderType(insured.getWorkOrderType());
 	                insuredVehicleInfo.setEngineNo(insured.getEngineNo());
 	                insuredVehicleInfo.setClaimantType(insured.getClaimantType());
 	                insuredVehicleInfo.setLossLocationDesc(insured.getLossLocationDesc());
 	                insuredVehicleInfo.setClaimStatus(insured.getClaimStatus());
-	                //insuredVehicleInfo.setFileNo(insured.getFileNo());
 	                insuredVehicleInfo.setFileNo(insured.getClaimNo());
 	                insuredVehicleInfo.setGarageAddress(insured.getGarageAddress());
 	                insuredVehicleInfo.setPlateType(insured.getPlateType());
-	                
+
 	                // Default values
 	                insuredVehicleInfo.setSurveyorId("surveyor_test1");
 	                insuredVehicleInfo.setDealerId("dealer_test1");
@@ -178,7 +217,7 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	                insuredVehicleInfo.setMobileNo(insured.getMobileNo());
 	                insuredVehicleInfo.setMobileCode(insured.getMobileCode());
 	                insuredVehicleInfo.setDeductible(insured.getDeductible());
-	                
+
 	                return insuredVehicleInfo;
 	            })
 	            .collect(Collectors.toList());

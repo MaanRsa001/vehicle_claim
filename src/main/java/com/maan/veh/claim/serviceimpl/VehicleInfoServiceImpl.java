@@ -19,9 +19,11 @@ import com.maan.veh.claim.dto.GarageClaimListDataDto;
 import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
+import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
+import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.request.ExternalVehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleInfoRequest;
@@ -44,11 +46,17 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
     
     @Autowired
     private ExternalApiServiceImpl ExternalApiServiceImpl;
+    
+    @Autowired
+	private LoginMasterRepository loginMasterRepo;
 
     @Override
     public CommonResponse getVehicleInfoByCompanyId(VehicleGarageViewRequest request) {
         CommonResponse response = new CommonResponse();    
         try {
+        	
+        	LoginMaster loginMaster = loginMasterRepo.findByLoginId(request.getGarageId());
+        	
             // Fetch the list of vehicle info based on company ID and Garage ID, ordered by EntryDate Desc
             List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository
                     .findByCompanyIdAndGarageIdOrderByEntryDateDesc(
@@ -78,6 +86,10 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 
             // Convert each entity to a response object using streams
             List<VehicleInfoResponse> vehList = vehicleInfoList.stream()
+            		// ✅ Filter out old records where entryDate is before effectiveDateStart
+            	    .filter(vehicle -> vehicle.getEntryDate() != null &&
+            	                       loginMaster.getEffectiveDateStart() != null &&
+            	                       vehicle.getEntryDate().after(loginMaster.getEffectiveDateStart()))
                     .map(vehicle -> {
                         VehicleInfoResponse veh = new VehicleInfoResponse();
                         veh.setCompanyId(vehicle.getCompanyId() != null ? String.valueOf(vehicle.getCompanyId()) : null);

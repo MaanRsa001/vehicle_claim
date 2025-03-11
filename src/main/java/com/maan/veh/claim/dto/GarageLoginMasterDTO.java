@@ -63,9 +63,8 @@ public class GarageLoginMasterDTO {
 	@JsonProperty("Emailid")
 	private String emailid;
 	
-	@JsonFormat(pattern = "dd/MM/yyyy")
 	@JsonProperty("Effectivedate")
-	private Date effectiveDate;
+	private String effectiveDate;
 	
 	@JsonProperty("Remarks")
 	private String remarks;

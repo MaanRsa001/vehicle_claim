@@ -1557,32 +1557,32 @@ List<ErrorList> errors = new ArrayList<>();
 	    }
 
 	    // Additional rule: effectiveDate should not be before entryDate
-	    if (req.getEffectiveDate() != null) {
-	        Date today = new Date();
-	        // Remove time component by setting hours, minutes, seconds, and milliseconds to zero.
-	        Calendar calendar = Calendar.getInstance();
-
-	        // Process the request's effective date.
-	        calendar.setTime(req.getEffectiveDate());
-	        calendar.set(Calendar.HOUR_OF_DAY, 0);
-	        calendar.set(Calendar.MINUTE, 0);
-	        calendar.set(Calendar.SECOND, 0);
-	        calendar.set(Calendar.MILLISECOND, 0);
-	        Date effectiveDateOnly = calendar.getTime();
-
-	        // Process today's date.
-	        calendar.setTime(today);
-	        calendar.set(Calendar.HOUR_OF_DAY, 0);
-	        calendar.set(Calendar.MINUTE, 0);
-	        calendar.set(Calendar.SECOND, 0);
-	        calendar.set(Calendar.MILLISECOND, 0);
-	        Date todayOnly = calendar.getTime();
-
-	        // Validate the effective date against today's date.
-	        if (effectiveDateOnly.before(todayOnly)) {
-	            list.add(new ErrorList("101", "Effectivedate", "Effective date cannot be before entry date"));
-	        }
-	    }
+//	    if (req.getEffectiveDate() != null) {
+//	        Date today = new Date();
+//	        // Remove time component by setting hours, minutes, seconds, and milliseconds to zero.
+//	        Calendar calendar = Calendar.getInstance();
+//
+//	        // Process the request's effective date.
+//	        calendar.setTime(req.getEffectiveDate());
+//	        calendar.set(Calendar.HOUR_OF_DAY, 0);
+//	        calendar.set(Calendar.MINUTE, 0);
+//	        calendar.set(Calendar.SECOND, 0);
+//	        calendar.set(Calendar.MILLISECOND, 0);
+//	        Date effectiveDateOnly = calendar.getTime();
+//
+//	        // Process today's date.
+//	        calendar.setTime(today);
+//	        calendar.set(Calendar.HOUR_OF_DAY, 0);
+//	        calendar.set(Calendar.MINUTE, 0);
+//	        calendar.set(Calendar.SECOND, 0);
+//	        calendar.set(Calendar.MILLISECOND, 0);
+//	        Date todayOnly = calendar.getTime();
+//
+//	        // Validate the effective date against today's date.
+//	        if (effectiveDateOnly.before(todayOnly)) {
+//	            list.add(new ErrorList("101", "Effectivedate", "Effective date cannot be before entry date"));
+//	        }
+//	    }
 	    
 	    // New validation for duplicate loginId and coreAppCode when oaCode is provided
 	    if (StringUtils.isBlank(req.getOaCode())) {

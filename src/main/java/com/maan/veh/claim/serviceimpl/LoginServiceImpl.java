@@ -1,5 +1,7 @@
 package com.maan.veh.claim.serviceimpl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -379,7 +381,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            loginMaster.setUpdatedBy(req.getCreatedBy());
 	            loginMaster.setUpdatedDate(new Date());
 	            loginMaster.setStatus(req.getStatus());
-	            loginMaster.setEffectiveDateStart(req.getEffectiveDate());
+	            loginMaster.setEffectiveDateStart(convertStringToDate(req.getEffectiveDate()));
 	            loginMaster.setAgencyCode(req.getCatagoryId());
 				
 				if("Y".equalsIgnoreCase(req.getChangePassYN())) {
@@ -402,7 +404,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            userInfo.setRemarks(req.getRemarks());
 	            userInfo.setUpdatedBy(req.getCreatedBy());
 	            userInfo.setUpdatedDate(new Date());
-	            userInfo.setEffectiveDateStart(req.getEffectiveDate());
+	            userInfo.setEffectiveDateStart(convertStringToDate(req.getEffectiveDate()));
 	            userInfo.setMobileCode(req.getMobileCode());
 	            userInfo.setMobileCodeDesc(req.getMobileCodeDesc());
 	            userInfo.setUserMobile(req.getMobileNo());
@@ -429,7 +431,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            loginMasterNew.setEntryDate(new Date());
 	            loginMasterNew.setOaCode(newOaCode);
 	            loginMasterNew.setAgencyCode(req.getCatagoryId());
-	            loginMasterNew.setEffectiveDateStart(req.getEffectiveDate());
+	            loginMasterNew.setEffectiveDateStart(convertStringToDate(req.getEffectiveDate()));
 	         
 				loginMasterNew.setLpassDate(dateAfter);
 	            
@@ -450,7 +452,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            userInfoNew.setEntryDate(new Date());
 	            userInfoNew.setCompanyId(req.getCompanyId());
 	            userInfoNew.setOaCode(newOaCode);
-	            userInfoNew.setEffectiveDateStart(req.getEffectiveDate());
+	            userInfoNew.setEffectiveDateStart(convertStringToDate(req.getEffectiveDate()));
 	            userInfoNew.setUserMobile(req.getMobileNo());
 	            userInfoNew.setUserMail(req.getEmailid());
 	            userInfoNew.setAgencyCode(req.getCatagoryId());
@@ -478,6 +480,31 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	        return comResponse;
 	    }
 	}
+	
+	public static Date convertStringToDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            // Convert String to Date
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            Date date = sdf.parse(dateStr);
+
+            // Reset time to 00:00:00
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+
+            return cal.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null; // Return null if parsing fails
+        }
+    }
 
 	@Override
 	public CommonResponse getAllLogin(GetAllLoginRequest req) {
@@ -525,7 +552,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            dto.setContactPersonName(userInfo.getCustomerName());
 	            dto.setMobileNo(userInfo.getUserMobile());
 	            dto.setEmailid(userInfo.getUserMail());
-	            dto.setEffectiveDate(userInfo.getEffectiveDateStart());
+	            dto.setEffectiveDate(convertDateToString(userInfo.getEffectiveDateStart()));
 	            dto.setRemarks(userInfo.getRemarks());
 	            dto.setOaCode(userInfo.getOaCode() != null ? userInfo.getOaCode().toString() : "");
 	            dto.setEntryDate(userInfo.getEntryDate());
@@ -573,6 +600,14 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	        return comResponse;
 	    }
 	}
+	
+	public static String convertDateToString(Date date) {
+        if (date == null) {
+            return null;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(date);
+    }
 
 	@Override
 	public CommonResponse getLoginDetails(GetAllLoginRequest req) {
@@ -614,7 +649,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            dto.setContactPersonName(userInfo.getCustomerName());
 	            dto.setMobileNo(userInfo.getUserMobile());
 	            dto.setEmailid(userInfo.getUserMail());
-	            dto.setEffectiveDate(userInfo.getEffectiveDateStart());
+	            dto.setEffectiveDate(convertDateToString(userInfo.getEffectiveDateStart()));
 	            dto.setRemarks(userInfo.getRemarks());
 	            dto.setOaCode(userInfo.getOaCode() != null ? userInfo.getOaCode().toString() : "");
 	            dto.setEntryDate(userInfo.getEntryDate());
