@@ -474,7 +474,7 @@ public class DropDownController {
 		}
 	}
     
-    @GetMapping(value = "/depressiontype/{companyId}")
+    @GetMapping(value = "/depreciationtype/{companyId}")
    	public ResponseEntity<CommonRes> getDepressionType(@PathVariable String companyId) {
    		CommonRes data = new CommonRes();
 
