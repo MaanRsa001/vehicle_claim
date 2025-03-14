@@ -39,4 +39,6 @@ public interface DamageSectionDetailsService {
 	CommonResponse viewSurveyorTotalAmount(GarageSectionDetailsSaveReq req);
 
 	CommonResponse saveSurveyorTotalAmount(TotalAmountViewResponse req);
+
+	CommonResponse viewsaveSparePartsDamageId(GarageSectionDetailsSaveReq req);
 }

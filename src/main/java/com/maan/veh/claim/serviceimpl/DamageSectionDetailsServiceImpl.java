@@ -499,8 +499,16 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            res.setNoOfUnits(data.getNoOfParts() != null ? data.getNoOfParts().toString() : "");
 	            res.setReplacementCharge(data.getReplaceCost() != null ? df.format(data.getReplaceCost()) : "");
 	            if("REPLACE".equalsIgnoreCase(data.getRepairReplace())) {
-	            	res.setUnitPrice(data.getGaragePrice() != null ? df.format(data.getGaragePrice()) : "");
+	            	if("Garage".equalsIgnoreCase(data.getGarageDealer())) {
+	            		res.setUnitPrice(data.getGaragePrice() != null ? df.format(data.getGaragePrice()) : "");
+	            	}else if("Dealer".equalsIgnoreCase(data.getGarageDealer())) {
+	            		res.setUnitPrice(data.getGaragePrice() != null ? df.format(data.getDealerPrice()) : "");
+	            	}else {
+	            		res.setUnitPrice(data.getGaragePrice() != null ? df.format(data.getGaragePrice()) : "");
+	            	}          	
 	            }
+	            res.setGaragePrice(data.getGaragePrice() != null ? df.format(data.getGaragePrice()) : "");
+	            res.setDealerPrice(data.getDealerPrice() != null ? df.format(data.getDealerPrice()) : "");
 	            res.setGarageLoginId(data.getGarageLoginId());
 	            res.setStatus(data.getStatus());
 	            res.setDeductablePer(data.getLabourCostDeductPercentage() != null ? df.format(data.getLabourCostDeductPercentage()) : "0.00");
@@ -841,9 +849,9 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            response.setErrors(Collections.emptyList());
 	            response.setIsError(false);
 	        } else {
-	            response.setMessage("Failed: No records found for ClaimNo: " + claimNo);
-	            response.setErrors(Collections.singletonList(new ErrorList("102", "ClaimNo", "No data found for claim number " + claimNo)));
-	            response.setIsError(true);
+//	            response.setMessage("Failed: No records found for ClaimNo: " + claimNo);
+//	            response.setErrors(Collections.singletonList(new ErrorList("102", "ClaimNo", "No data found for claim number " + claimNo)));
+//	            response.setIsError(true);
 	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -857,6 +865,84 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	private String convertBigDecimalToString(BigDecimal value) {
 	    return value != null ? value.toString() : null;
 	}
+	
+	@Override
+	public CommonResponse viewsaveSparePartsDamageId(GarageSectionDetailsSaveReq req) {
+	    CommonResponse response = new CommonResponse();
+	    try {
+	        String claimNo = req.getClaimNo();
+	        String quotationNo = req.getQuotationNo();
+	        String garageId = req.getGarageLoginId();
+	        String damageSno=req.getDamageSno();
+	        
+	        VcSparePartsDetailsRequest nullResponse = new VcSparePartsDetailsRequest();
+
+	        List<VcSparePartsDetails> sparePartsList = 
+	            sparePartsDetailsRepo.findByClaimNumberAndQuotationNoAndGarageIdAndDamageSno(claimNo, quotationNo, garageId,damageSno);
+
+	        if (sparePartsList != null && !sparePartsList.isEmpty()) {
+	            List<VcSparePartsDetailsRequest> sparePartsResponses = sparePartsList.stream().map(spareParts -> {
+	                VcSparePartsDetailsRequest sparePartsResponse = new VcSparePartsDetailsRequest();
+	                
+	                sparePartsResponse.setClaimNo(spareParts.getClaimNumber());
+	                sparePartsResponse.setQuotationNo(spareParts.getQuotationNo());
+	                sparePartsResponse.setGarageId(spareParts.getGarageId());
+	                sparePartsResponse.setSparePartType(spareParts.getSparePartType());
+	                sparePartsResponse.setSparePartTypeDesc(spareParts.getSparePartTypeDesc());
+	                sparePartsResponse.setOriginalDiscount(convertBigDecimalToString(spareParts.getOriginalDiscount()));
+	                sparePartsResponse.setDiscountPercentage(convertBigDecimalToString(spareParts.getDiscountPercentage()));
+	                sparePartsResponse.setDiscountAmount(convertBigDecimalToString(spareParts.getDiscountAmount()));
+	                sparePartsResponse.setReplacementCostDeductible(convertBigDecimalToString(spareParts.getReplacementCostDeductible()));
+	                sparePartsResponse.setDamageType(spareParts.getDamageType());
+	                sparePartsResponse.setDepreciationType(spareParts.getDepreciationType());
+	                sparePartsResponse.setDepreciationTypeDesc(spareParts.getDepreciationTypeDesc());
+	                sparePartsResponse.setDepreciation(convertBigDecimalToString(spareParts.getDepreciation()));
+	                sparePartsResponse.setReferralStatus(spareParts.getReferralStatus());
+	                sparePartsResponse.setRepairLabour(convertBigDecimalToString(spareParts.getRepairLabour()));
+	                sparePartsResponse.setRepairLabourDiscount(convertBigDecimalToString(spareParts.getRepairLabourDiscount()));
+	                sparePartsResponse.setRepairLabourDiscountAmount(convertBigDecimalToString(spareParts.getRepairLabourDiscountAmount()));
+	                sparePartsResponse.setRepairLabourDeductible(convertBigDecimalToString(spareParts.getRepairLabourDeductible()));
+	                sparePartsResponse.setTotalAmountRepairLabour(convertBigDecimalToString(spareParts.getTotalAmountRepairLabour()));
+	                sparePartsResponse.setRemarks(spareParts.getRemarks());
+	                sparePartsResponse.setDamageDirection(spareParts.getDamageDirection());
+	                sparePartsResponse.setDamageDirectionDesc(spareParts.getDamageDirectionDesc());
+	                sparePartsResponse.setPartType(spareParts.getPartType());
+	                sparePartsResponse.setPartTypeDesc(spareParts.getPartTypeDesc());
+	                sparePartsResponse.setReplaceRepair(spareParts.getReplaceRepair());
+	                sparePartsResponse.setNoOfUnits(spareParts.getNoOfUnits() != null ? spareParts.getNoOfUnits().toString() : null);
+	                sparePartsResponse.setSparePartsCost(convertBigDecimalToString(spareParts.getSparePartsCost()));
+	                sparePartsResponse.setLabourCharge(convertBigDecimalToString(spareParts.getLabourCharge()));
+	                sparePartsResponse.setTotalCost(convertBigDecimalToString(spareParts.getTotalCost()));
+	                sparePartsResponse.setDamageSno(spareParts.getDamageSno());
+	                return sparePartsResponse;
+	            }).collect(Collectors.toList());
+
+	            response.setResponse(sparePartsResponses);
+	            response.setMessage("Success");
+	            response.setErrors(Collections.emptyList());
+	            response.setIsError(false);
+	        } else {
+//	            response.setMessage("Failed: No records found for ClaimNo: " + claimNo);
+//	            response.setErrors(Collections.singletonList(new ErrorList("102", "ClaimNo", "No data found for claim number " + claimNo)));
+//	            response.setIsError(true);
+	        	response.setResponse(nullResponse);
+	            response.setMessage("Success");
+	            response.setErrors(Collections.emptyList());
+	            response.setIsError(false);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.setMessage("Failed: An error occurred while retrieving spare parts details");
+	        response.setErrors(Collections.singletonList(new ErrorList("500", "Exception", e.getMessage())));
+	        response.setIsError(true);
+	    }
+	    return response;
+	}
+
+//	private String convertBigDecimalToString(BigDecimal value) {
+//	    return value != null ? value.toString() : null;
+//	}
+
 
 
 
@@ -940,14 +1026,31 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 
 	                // Other Amounts
 	                sparePartsResponse.setNetAmount(convertBigDecimalToString(spareParts.getNetAmount()));
-	                sparePartsResponse.setUnknownAccidentDeduction(convertBigDecimalToString(spareParts.getUnknownAccidentDeduction()));
-	                sparePartsResponse.setAmountToBeRecovered(convertBigDecimalToString(spareParts.getAmountToBeRecovered()));
+//	                sparePartsResponse.setUnknownAccidentDeduction(StringUtils.isBlank(spareParts.getUnknownAccidentDeduction())?toBigDecimal("0"):convertBigDecimalToString(spareParts.getUnknownAccidentDeduction()));
+//	                sparePartsResponse.setAmountToBeRecovered(StringUtils.isBlank(spareParts.getAmountToBeRecovered())?toBigDecimal("0"):convertBigDecimalToString(spareParts.getAmountToBeRecovered()));
 	                sparePartsResponse.setTotalAfterDeduction(convertBigDecimalToString(spareParts.getTotalAfterDeductions()));
 
 	                // VAT Details
-	                sparePartsResponse.setVatRate(convertBigDecimalToString(spareParts.getVatRatePercentage()));
+//	                sparePartsResponse.setVatRate(StringUtils.isBlank(spareParts.getVatRate())?"0":convertBigDecimalToString(spareParts.getVatRatePercentage()));
 	                sparePartsResponse.setVatAmount(convertBigDecimalToString(spareParts.getVatAmount()));
 	                sparePartsResponse.setTotalAmountWithVAT(convertBigDecimalToString(spareParts.getTotalWithVat()));
+	                sparePartsResponse.setVatRate(
+	                	    (spareParts.getVatRate() == null || StringUtils.isBlank(spareParts.getVatRate().toString())) 
+	                	        ? "0" 
+	                	        : convertBigDecimalToString(spareParts.getVatRatePercentage())
+	                	);
+	                sparePartsResponse.setUnknownAccidentDeduction(
+	                	    (spareParts.getUnknownAccidentDeduction() == null) 
+	                	        ? "0" 
+	                	        : convertBigDecimalToString(spareParts.getUnknownAccidentDeduction())
+	                	);
+
+	                	sparePartsResponse.setAmountToBeRecovered(
+	                	    (spareParts.getAmountToBeRecovered() == null) 
+	                	        ? "0" 
+	                	        : convertBigDecimalToString(spareParts.getAmountToBeRecovered())
+	                	);
+
 
 	                return sparePartsResponse;
 	            }).collect(Collectors.toList());
@@ -1003,13 +1106,12 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            spareParts.setRepairLabourDiscountAmount(toBigDecimal(req.getRepairLabourDiscount()));
 	            spareParts.setRepairLabourDeductible(toBigDecimal(req.getRepairLabourDeductible()));
 	            spareParts.setTotalAmountRepairLabour(toBigDecimal(req.getTotalAmountRepairLabour()));
-
-	            spareParts.setNetAmount(toBigDecimal(req.getNetAmount()));
-	            spareParts.setUnknownAccidentDeduction(toBigDecimal(req.getUnknownAccidentDeduction()));
-	            spareParts.setAmountToBeRecovered(toBigDecimal(req.getAmountToBeRecovered()));
+	            spareParts.setNetAmount(StringUtils.isBlank(req.getNetAmount())?toBigDecimal("0"):toBigDecimal(req.getNetAmount()));
+	            spareParts.setUnknownAccidentDeduction(StringUtils.isBlank(req.getUnknownAccidentDeduction())?toBigDecimal("0"):toBigDecimal(req.getUnknownAccidentDeduction()));
+	            spareParts.setAmountToBeRecovered(StringUtils.isBlank(req.getAmountToBeRecovered())?toBigDecimal("0"):toBigDecimal(req.getAmountToBeRecovered()));
 	            spareParts.setTotalAfterDeductions(toBigDecimal(req.getTotalAfterDeduction()));
 
-	            spareParts.setVatRatePercentage(toBigDecimal(req.getVatRate()));
+	            spareParts.setVatRatePercentage(StringUtils.isBlank(req.getVatRate())?toBigDecimal("0"):toBigDecimal(req.getVatRate()));
 	            spareParts.setVatAmount(toBigDecimal(req.getVatAmount()));
 	            spareParts.setTotalWithVat(toBigDecimal(req.getTotalAmountWithVAT()));
 

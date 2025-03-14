@@ -1688,61 +1688,64 @@ List<ErrorList> errors = new ArrayList<>();
 	    if (StringUtils.isBlank(req.getGarageId())) {
 	        errors.add(new ErrorList("100", "GarageId", "GarageId cannot be blank"));
 	    }
-	    if (StringUtils.isBlank(req.getSparePartType())) {
-	        errors.add(new ErrorList("100", "SparePartType", "Spare part type cannot be blank"));
-	    }
-	    if (StringUtils.isBlank(req.getDamageType())) {
-	        errors.add(new ErrorList("100", "DamageType", "Damage type cannot be blank"));
-	    }
-	    if (StringUtils.isBlank(req.getDepreciationType())) {
-	        errors.add(new ErrorList("100", "DepreciationType", "Depreciation type cannot be blank"));
-	    }
+	    
 	    if (StringUtils.isBlank(req.getPartType())) {
 	        errors.add(new ErrorList("100", "PartType", "Part type cannot be blank"));
 	    }
 	    if (StringUtils.isBlank(req.getReplaceRepair())) {
 	        errors.add(new ErrorList("100", "ReplaceRepair", "Replace/Repair flag cannot be blank"));
+	    }else if(req.getReplaceRepair().equalsIgnoreCase("REPLACE")) {
+	    	if (StringUtils.isBlank(req.getSparePartType())) {
+		        errors.add(new ErrorList("100", "SparePartType", "Spare part type cannot be blank"));
+		    }
+	    	 if (StringUtils.isBlank(req.getDamageType())) {
+	 	        errors.add(new ErrorList("100", "DamageType", "Damage type cannot be blank"));
+	 	    }
+	    	 if (StringUtils.isBlank(req.getDepreciationType())) {
+	 	        errors.add(new ErrorList("100", "DepreciationType", "Depreciation type cannot be blank"));
+	 	    }
 	    }
 	    if (StringUtils.isBlank(req.getNoOfUnits())) {
 	        errors.add(new ErrorList("100", "NoOfUnits", "Number of units cannot be blank"));
 	    }
-
+	    
+	    
 	    // Validate decimal fields
-	    validateDecimalField(req.getOriginalDiscount(), "OriginalDiscount", errors);
-	    validateDecimalField(req.getDiscountPercentage(), "DiscountPercentage", errors);
-	    validateDecimalField(req.getDiscountAmount(), "DiscountAmount", errors);
-	    validateDecimalField(req.getReplacementCostDeductible(), "ReplacementCostDeductible", errors);
-	    validateDecimalField(req.getDepreciation(), "Depreciation", errors);
-	    validateDecimalField(req.getRepairLabour(), "RepairLabour", errors);
-	    validateDecimalField(req.getRepairLabourDiscount(), "RepairLabourDiscount", errors);
-	    validateDecimalField(req.getRepairLabourDiscountAmount(), "RepairLabourDiscountAmount", errors);
-	    validateDecimalField(req.getRepairLabourDeductible(), "RepairLabourDeductible", errors);
-	    validateDecimalField(req.getTotalAmountRepairLabour(), "TotalAmountRepairLabour", errors);
-	    validateDecimalField(req.getSparePartsCost(), "SparePartsCost", errors);
-	    validateDecimalField(req.getLabourCharge(), "LabourCharge", errors);
-	    validateDecimalField(req.getTotalCost(), "TotalCost", errors);
+//	    validateDecimalField(req.getOriginalDiscount(), "OriginalDiscount", errors);
+//	    validateDecimalField(req.getDiscountPercentage(), "DiscountPercentage", errors);
+//	    validateDecimalField(req.getDiscountAmount(), "DiscountAmount", errors);
+//	    validateDecimalField(req.getReplacementCostDeductible(), "ReplacementCostDeductible", errors);
+//	    validateDecimalField(req.getDepreciation(), "Depreciation", errors);
+//	    validateDecimalField(req.getRepairLabour(), "RepairLabour", errors);
+//	    validateDecimalField(req.getRepairLabourDiscount(), "RepairLabourDiscount", errors);
+//	    validateDecimalField(req.getRepairLabourDiscountAmount(), "RepairLabourDiscountAmount", errors);
+//	    validateDecimalField(req.getRepairLabourDeductible(), "RepairLabourDeductible", errors);
+//	    validateDecimalField(req.getTotalAmountRepairLabour(), "TotalAmountRepairLabour", errors);
+//	    validateDecimalField(req.getSparePartsCost(), "SparePartsCost", errors);
+//	    validateDecimalField(req.getLabourCharge(), "LabourCharge", errors);
+//	    validateDecimalField(req.getTotalCost(), "TotalCost", errors);
 
 	    // Business rules validations
 	    BigDecimal replacementCost = toBigDecimal(req.getSparePartsCost());
 	    BigDecimal sparePartDepreciation = toBigDecimal(req.getDepreciation());
 	    BigDecimal discountOnSpareParts = toBigDecimal(req.getDiscountAmount());
 
-	    if (replacementCost != null && sparePartDepreciation != null && discountOnSpareParts != null) {
-	        if (sparePartDepreciation.add(discountOnSpareParts).compareTo(replacementCost) > 0) {
-	            errors.add(new ErrorList("102", "SparePartDepreciation & DiscountOnSpareParts",
-	                "SparePartDepreciation + DiscountOnSpareParts should not be greater than ReplacementCost"));
-	        }
-	    }
+//	    if (replacementCost != null && sparePartDepreciation != null && discountOnSpareParts != null) {
+//	        if (sparePartDepreciation.add(discountOnSpareParts).compareTo(replacementCost) > 0) {
+//	            errors.add(new ErrorList("102", "SparePartDepreciation & DiscountOnSpareParts",
+//	                "SparePartDepreciation + DiscountOnSpareParts should not be greater than ReplacementCost"));
+//	        }
+//	    }
 
 	    BigDecimal repairLabour = toBigDecimal(req.getRepairLabour());
 	    BigDecimal repairLabourDiscountAmount = toBigDecimal(req.getRepairLabourDiscountAmount());
 
-	    if (repairLabour != null && repairLabourDiscountAmount != null) {
-	        if (repairLabourDiscountAmount.compareTo(repairLabour) > 0) {
-	            errors.add(new ErrorList("103", "RepairLabourDiscountAmount",
-	                "RepairLabourDiscountAmount should not be greater than RepairLabour"));
-	        }
-	    }
+//	    if (repairLabour != null && repairLabourDiscountAmount != null) {
+//	        if (repairLabourDiscountAmount.compareTo(repairLabour) > 0) {
+//	            errors.add(new ErrorList("103", "RepairLabourDiscountAmount",
+//	                "RepairLabourDiscountAmount should not be greater than RepairLabour"));
+//	        }
+//	    }
 
 	    return errors;
 	}

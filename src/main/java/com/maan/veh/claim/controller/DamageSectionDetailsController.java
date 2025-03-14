@@ -109,6 +109,12 @@ public class DamageSectionDetailsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     
+    @PostMapping("/surveyor/view/spareparts/damageid")
+    public ResponseEntity<CommonResponse> viewsaveSparePartsDamageId(@RequestBody GarageSectionDetailsSaveReq req) {
+        CommonResponse response = service.viewsaveSparePartsDamageId(req);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    
     
     @PostMapping("/surveyor/view/totalamount")
     public ResponseEntity<CommonResponse> viewSurveyorTotalAmount(@RequestBody GarageSectionDetailsSaveReq req) {

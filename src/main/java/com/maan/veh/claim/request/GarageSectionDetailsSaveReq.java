@@ -57,6 +57,11 @@ public class GarageSectionDetailsSaveReq {
     
     @JsonProperty("DeductableAmount")
     private String deductableAmount;
-
+    
+    @JsonProperty("GaragePrice")
+    private String garagePrice;
+    
+    @JsonProperty("DealerPrice")
+    private String dealerPrice;
 
 }

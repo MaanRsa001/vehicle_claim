@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "vc_spare_parts_details")
+@Table(name = "eagle_spare_parts_details")
 @IdClass(VcSparePartsDetailsId.class)
 public class VcSparePartsDetails {
 

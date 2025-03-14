@@ -82,6 +82,7 @@ import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.SparePartsSaveDetails;
 import com.maan.veh.claim.entity.VcClaimStatus;
 import com.maan.veh.claim.entity.VcDocumentUploadDetails;
+import com.maan.veh.claim.entity.VcSparePartsDetails;
 import com.maan.veh.claim.external.ErrorDetail;
 import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.external.ExternalApiResponse;
@@ -115,6 +116,7 @@ import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
 import com.maan.veh.claim.repository.VcClaimStatusRepository;
 import com.maan.veh.claim.repository.VcDocumentUploadDetailsRepository;
+import com.maan.veh.claim.repository.VcSparePartsDetailsRepository;
 import com.maan.veh.claim.request.CheckClaimStatusRequest;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
 import com.maan.veh.claim.request.ClaimIntimationRequestMetaData;
@@ -174,6 +176,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     
     @Autowired
     private ApiIntegMasterRepository apiIntegMasterRepository;
+    
+    @Autowired
+    private VcSparePartsDetailsRepository sparePartsDetailsRepo;
     
     @Value("${external.api.url.createfnol}")  
     private String externalApiUrlCreatefnol;
@@ -1331,22 +1336,21 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			request.setWorkOrderNo(partsSaveDetails.getWorkOrderNo());
 			request.setWorkOrderDate(isoDateFormat.format(partsSaveDetails.getWorkOrderDate())); 
 			request.setAccForSettlementType(partsSaveDetails.getAccountSettlementType());
-//			request.setAccForSettlement(partsSaveDetails.getAccountSettlementName());
-			request.setAccForSettlement("");
+			request.setAccForSettlement(partsSaveDetails.getAccountSettlementName());
 			request.setSparePartsDealer(partsSaveDetails.getSparePartsDealer());
 			request.setGarageCode(partsSaveDetails.getGarageCode());
-//			request.setGarageQuotationNo(partsSaveDetails.getQuotationNo());
+			request.setGarageQuotationNo(partsSaveDetails.getQuotationNo());
 			request.setGarageQuotationNo(partsSaveDetails.getWorkOrderNo());
 			request.setDeliveryDate(isoDateFormat.format(partsSaveDetails.getDeliveryDate()));
 			request.setDeliveredTo(partsSaveDetails.getDeliveredTo());
 			request.setDeliveredId(partsSaveDetails.getGarageCode());
 			request.setSubrogation("Y".equalsIgnoreCase(partsSaveDetails.getSubrogation())?"true":"false");
 			request.setJointOrder("Y".equalsIgnoreCase(partsSaveDetails.getJointOrder())?"true":"false");
-			//request.setTotalLoss(partsSaveDetails.getTotalLoss().toString());
+			request.setTotalLoss(partsSaveDetails.getTotalLoss().toString());
 			request.setTotalLoss("N");
-			//request.setTotalLossType(partsSaveDetails.getTotalLossType());
-			request.setTotalLossType("");
+			request.setTotalLossType(partsSaveDetails.getTotalLossType());
 			request.setRemarks(partsSaveDetails.getRemarks());
+			request.setLpoId(partsSaveDetails.getLpoId());
 			request.setClaimNo(partsSaveDetails.getClaimNo());
 
 			List<VehicleDamageDetailRequest> vehicleDamageDetails = new ArrayList<>();
@@ -1355,13 +1359,12 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			    VehicleDamageDetailRequest damageRequest = new VehicleDamageDetailRequest();
 			    String directionCode = dropDownServiceImpl.getItemCodeByItemValue(detail.getDamageDirection(),"DAMAGE_DIRECTION");
 			    String partCode = dropDownServiceImpl.getbodyPartCodeByValue(detail.getDamagePart());
+			    VcSparePartsDetails spare = sparePartsDetailsRepo.findByClaimNumberAndQuotationNoAndDamageSnoAndGarageId(partsSaveDetails.getClaimNo(),partsSaveDetails.getQuotationNo(),String.valueOf(detail.getDamageSno()),detail.getGarageLoginId());
 			    BigDecimal total = BigDecimal.ZERO;
 			    damageRequest.setDamageDirection(directionCode);
 			    damageRequest.setPartyType(partCode);
-			    //damageRequest.setReplaceOrRepair(detail.getRepairReplace());
-			    damageRequest.setReplaceOrRepair("");
-			    //damageRequest.setNoUnits(detail.getNoOfParts());
-			    damageRequest.setNoUnits("0");
+			    damageRequest.setReplaceOrRepair(detail.getRepairReplace());
+			    damageRequest.setNoUnits(detail.getNoOfParts()!=null ?detail.getNoOfParts().toString():"0");
 			    if("REPLACE".equalsIgnoreCase(detail.getRepairReplace())) {
 			    	damageRequest.setUnitPrice(detail.getGaragePrice()!=null?detail.getGaragePrice().toString():"");
 			    	BigDecimal unitPrice = detail.getGaragePrice() != null ? detail.getGaragePrice() : BigDecimal.ZERO;
@@ -1376,8 +1379,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 				        total = BigDecimal.ZERO;
 				    }
 
-				    //damageRequest.setTotal(total);
-				    damageRequest.setTotal("");
+				    damageRequest.setTotal(String.valueOf(total));
 			    }else {
 			    	damageRequest.setUnitPrice("");
 			    	 BigDecimal replacementCharge = detail.getReplaceCost() != null ? detail.getReplaceCost() : BigDecimal.ZERO;
@@ -1385,8 +1387,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			    	damageRequest.setAsPerInvoice("true".equalsIgnoreCase(detail.getAsPerInvoice())?"Y" : "N");
 			    	damageRequest.setDeductiblePer(detail.getLabourCostDeductPercentage() != null ? detail.getLabourCostDeductPercentage().toString() : "0");
 			    	damageRequest.setDeductibleAmount(detail.getLabourCostDeduct() != null ? detail.getLabourCostDeduct().toString() : "0");
-			    	//damageRequest.setBeforeDeduction(replacementCharge!=null ? replacementCharge.toString():"0");
-			    	damageRequest.setBeforeDeduction("");
+			    	damageRequest.setBeforeDeduction(replacementCharge!=null ? replacementCharge.toString():"0");
 			    	BigDecimal dedudct = detail.getLabourCostDeduct() != null ? detail.getLabourCostDeduct() : BigDecimal.ZERO;
 			    	total = replacementCharge.subtract(dedudct);
 			    	damageRequest.setTotal("");
@@ -1408,29 +1409,25 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			metaData.setCurrentBranch("2222");
 			metaData.setOriginBranch("2222");
 			metaData.setUserName("09988877772");
-			//metaData.setIpAddress(workOrder.getIpAddress());
+//			metaData.setIpAddress(workOrder.getIpAddress());
 			metaData.setRequestGeneratedDateTime(isoDateFormat.format(new Date()));
-			//metaData.setConsumerTrackingID(UUID.randomUUID().toString()); // example, replace as necessary
+//			metaData.setConsumerTrackingID(UUID.randomUUID().toString()); // example, replace as necessary
 			request.setRequestMetaData(metaData);
 			
-//			request.setReplacementCost(partsSaveDetails.getReplacementCost() != null ? partsSaveDetails.getReplacementCost().toString() : "0");
-			request.setReplacementCost("");
+			request.setReplacementCost(partsSaveDetails.getReplacementCost() != null ? partsSaveDetails.getReplacementCost().toString() : "0");
+	
 			request.setReplacementCostDeductible(partsSaveDetails.getReplacementCostDeductible() != null ? partsSaveDetails.getReplacementCostDeductible().toString() : "0");
 			request.setSparePartDepreciation(partsSaveDetails.getSparePartDepreciation() != null ? partsSaveDetails.getSparePartDepreciation().toString() : "0");
 			request.setDiscountonSpareParts(partsSaveDetails.getDiscountOnSpareParts() != null ? partsSaveDetails.getDiscountOnSpareParts().toString() : "0");
-//			request.setTotalAmountReplacement(partsSaveDetails.getTotalAmountReplacement() != null ? partsSaveDetails.getTotalAmountReplacement().toString() : "0");
-			request.setTotalAmountReplacement("");
-//			request.setRepairLabour(partsSaveDetails.getRepairLabour() != null ? partsSaveDetails.getRepairLabour().toString() : "0");
-			request.setRepairLabour("");
+			request.setTotalAmountReplacement(partsSaveDetails.getTotalAmountReplacement() != null ? partsSaveDetails.getTotalAmountReplacement().toString() : "0");
+			request.setRepairLabour(partsSaveDetails.getRepairLabour() != null ? partsSaveDetails.getRepairLabour().toString() : "0");
 			request.setRepairLabourDeductible(partsSaveDetails.getRepairLabourDeductible() != null ? partsSaveDetails.getRepairLabourDeductible().toString() : "0");
 			request.setRepairLabourDiscountAmount(partsSaveDetails.getRepairLabourDiscountAmount() != null ? partsSaveDetails.getRepairLabourDiscountAmount().toString() : "0");
-			request.setTotalAmountRepairLabour("");
-			//request.setTotalAmountRepairLabour(partsSaveDetails.getTotalAmountRepairLabour() != null ? partsSaveDetails.getTotalAmountRepairLabour().toString() : "0");
+			request.setTotalAmountRepairLabour(partsSaveDetails.getTotalAmountRepairLabour() != null ? partsSaveDetails.getTotalAmountRepairLabour().toString() : "0");
 			request.setNetAmount(partsSaveDetails.getNetAmount() != null ? partsSaveDetails.getNetAmount().toString() : "0");
 			request.setUnkownAccidentDeduction(partsSaveDetails.getUnknownAccidentDeduction() != null ? partsSaveDetails.getUnknownAccidentDeduction().toString() : "0");
 			request.setAmounttobeRecovered(partsSaveDetails.getAmountToBeRecovered() != null ? partsSaveDetails.getAmountToBeRecovered().toString() : "0");
-//			request.setTotalafterDeductions(partsSaveDetails.getTotalAfterDeductions() != null ? partsSaveDetails.getTotalAfterDeductions().toString() : "0");
-			request.setTotalafterDeductions("0");
+			request.setTotalafterDeductions(partsSaveDetails.getTotalAfterDeductions() != null ? partsSaveDetails.getTotalAfterDeductions().toString() : "0");
 			request.setVatRatePer(partsSaveDetails.getVatRatePercentage() != null ? partsSaveDetails.getVatRatePercentage().toString() : "0");
 			request.setVatRate(partsSaveDetails.getVatRate() != null ? partsSaveDetails.getVatRate().toString() : "0");
 			request.setVatAmount(partsSaveDetails.getVatAmount() != null ? partsSaveDetails.getVatAmount().toString() : "0");
