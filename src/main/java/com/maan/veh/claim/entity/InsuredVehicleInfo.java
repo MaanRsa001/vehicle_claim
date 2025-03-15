@@ -107,4 +107,10 @@ public class InsuredVehicleInfo {
     @Column(name = "plate_type", length = 100)
     private String plateType;
     
+    @Column(name = "clcp_id", length = 50)
+    private String clcpId;
+    
+    @Column(name = "veh_id", length = 50)
+    private String vehId;
+    
 }

@@ -36,8 +36,6 @@ public class VcInuredVehicleApiReponse {
 		 @JsonProperty("insuredName")
 		 private String insuredname ;
 		 
-	
-		 
 		 @JsonProperty("lossLocation")
 		 private String losslocation ;
 		 
@@ -92,4 +90,10 @@ public class VcInuredVehicleApiReponse {
 		
 		@JsonProperty("lpoId")
 		 private String lpoId ;
+		
+		@JsonProperty("vehId")
+		 private String vehId ;
+		
+		@JsonProperty("clcpId")
+		 private String clcpId ;
 }

@@ -180,6 +180,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     @Autowired
     private VcSparePartsDetailsRepository sparePartsDetailsRepo;
     
+    @Autowired
+    private InsuredVehicleInfoRepository insuredVehicleInfoRepo;
+    
     @Value("${external.api.url.createfnol}")  
     private String externalApiUrlCreatefnol;
     
@@ -1226,6 +1229,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        // Retrieve data from repositories
 	    	GarageWorkOrder workOrder = garageWorkOrderRepo.findByClaimNoAndQuotationNo(request.getClaimNo(),request.getQuotationNo());
 	    	LoginMaster loginMaster = loginRepo.findByLoginId(workOrder.getGarageId());
+	    	Optional<InsuredVehicleInfo> optional = insuredVehicleInfoRepo.findByClaimNoAndGarageId(request.getClaimNo(),workOrder.getGarageId());
 	        List<DamageSectionDetails> damageDetails = damageSectionDetailsRepo.findByClaimNoAndQuotationNo(request.getClaimNo(),request.getQuotationNo());
 	        SparePartsSaveDetails partsSaveDetails = SparePartsSaveDetailsRepo.findByClaimNoAndGarageCode(request.getClaimNo(),loginMaster.getCoreAppCode());
 	        if (workOrder == null || damageDetails.isEmpty()) {
@@ -1246,7 +1250,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	        // Map entities to request DTO
 	        //SaveSparePartsRequest dto = mapToSaveSparePartsRequest(workOrder, damageDetails);
-	        SaveSparePartsRequest dto = mapToSaveSparePartsRequestV1(partsSaveDetails, damageDetails);
+	        SaveSparePartsRequest dto = mapToSaveSparePartsRequestV1(partsSaveDetails, damageDetails,optional.get());
 	        
 	        // Authenticate and retrieve JWT token
 	        String jwtToken = authenticateUserCall();
@@ -1325,17 +1329,17 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	
 	
 	private SaveSparePartsRequest mapToSaveSparePartsRequestV1(SparePartsSaveDetails partsSaveDetails,
-			List<DamageSectionDetails> damageDetails) {
+			List<DamageSectionDetails> damageDetails, InsuredVehicleInfo insuredInfo) {
 		SaveSparePartsRequest request = new SaveSparePartsRequest();
 
 	    try {
 	    	SimpleDateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	    	
-			// Map fields from GarageWorkOrder to SaveSparePartsRequest
+	    	// Map fields from GarageWorkOrder to SaveSparePartsRequest
 			request.setWorkOrderType(partsSaveDetails.getWorkOrderType());
 			request.setWorkOrderNo(partsSaveDetails.getWorkOrderNo());
 			request.setWorkOrderDate(isoDateFormat.format(partsSaveDetails.getWorkOrderDate())); 
-			request.setAccForSettlementType(partsSaveDetails.getAccountSettlementType());
+//			request.setAccForSettlementType(partsSaveDetails.getAccountSettlementType());
+			request.setAccForSettlementType("");
 			request.setAccForSettlement(partsSaveDetails.getAccountSettlementName());
 			request.setSparePartsDealer(partsSaveDetails.getSparePartsDealer());
 			request.setGarageCode(partsSaveDetails.getGarageCode());
@@ -1344,14 +1348,16 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			request.setDeliveryDate(isoDateFormat.format(partsSaveDetails.getDeliveryDate()));
 			request.setDeliveredTo(partsSaveDetails.getDeliveredTo());
 			request.setDeliveredId(partsSaveDetails.getGarageCode());
-			request.setSubrogation("Y".equalsIgnoreCase(partsSaveDetails.getSubrogation())?"true":"false");
-			request.setJointOrder("Y".equalsIgnoreCase(partsSaveDetails.getJointOrder())?"true":"false");
+			request.setSubrogation(partsSaveDetails.getSubrogation());
+			request.setJointOrder(partsSaveDetails.getJointOrder());
 			request.setTotalLoss(partsSaveDetails.getTotalLoss().toString());
 			request.setTotalLoss("N");
-			request.setTotalLossType(partsSaveDetails.getTotalLossType());
+			request.setTotalLossType("");
 			request.setRemarks(partsSaveDetails.getRemarks());
 			request.setLpoId(partsSaveDetails.getLpoId());
 			request.setClaimNo(partsSaveDetails.getClaimNo());
+			request.setVehId(insuredInfo.getVehId());
+			request.setClcpId(insuredInfo.getClcpId());
 
 			List<VehicleDamageDetailRequest> vehicleDamageDetails = new ArrayList<>();
 
@@ -1364,7 +1370,27 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			    damageRequest.setDamageDirection(directionCode);
 			    damageRequest.setPartyType(partCode);
 			    damageRequest.setReplaceOrRepair(detail.getRepairReplace());
-			    damageRequest.setNoUnits(detail.getNoOfParts()!=null ?detail.getNoOfParts().toString():"0");
+			    
+			    damageRequest.setNoUnits(spare.getNoOfUnits()!=null ?spare.getNoOfUnits().toString():"0");
+			    damageRequest.setDiscount(spare.getDiscountPercentage()!=null ?spare.getDiscountPercentage().toString():"0");
+			    damageRequest.setDiscountAmt(spare.getDiscountAmount()!=null ?spare.getDiscountAmount().toString():"0");
+			    damageRequest.setDamageTyp(spare.getDamageType());
+			    damageRequest.setDeprect(spare.getDepreciation()!=null ?spare.getDepreciation().toString():"0");
+			    damageRequest.setDeprectTyp(spare.getDepreciationType());
+			    damageRequest.setOriginalDisc(spare.getOriginalDiscount()!=null ?spare.getOriginalDiscount().toString():"");
+			    damageRequest.setPartAccident("");
+			    damageRequest.setReffStatus(spare.getReferralStatus()!=null ?spare.getReferralStatus().toString():"A");
+			    damageRequest.setRemarks(spare.getRemarks());
+			    damageRequest.setRepairLabour(spare.getRepairLabour()!=null ?spare.getRepairLabour().toString():"0");
+			    damageRequest.setRepairLabourDeduct(spare.getRepairLabourDeductible()!=null ?spare.getRepairLabourDeductible().toString():"0");
+			    damageRequest.setRepairLabourDisc(spare.getRepairLabourDiscount()!=null ?spare.getRepairLabourDiscount().toString():"0");
+			    damageRequest.setRepairLabourDiscAmt(spare.getRepairLabourDiscountAmount()!=null ?spare.getRepairLabourDiscountAmount().toString():"0");
+			    damageRequest.setReplaceCostDed(spare.getReplacementCostDeductible()!=null ?spare.getReplacementCostDeductible().toString():"0");
+			    damageRequest.setSparePartTyp(spare.getSparePartType()!=null ?spare.getSparePartType().toString():"0");
+			    damageRequest.setTotalAmtRepLab(spare.getTotalAmountRepairLabour()!=null ?spare.getTotalAmountRepairLabour().toString():"0");
+			    damageRequest.setTotal(spare.getTotalCost()!=null ?spare.getTotalCost().toString():"0");
+
+
 			    if("REPLACE".equalsIgnoreCase(detail.getRepairReplace())) {
 			    	damageRequest.setUnitPrice(detail.getGaragePrice()!=null?detail.getGaragePrice().toString():"");
 			    	BigDecimal unitPrice = detail.getGaragePrice() != null ? detail.getGaragePrice() : BigDecimal.ZERO;
@@ -1379,18 +1405,15 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 				        total = BigDecimal.ZERO;
 				    }
 
-				    damageRequest.setTotal(String.valueOf(total));
+//				    damageRequest.setTotal(String.valueOf(total));
 			    }else {
+				   
 			    	damageRequest.setUnitPrice("");
 			    	 BigDecimal replacementCharge = detail.getReplaceCost() != null ? detail.getReplaceCost() : BigDecimal.ZERO;
 			    	total = replacementCharge;
-			    	damageRequest.setAsPerInvoice("true".equalsIgnoreCase(detail.getAsPerInvoice())?"Y" : "N");
-			    	damageRequest.setDeductiblePer(detail.getLabourCostDeductPercentage() != null ? detail.getLabourCostDeductPercentage().toString() : "0");
-			    	damageRequest.setDeductibleAmount(detail.getLabourCostDeduct() != null ? detail.getLabourCostDeduct().toString() : "0");
-			    	damageRequest.setBeforeDeduction(replacementCharge!=null ? replacementCharge.toString():"0");
 			    	BigDecimal dedudct = detail.getLabourCostDeduct() != null ? detail.getLabourCostDeduct() : BigDecimal.ZERO;
 			    	total = replacementCharge.subtract(dedudct);
-			    	damageRequest.setTotal("");
+//			    	damageRequest.setTotal("");
 			    }
 			    
 			    

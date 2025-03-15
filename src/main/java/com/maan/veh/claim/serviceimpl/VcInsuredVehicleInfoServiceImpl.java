@@ -151,7 +151,8 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	                insuredVehicleInfo.setEntryDate(new Date());
 	                insuredVehicleInfo.setStatus("Y");
 	                insuredVehicleInfo.setFnolSgsId(insured.getFnolsgsid());
-	                
+	                insuredVehicleInfo.setVehId(insured.getVehId());
+	                insuredVehicleInfo.setClcpId(insured.getClcpId());
 	                // Default values
 	                insuredVehicleInfo.setSurveyorId("surveyor_test1");
 	                insuredVehicleInfo.setDealerId("dealer_test1");
