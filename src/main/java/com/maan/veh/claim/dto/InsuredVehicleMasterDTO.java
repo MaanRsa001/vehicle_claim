@@ -23,5 +23,8 @@ public class InsuredVehicleMasterDTO {
 	 
 	 @JsonProperty("SurveyorId")
 	 private String  surveyorId;
+	 
+	 @JsonProperty("DealerId")
+	 private String  dealerId;
 
 }

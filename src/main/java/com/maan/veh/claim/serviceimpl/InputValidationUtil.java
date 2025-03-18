@@ -24,12 +24,9 @@ import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.LoginUserInfo;
 import com.maan.veh.claim.entity.SessionMaster;
-import com.maan.veh.claim.entity.VcDocumentMaster;
-import com.maan.veh.claim.entity.VcDocumentUploadDetails;
 import com.maan.veh.claim.entity.VcFlowMaster;
 import com.maan.veh.claim.error.Error;
 import com.maan.veh.claim.file.DocumentUploadDetailsReqRes;
-import com.maan.veh.claim.qiic.request.GetGarageWorkOrderRequest;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
@@ -1714,38 +1711,51 @@ List<ErrorList> errors = new ArrayList<>();
 //	    validateDecimalField(req.getOriginalDiscount(), "OriginalDiscount", errors);
 //	    validateDecimalField(req.getDiscountPercentage(), "DiscountPercentage", errors);
 //	    validateDecimalField(req.getDiscountAmount(), "DiscountAmount", errors);
-//	    validateDecimalField(req.getReplacementCostDeductible(), "ReplacementCostDeductible", errors);
+	    validateDecimalField(req.getReplacementCostDeductible(), "ReplacementCostDeductible", errors);
 //	    validateDecimalField(req.getDepreciation(), "Depreciation", errors);
-//	    validateDecimalField(req.getRepairLabour(), "RepairLabour", errors);
-//	    validateDecimalField(req.getRepairLabourDiscount(), "RepairLabourDiscount", errors);
-//	    validateDecimalField(req.getRepairLabourDiscountAmount(), "RepairLabourDiscountAmount", errors);
-//	    validateDecimalField(req.getRepairLabourDeductible(), "RepairLabourDeductible", errors);
-//	    validateDecimalField(req.getTotalAmountRepairLabour(), "TotalAmountRepairLabour", errors);
-//	    validateDecimalField(req.getSparePartsCost(), "SparePartsCost", errors);
-//	    validateDecimalField(req.getLabourCharge(), "LabourCharge", errors);
+	    validateDecimalField(req.getRepairLabour(), "RepairLabour", errors);
+	    validateDecimalField(req.getRepairLabourDiscount(), "RepairLabourDiscount", errors);
+	    validateDecimalField(req.getRepairLabourDiscountAmount(), "RepairLabourDiscountAmount", errors);
+	    validateDecimalField(req.getRepairLabourDeductible(), "RepairLabourDeductible", errors);
+	    validateDecimalField(req.getTotalAmountRepairLabour(), "TotalAmountRepairLabour", errors);
+	    validateDecimalField(req.getSparePartsCost(), "SparePartsCost", errors);
+	    validateDecimalField(req.getLabourCharge(), "LabourCharge", errors);
 //	    validateDecimalField(req.getTotalCost(), "TotalCost", errors);
 
 	    // Business rules validations
-	    BigDecimal replacementCost = toBigDecimal(req.getSparePartsCost());
-	    BigDecimal sparePartDepreciation = toBigDecimal(req.getDepreciation());
-	    BigDecimal discountOnSpareParts = toBigDecimal(req.getDiscountAmount());
-
+	   
 //	    if (replacementCost != null && sparePartDepreciation != null && discountOnSpareParts != null) {
 //	        if (sparePartDepreciation.add(discountOnSpareParts).compareTo(replacementCost) > 0) {
 //	            errors.add(new ErrorList("102", "SparePartDepreciation & DiscountOnSpareParts",
-//	                "SparePartDepreciation + DiscountOnSpareParts should not be greater than ReplacementCost"));
+//	                "SparePartDepreciation + DiscountOnSpareParts should not be greater than total cost"));
 //	        }
 //	    }
+	    BigDecimal ReplacementCostDeductible = toBigDecimal(req.getReplacementCostDeductible());
+	    BigDecimal Depreciation = toBigDecimal(req.getDepreciation());
+	    BigDecimal DiscountAmount = toBigDecimal(req.getDiscountAmount());
+	    BigDecimal totalCost = toBigDecimal(req.getNoOfUnits()).multiply(toBigDecimal(req.getSparePartsCost()));
 
-	    BigDecimal repairLabour = toBigDecimal(req.getRepairLabour());
+	    if (ReplacementCostDeductible != null && Depreciation != null && DiscountAmount != null && totalCost != null) {
+	        BigDecimal sum = ReplacementCostDeductible.add(Depreciation).add(DiscountAmount);
+	        if (totalCost.compareTo(sum) < 0) { 
+	            errors.add(new ErrorList("102", "totalCost",
+	                    "Total cost should not be less than the sum of replacement cost, depreciation, and discount"));
+	        }
+	    }
+
+	    BigDecimal repairLabourDeductible = toBigDecimal(req.getRepairLabourDeductible());
+	    BigDecimal TotalAmountRepairLabour = toBigDecimal(req.getLabourCharge());
 	    BigDecimal repairLabourDiscountAmount = toBigDecimal(req.getRepairLabourDiscountAmount());
 
-//	    if (repairLabour != null && repairLabourDiscountAmount != null) {
-//	        if (repairLabourDiscountAmount.compareTo(repairLabour) > 0) {
-//	            errors.add(new ErrorList("103", "RepairLabourDiscountAmount",
-//	                "RepairLabourDiscountAmount should not be greater than RepairLabour"));
-//	        }
-//	    }
+	    if (TotalAmountRepairLabour != null && repairLabourDiscountAmount != null && repairLabourDeductible != null) {
+	        BigDecimal sum1 = repairLabourDiscountAmount.add(repairLabourDeductible);
+	        if (TotalAmountRepairLabour.compareTo(sum1) < 0) { 
+	            errors.add(new ErrorList("103", "RepairLabour",
+	                    "RepairLabour should not be less than the sum of deductible and discount amount"));
+	        }
+	    }
+	    
+
 
 	    return errors;
 	}
@@ -2002,32 +2012,6 @@ List<ErrorList> errors = new ArrayList<>();
 
 		}
 		return list;
-	}
-
-	public List<ErrorList> validateCreateWorkBasket(GetGarageWorkOrderRequest req) {
-	    List<ErrorList> list = new ArrayList<>();
-
-	    // Fetch mandatory documents from the master table
-	    List<VcDocumentMaster> mandatoryDocList = VcDocumentMasterRepo
-	            .findByStatusAndMandatoryStatusAndCompanyIdOrderByDocumentIdAsc("Y", "Y", req.getCompanyid());
-
-	    // Fetch uploaded documents for the given claim number
-	    List<VcDocumentUploadDetails> uploadedList = VcDocumentUploadDetailsRepo.findByClaimNo(req.getClaimNo());
-
-	    // Convert uploaded document names into a set for quick lookup
-	    Set<String> uploadedDocNames = uploadedList.stream()
-	            .map(VcDocumentUploadDetails::getDocName)
-	            .collect(Collectors.toSet());
-
-	    // Validate if all mandatory documents are uploaded
-	    for (VcDocumentMaster mandatoryDoc : mandatoryDocList) {
-	        if (!uploadedDocNames.contains(mandatoryDoc.getDocumentName())) {
-	            list.add(new ErrorList("123", "Document", 
-	                "Please upload mandatory document: " + mandatoryDoc.getDocumentName()));
-	        }
-	    }
-
-	    return list;
 	}
 
 	public List<ErrorList> validateSaveSurveyorTotalAmount(TotalAmountViewResponse req) {

@@ -1,4 +1,4 @@
-package com.maan.veh.claim.external;
+package com.maan.veh.claim.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;

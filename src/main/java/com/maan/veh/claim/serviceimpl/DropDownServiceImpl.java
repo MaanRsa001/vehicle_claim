@@ -81,11 +81,6 @@ public class DropDownServiceImpl implements DropDownService {
     }
 
     @Override
-    public List<DropDownRes> getDamageDropdown(String companyId) {
-        return getDropdownValues("DAMAGE_DROPDOWN",companyId);
-    }
-
-    @Override
     public List<DropDownRes> getWorkOrderType(String companyId) {
         return getDropdownValues("WORK_ORDER_TYPE",companyId);
     }
@@ -99,42 +94,15 @@ public class DropDownServiceImpl implements DropDownService {
     public List<DropDownRes> getDepressionType(String companyId) {
         return getDropdownValues("DEPRESSION_TYPE",companyId);
     }
-    
-    @Transactional
-    @Override
-    public String getItemCodeByItemValue(String value,String type) {
-    	try {
-			List<ListItemValue> list = listRepo.findByItemValueAndItemTypeOrderByAmendIdDesc(value,type);
-			if(list != null && list.size()>0) {
-				return list.get(0).getItemCode();
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-    	return null;
-    }
-
     @Override
     public List<DropDownRes> getSettlementType(String companyId) {
         return getDropdownValues("SETTLEMENT_TYPE",companyId);
     }
 
     @Override
-    public List<DropDownRes> getLossType(String companyId) {
-        return getDropdownValues("LOSS_TYPE",companyId);
-    }
-
-    @Override
     public List<DropDownRes> getDamageType(String companyId) {
         return getDropdownValues("DAMAGE_TYPE",companyId);
     }
-    
-	@Override
-	public List<DropDownRes> getVatPercentage(String companyId) {
-		 return getDropdownValues("VAT_PERCENTAGE",companyId);
-	}
 	
 	@Override
 	public List<DropDownRes> getAccountForSettlement(String companyId) {
@@ -163,14 +131,31 @@ public class DropDownServiceImpl implements DropDownService {
 		return getDropdownValues("LOSS_LOCATION",companyId);
 	}
 	@Override
-	public List<DropDownRes> getMobileCode(String companyId) {
-		return getDropdownValues("MOBILE_CODE",companyId);
+	public List<DropDownRes> getPoliceStation(String companyId) {
+		return getDropdownValues("POLICE_STATION",companyId);
 	}
-	
+	@Override
+	public List<DropDownRes> getNatureOfLoss(String companyId) {
+		return getDropdownValues("NATURE_OF_LOSS",companyId);
+	}
+    @Transactional
+    @Override
+    public String getItemCodeByItemValue(String value,String type) {
+    	try {
+			List<ListItemValue> list = listRepo.findByItemValueAndItemTypeOrderByAmendIdDesc(value,type);
+			if(list != null && list.size()>0) {
+				return list.get(0).getItemCode();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+    	return null;
+    }
+    
     private List<DropDownRes> getDropdownValues(String itemType,String companyId) {
         List<DropDownRes> resList = new ArrayList<>();
         try {
-            //List<ListItemValue> getList = listRepo.findByItemTypeAndStatusOrderByItemCodeAsc(itemType, "Y");
         	List<ListItemValue> getList = getFromListItemValue(itemType,companyId);
             for (ListItemValue data : getList) {
                 DropDownRes res = new DropDownRes();
@@ -411,5 +396,6 @@ public class DropDownServiceImpl implements DropDownService {
         }
         return resList;
 	}
+
 
 }

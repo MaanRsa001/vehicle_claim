@@ -3,9 +3,6 @@ package com.maan.veh.claim.notification;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -19,78 +16,51 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JobCredentials implements Serializable {
 
-	/*private String host; 
-	private Long port;
-	private Boolean isSSL;
-	private String username;
-	private String password;
-	*/
-
-
-//    private static final long serialVersionUID = 1L;
-
-    //----------------------------------------------------------------------
-    // ENTITY PRIMARY KEY 
-    //----------------------------------------------------------------------
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	@JsonProperty("Applicationid")
-    private String     applicationId ;
-
-    //----------------------------------------------------------------------
-    // ENTITY DATA FIELDS 
-    //----------------------------------------------------------------------    
+	private String applicationId;
 	@JsonProperty("Mailcc")
-    private String     mailCc       ;
+	private String mailCc;
 	@JsonProperty("Smtphost")
-    private String     smtpHost     ;
+	private String smtpHost;
 	@JsonProperty("Smtpuser")
-    private String     smtpUser     ;
+	private String smtpUser;
 	@JsonProperty("Smtppwd")
-    private String     smtpPwd      ;
+	private String smtpPwd;
 	@JsonProperty("Expdate")
-    private String     expDate      ;
+	private String expDate;
 	@JsonProperty("Exptime")
-    private String     expTime      ;
+	private String expTime;
 	@JsonProperty("Pwdcnt")
-    private BigDecimal pwdCnt       ;
+	private BigDecimal pwdCnt;
 	@JsonProperty("Pwdlen")
-    private BigDecimal pwdLen       ;
+	private BigDecimal pwdLen;
 	@JsonProperty("Homeapplicationid")
-    private String     homeApplicationId ;
+	private String homeApplicationId;
 	@JsonProperty("Address")
-    private String     address      ;
+	private String address;
 	@JsonProperty("Status")
-    private String     status       ;
+	private String status;
 	@JsonProperty("Remarks")
-    private String     remarks      ;
+	private String remarks;
 	@JsonProperty("Companyname")
-    private String     companyName  ;
+	private String companyName;
 	@JsonProperty("Toaddress")
-    private String     toAddress    ;
+	private String toAddress;
 	@JsonProperty("Authorizyn")
-    private String     authorizYn   ;
+	private String authorizYn;
 	@JsonProperty("Smtpport")
-    private BigDecimal smtpPort     ;
-	 
-	 @JsonProperty("CompanyId")
-	    private String     companyId ;
-
-	    
-	 @JsonProperty("S_NO")
-	    private Integer    sNo ;
-
-	 @JsonProperty("BRANCH_CODE")
-	    private String     branchCode ;
-
-	 @JsonProperty("AMEND_ID")
-	 private Integer    amendId ;
-    //----------------------------------------------------------------------
-    // ENTITY LINKS ( RELATIONSHIP )
-    //----------------------------------------------------------------------
-
-      
-	  
-	  
-
-	
+	private BigDecimal smtpPort;
+	@JsonProperty("CompanyId")
+	private String companyId;
+	@JsonProperty("S_NO")
+	private Integer sNo;
+	@JsonProperty("BRANCH_CODE")
+	private String branchCode;
+	@JsonProperty("AMEND_ID")
+	private Integer amendId;
 
 }

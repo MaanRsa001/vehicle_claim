@@ -8,21 +8,15 @@ public interface DropDownService {
 
 	List<DropDownRes> getDamageDirection(String companyId);
 
-	List<DropDownRes> getDamageDropdown(String companyId);
-
 	List<DropDownRes> getWorkOrderType(String companyId);
 
 	List<DropDownRes> getSettlementType(String companyId);
-
-	List<DropDownRes> getLossType(String companyId);
 
 	List<DropDownRes> getDamageType(String companyId);
 
 	List<DropDownRes> getLosstype(String companyId);
 
 	List<DropDownRes> getbodyPart(String companyId,String direction);
-
-	List<DropDownRes> getVatPercentage(String companyId);
 
 	List<DropDownRes> getAccountForSettlement(String companyId);
 
@@ -54,9 +48,11 @@ public interface DropDownService {
 
 	List<DropDownRes> getLossLocation(String companyId);
 
-	List<DropDownRes> getMobileCode(String companyId);
-
 	List<DropDownRes> getSparePartsType(String companyId);
 
 	List<DropDownRes> getDepressionType(String companyId);
+	
+	List<DropDownRes> getPoliceStation(String companyId);
+
+	List<DropDownRes> getNatureOfLoss(String companyId);
 }

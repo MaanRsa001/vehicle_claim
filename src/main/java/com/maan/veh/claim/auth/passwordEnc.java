@@ -59,22 +59,10 @@ public class passwordEnc {
 
 
 	public void LoginInfo(String userName, String password) {
-		// clearError();
 
-		//  this.undatabasify(userName);
 		try {
-			//crypt the password and check if the undatabasify is ok.
-			/*if (!(this.loginPassword.equals(crypt(password.substring(0,3),password))) ) {
-				this.loginName = null;
-				//setError(crypt(password.substring(0,3),password));
-
-				//   this.status = null;
-			}*/
 			if (!(this.loginPassword.equals(crypt(password))) ) {
 				this.loginName = null;
-				//setError(crypt(password.substring(0,3),password));
-
-				//   this.status = null;
 			}
 		}
 		catch (Exception exception) {
@@ -86,20 +74,9 @@ public class passwordEnc {
 		}
 	}
 
-
-	/*public  String crypt(String salt, String original) {
-		String encryptedString = "";
-		try {
-			//PasswordService password = new PasswordService();
-			encryptedString = encrypt(original); 
-		} catch(SystemUnavailableException e) {System.out.println(e.getMessage());}
-		return encryptedString;
-
-	}*/
 	public  String crypt(String original) {
 		String encryptedString = "";
 		try {
-			//PasswordService password = new PasswordService();
 			encryptedString = encrypt(original); 
 		} catch(SystemUnavailableException e) {System.out.println(e.getMessage());}
 		return encryptedString;

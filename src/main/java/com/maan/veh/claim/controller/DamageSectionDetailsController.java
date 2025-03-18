@@ -12,13 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.maan.veh.claim.request.DamageSectionDetailsRequest;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
 import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.VcSparePartsDetailsRequest;
 import com.maan.veh.claim.response.CommonResponse;
-import com.maan.veh.claim.response.DamageSectionDetailsResponse;
 import com.maan.veh.claim.response.TotalAmountViewResponse;
 import com.maan.veh.claim.service.DamageSectionDetailsService;
 
@@ -28,13 +26,6 @@ public class DamageSectionDetailsController {
 
     @Autowired
     private DamageSectionDetailsService service;
-
-    @PostMapping("/byclaimno")
-    public ResponseEntity<List<DamageSectionDetailsResponse>> getDamageDetailsByClaimNo(
-            @RequestBody DamageSectionDetailsRequest request) {
-        List<DamageSectionDetailsResponse> response = service.getDamageDetailsByClaimNo(request);
-        return ResponseEntity.ok(response);
-    }
     
     @PostMapping("/save")
     public ResponseEntity<CommonResponse> saveDamageSectionDetails(@RequestBody List<DamageSectionDetailsSaveReq> req) {

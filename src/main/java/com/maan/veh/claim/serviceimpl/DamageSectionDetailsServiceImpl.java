@@ -14,7 +14,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,15 +21,12 @@ import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.entity.SparePartsSaveDetails;
-import com.maan.veh.claim.entity.TotalAmountDetails;
 import com.maan.veh.claim.entity.VcSparePartsDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
-import com.maan.veh.claim.repository.TotalAmountDetailsRepository;
 import com.maan.veh.claim.repository.VcSparePartsDetailsRepository;
-import com.maan.veh.claim.request.DamageSectionDetailsRequest;
 import com.maan.veh.claim.request.DamageSectionDetailsSaveReq;
 import com.maan.veh.claim.request.DealerSectionDetailsSaveReq;
 import com.maan.veh.claim.request.GarageSectionDetailsSaveReq;
@@ -45,16 +41,12 @@ import com.maan.veh.claim.service.DamageSectionDetailsService;
 @Service
 public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsService {
 	
-	//private static SimpleDateFormat DD_MM_YYYY = new SimpleDateFormat("dd/MM/yyyy");
 	
 	@Autowired
 	private DamageSectionDetailsRepository repository;
 	
 	@Autowired
 	private SparePartsSaveDetailsRepository sparePartsSaveRepo;
-	
-	@Autowired
-    private TotalAmountDetailsRepository totalAmountDetailsRepository;
 	
 	@Autowired
 	private GarageWorkOrderRepository garageWorkOrderRepo;
@@ -73,17 +65,6 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	
 	@Autowired
 	private InsuredVehicleInfoRepository insuredVehicleInfoRepo;
-
-	@Override
-	public List<DamageSectionDetailsResponse> getDamageDetailsByClaimNo(DamageSectionDetailsRequest request) {
-		try {
-			List<DamageSectionDetails> detailsList = repository.findByClaimNo(request.getClaimNo());
-
-			return detailsList.stream().map(this::mapToResponse).collect(Collectors.toList());
-		} catch (Exception e) {
-			throw new ServiceException("Error fetching damage details", e);
-		}
-	}
 
 	private DamageSectionDetailsResponse mapToResponse(DamageSectionDetails details) {
 		DamageSectionDetailsResponse response = new DamageSectionDetailsResponse();
@@ -200,17 +181,12 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	                damageSno++;
 	            }
 	            repository.saveAllAndFlush(saveList);
-
-	            // Create or Update a Record in total_amount_details
-	            //updateTotalAmountDetails(claimNo);
 	            
 	            asignRepairWorkToGarage(claimList,surveyorId);
 	            
 	            response.setErrors(Collections.emptyList());
 	            response.setMessage("Success");
 	            response.setResponse(Collections.emptyList());
-	            //saving in spareparts details
-	            //garageWorkOrderServiceImpl.directGarageSave();
 	        } else {
 	            response.setErrors(errors);
 	            response.setMessage("Failed");
@@ -255,68 +231,6 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public void updateTotalAmountDetails(String claimNo) {
-	    // Aggregate data for the specific claim_no
-	    List<DamageSectionDetails> damageDetailsList = repository.findByClaimNo(claimNo);
-	    
-	    BigDecimal netAmount = BigDecimal.ZERO;
-	    BigDecimal totAmtAfterDeduct = BigDecimal.ZERO;
-	    BigDecimal vatPercent = new BigDecimal("18.00");
-	    BigDecimal vatRate = BigDecimal.ZERO;
-	    BigDecimal vatAmount = BigDecimal.ZERO;
-	    BigDecimal totAmtWithVat = BigDecimal.ZERO;
-	    BigDecimal totalReplaceCost = BigDecimal.ZERO;
-	    BigDecimal totalLabourCost = BigDecimal.ZERO;
-
-	    BigDecimal totDeduct = BigDecimal.ZERO;
-	    
-	    for (DamageSectionDetails damageDetails : damageDetailsList) {
-	    	
-	    	if(damageDetails.getRepairReplace().equalsIgnoreCase("REPAIR")) {
-	    		
-	    		totDeduct = totDeduct.add(damageDetails.getLabourCostDeduct());
-		    	netAmount = netAmount.add(damageDetails.getTotamtOfLabour());
-	    		
-	    	}else if(damageDetails.getRepairReplace().equalsIgnoreCase("REPLACE")) {
-	    		
-	    		totDeduct = totDeduct.add(damageDetails.getReplaceCostDeduct());
-		    	netAmount = netAmount.add(damageDetails.getTotamtReplace());
-	    	}
-	    	
-	        totalReplaceCost = totalReplaceCost.add(damageDetails.getTotamtReplace());
-	        totalLabourCost = totalLabourCost.add(damageDetails.getTotamtOfLabour());
-	        
-	    }
-
-	    // Calculate VAT and other related amounts
-        vatRate = vatPercent.divide(new BigDecimal("100"));
-	    vatAmount = netAmount.multiply(vatRate);
-	    totAmtWithVat = netAmount.add(vatAmount);
-	    totAmtAfterDeduct = totAmtWithVat.subtract(totDeduct);
-
-	    // Create or update a record in total_amount_details
-	    TotalAmountDetails totalAmountDetails = totalAmountDetailsRepository.findByClaimNo(claimNo)
-	            .orElse(new TotalAmountDetails());
-
-	    totalAmountDetails.setClaimNo(claimNo);
-
-	    // Update calculated values
-	    totalAmountDetails.setNetAmount(netAmount);                  // Total_amount of Repair or Replace
-	    totalAmountDetails.setTotamtAftDeduction(totAmtAfterDeduct); // Total amount after deduction from repair or replace
-	    totalAmountDetails.setVatRatePercent(vatPercent);            // VAT rate percent is fixed at 18.00%
-	    totalAmountDetails.setVatRate(vatRate);                      // Calculated VAT rate based on VAT rate percent
-	    totalAmountDetails.setVatAmount(vatAmount);                  // The amount of VAT based on net amount
-	    totalAmountDetails.setTotamtWithVat(totAmtWithVat);          // Total amount with VAT
-	    totalAmountDetails.setTotReplaceCost(totalReplaceCost);      // Total Replace Cost
-	    totalAmountDetails.setTotLabourCost(totalLabourCost);        // Total Labour Cost
-
-	    totalAmountDetails.setEntryDate(new Date());
-	    totalAmountDetails.setCreatedBy("System"); 
-	    totalAmountDetails.setStatus("Y");
-
-	    totalAmountDetailsRepository.saveAndFlush(totalAmountDetails);
 	}
 
 	@Override
@@ -406,6 +320,8 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	@Override
 	public CommonResponse saveDealerDamageSectionDetails(List<DealerSectionDetailsSaveReq> reqList) {
 		CommonResponse response = new CommonResponse();
+		
+		
 	    try {
 	        List<ErrorList> errors = validation.validateDealerDamageDetails(reqList);
 	        if (errors.isEmpty()) {
@@ -432,6 +348,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	        	        .orElse(""); 
 	        	
 	            for (DealerSectionDetailsSaveReq req:reqList) {
+	            	
 	            	
 	            	DamageSectionDetails details = repository.findByClaimNoAndQuotationNoAndDamageSno(req.getClaimNo(),req.getQuotationNo(),Optional.ofNullable(req.getDamageSno()).map(Integer::valueOf).orElse(damageSno));
 	            	
@@ -483,6 +400,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    	
 	        List<GarageSectionDetailsSaveReq> groupedDamageDetails = new ArrayList<>();
 	        
+	        
 	        // Fetch damage section details based on ClaimNo and QuotationNo
 	        List<DamageSectionDetails> details = repository.findByClaimNoAndQuotationNo(req.getClaimNo(), req.getQuotationNo());
 	        
@@ -517,9 +435,6 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            groupedDamageDetails.add(res); 
 	        }
 	        
-//	        groupedDamageDetails = groupedDamageDetails.stream()
-//	        	    .filter(res -> "Replace".equalsIgnoreCase(res.getRepairReplace())) // Filter condition
-//	        	    .collect(Collectors.toList()); // Collect the filtered results back to a list
 	        
 	        // Set the response
 	        response.setErrors(Collections.emptyList());
@@ -697,6 +612,94 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    return response;
 	}
 
+	
+	public CommonResponse saveSparePartsNew(VcSparePartsDetailsRequest req) {
+	    CommonResponse response = new CommonResponse(); 
+	    
+	    
+	    try {
+	        List<ErrorList> errors = validation.validateSaveSpareParts(req);
+	              
+	        if (errors.isEmpty()) {
+	        	BigDecimal ReplacementCostDeductible = toBigDecimal(req.getReplacementCostDeductible());
+	    	    BigDecimal Depreciation = toBigDecimal(req.getDepreciation());
+	    	    BigDecimal totalCost = toBigDecimal(req.getNoOfUnits()).multiply(toBigDecimal(req.getSparePartsCost()));	
+	    	    BigDecimal DiscountPercentage= toBigDecimal(req.getDiscountPercentage());
+	    	    
+	    	    BigDecimal DiscountAmount=(DiscountPercentage.divide(new BigDecimal(100))).multiply(totalCost);
+	    	    BigDecimal sparePartsDamageAmount=totalCost.subtract(DiscountAmount).subtract(ReplacementCostDeductible).subtract(Depreciation);
+	    	    
+	    	    BigDecimal repairLabourDeductible = toBigDecimal(req.getRepairLabourDeductible());
+	    	    BigDecimal TotalAmountRepairLabour = toBigDecimal(req.getLabourCharge());
+	    	    BigDecimal RepairLabourDiscount = toBigDecimal(req.getRepairLabourDiscount());
+	    	    
+	    	    BigDecimal repairLabourDiscountAmount=(RepairLabourDiscount.divide(new BigDecimal(100))).multiply(TotalAmountRepairLabour);
+	    	    BigDecimal repairLabourTotalAmount=TotalAmountRepairLabour.subtract(repairLabourDiscountAmount).subtract(repairLabourDeductible);
+	    	    
+	    	    BigDecimal GrandTotal=sparePartsDamageAmount.add(repairLabourTotalAmount);
+	            VcSparePartsDetails spareParts = sparePartsDetailsRepo.findByClaimNumberAndQuotationNoAndDamageSnoAndGarageId(
+	                req.getClaimNo(), req.getQuotationNo(), req.getDamageSno(), req.getGarageId());
+	            
+	            if (spareParts == null) {
+	                spareParts = new VcSparePartsDetails();
+	            }
+	            
+	            // Mapping all fields from request to entity, with type conversions where necessary
+	            spareParts.setClaimNumber(req.getClaimNo());
+	            spareParts.setQuotationNo(req.getQuotationNo());
+	            spareParts.setGarageId(req.getGarageId());
+	            spareParts.setSparePartType(req.getSparePartType());
+	            spareParts.setSparePartTypeDesc(req.getSparePartTypeDesc());
+	            spareParts.setOriginalDiscount(toBigDecimal(req.getOriginalDiscount()));
+	            spareParts.setDiscountPercentage(toBigDecimal(req.getDiscountPercentage()));
+	            spareParts.setDiscountAmount(DiscountAmount);
+	            spareParts.setReplacementCostDeductible(toBigDecimal(req.getReplacementCostDeductible()));
+	            spareParts.setDamageType(req.getDamageType());
+	            spareParts.setDepreciationType(req.getDepreciationType());
+	            spareParts.setDepreciationTypeDesc(req.getDepreciationTypeDesc());
+	            spareParts.setDepreciation(toBigDecimal(req.getDepreciation()));
+	            spareParts.setReferralStatus(req.getReferralStatus());
+	            spareParts.setRepairLabour(toBigDecimal(req.getRepairLabour()));
+	            spareParts.setRepairLabourDiscount(toBigDecimal(req.getRepairLabourDiscount()));
+	            spareParts.setRepairLabourDiscountAmount(repairLabourDiscountAmount);
+	            spareParts.setRepairLabourDeductible(toBigDecimal(req.getRepairLabourDeductible()));
+	            spareParts.setTotalAmountRepairLabour(repairLabourTotalAmount);
+	            spareParts.setRemarks(req.getRemarks());
+	            spareParts.setDamageDirection(req.getDamageDirection());
+	            spareParts.setDamageDirectionDesc(req.getDamageDirectionDesc());
+	            spareParts.setPartType(req.getPartType());
+	            spareParts.setPartTypeDesc(req.getPartTypeDesc());
+	            spareParts.setReplaceRepair(req.getReplaceRepair());
+	            spareParts.setNoOfUnits(toInteger(req.getNoOfUnits()));
+	            spareParts.setSparePartsCost(toBigDecimal(req.getSparePartsCost()));
+	            spareParts.setLabourCharge(toBigDecimal(req.getLabourCharge()));
+	            spareParts.setTotalCost(sparePartsDamageAmount);
+	            spareParts.setDamageSno(req.getDamageSno());
+
+	            // Save the updated spare parts details
+	            sparePartsDetailsRepo.save(spareParts);
+	            
+	            response.setErrors(Collections.emptyList()); 
+	            response.setMessage("Success");
+	            response.setResponse(Collections.emptyList());
+	            response.setIsError(false);
+	        } else {
+	            response.setErrors(errors);
+	            response.setMessage("Failed");
+	            response.setResponse(Collections.emptyList());
+	            response.setIsError(true);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.setErrors(Collections.emptyList());
+	        response.setMessage("Failed");
+	        String exceptionDetails = e.getClass().getSimpleName() + ": " + e.getMessage();
+	        response.setResponse(exceptionDetails);
+	        response.setIsError(true);
+	    }
+	    return response;
+	}
+	
 	@Override
 	public CommonResponse saveSpareParts(VcSparePartsDetailsRequest req) {
 	    CommonResponse response = new CommonResponse();
@@ -848,10 +851,6 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            response.setMessage("Success");
 	            response.setErrors(Collections.emptyList());
 	            response.setIsError(false);
-	        } else {
-//	            response.setMessage("Failed: No records found for ClaimNo: " + claimNo);
-//	            response.setErrors(Collections.singletonList(new ErrorList("102", "ClaimNo", "No data found for claim number " + claimNo)));
-//	            response.setIsError(true);
 	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -922,9 +921,6 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            response.setErrors(Collections.emptyList());
 	            response.setIsError(false);
 	        } else {
-//	            response.setMessage("Failed: No records found for ClaimNo: " + claimNo);
-//	            response.setErrors(Collections.singletonList(new ErrorList("102", "ClaimNo", "No data found for claim number " + claimNo)));
-//	            response.setIsError(true);
 	        	response.setResponse(nullResponse);
 	            response.setMessage("Success");
 	            response.setErrors(Collections.emptyList());
@@ -938,13 +934,6 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    }
 	    return response;
 	}
-
-//	private String convertBigDecimalToString(BigDecimal value) {
-//	    return value != null ? value.toString() : null;
-//	}
-
-
-
 
 	@Override
 	public CommonResponse getDamageDetails(String companyId) {
@@ -1137,6 +1126,76 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	    }
 	    return response;
 	}
+
+
+//	@Override
+//	public CommonResponse saveSurveyorTotalAmount(TotalAmountViewResponse req) {
+//	    CommonResponse response = new CommonResponse();
+//	    List<VcSparePartsDetails> spare = sparePartsDetailsRepo.findByClaimNumberAndQuotationNoAndGarageId(
+//                req.getClaimNo(), req.getQuotationNo(), req.getGarageId());
+//
+//	    try {
+//	        // Perform validation
+//	        List<ErrorList> errors = validation.validateSaveSurveyorTotalAmount(req);
+//
+//	        if (errors.isEmpty()) {
+//	            // Check if record already exists in DB
+//	            List<SparePartsSaveDetails> sparePartsList = sparePartsSaveRepo.findByClaimNoAndQuotationNo(
+//	                req.getClaimNo(), req.getQuotationNo());
+//
+//	            SparePartsSaveDetails spareParts = new SparePartsSaveDetails();
+//
+//	            if (sparePartsList != null && !sparePartsList.isEmpty()) {
+//	                spareParts = sparePartsList.get(0);
+//	            }
+//
+//	            // Mapping request fields to entity
+//	            spareParts.setClaimNo(req.getClaimNo());
+//	            spareParts.setQuotationNo(req.getQuotationNo());
+//
+//	            // Mapping numeric fields safely
+//	            spareParts.setReplacementCost(toBigDecimal(req.getSparePartsCost()));
+//	            spareParts.setSparePartDepreciation(toBigDecimal(req.getSparePartsDepreciation()));
+//	            spareParts.setDiscountOnSpareParts(toBigDecimal(req.getSparePartsDiscount()));
+//	            spareParts.setReplacementCostDeductible(toBigDecimal(req.getSparePartsDeductible()));
+//	            spareParts.setTotalAmountReplacement(toBigDecimal(req.getTotalAmountSpareParts()));
+//
+//	            spareParts.setRepairLabour(toBigDecimal(req.getRepairLabourCost()));
+//	            spareParts.setRepairLabourDiscountAmount(toBigDecimal(req.getRepairLabourDiscount()));
+//	            spareParts.setRepairLabourDeductible(toBigDecimal(req.getRepairLabourDeductible()));
+//	            spareParts.setTotalAmountRepairLabour(toBigDecimal(req.getTotalAmountRepairLabour()));
+//	            spareParts.setNetAmount(StringUtils.isBlank(req.getNetAmount())?toBigDecimal("0"):toBigDecimal(req.getNetAmount()));
+//	            spareParts.setUnknownAccidentDeduction(StringUtils.isBlank(req.getUnknownAccidentDeduction())?toBigDecimal("0"):toBigDecimal(req.getUnknownAccidentDeduction()));
+//	            spareParts.setAmountToBeRecovered(StringUtils.isBlank(req.getAmountToBeRecovered())?toBigDecimal("0"):toBigDecimal(req.getAmountToBeRecovered()));
+//	            spareParts.setTotalAfterDeductions(toBigDecimal(req.getTotalAfterDeduction()));
+//
+//	            spareParts.setVatRatePercentage(StringUtils.isBlank(req.getVatRate())?toBigDecimal("0"):toBigDecimal(req.getVatRate()));
+//	            spareParts.setVatAmount(toBigDecimal(req.getVatAmount()));
+//	            spareParts.setTotalWithVat(toBigDecimal(req.getTotalAmountWithVAT()));
+//
+//	            // Save the entity to the repository
+//	            sparePartsSaveRepo.save(spareParts);
+//
+//	            response.setErrors(Collections.emptyList());
+//	            response.setMessage("Success: Surveyor total amount saved successfully.");
+//	            response.setResponse(Collections.singletonList("Surveyor total amount saved successfully."));
+//	            response.setIsError(false);
+//	        } else {
+//	            response.setErrors(errors);
+//	            response.setMessage("Validation Failed");
+//	            response.setResponse(Collections.emptyList());
+//	            response.setIsError(true);
+//	        }
+//	    } catch (Exception e) {
+//	        e.printStackTrace();
+//	        response.setErrors(Collections.singletonList(new ErrorList("500", "Exception", e.getMessage())));
+//	        response.setMessage("Failed: Error occurred while saving surveyor total amount.");
+//	        response.setResponse(Collections.emptyList());
+//	        response.setIsError(true);
+//	    }
+//	    return response;
+//	}
+
 
 
 

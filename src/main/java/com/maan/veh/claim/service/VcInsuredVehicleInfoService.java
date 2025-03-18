@@ -14,4 +14,6 @@ public interface VcInsuredVehicleInfoService {
 
 	CommonResponse assignSurveyorInsuredVehicleInfo(InsuredVehicleMasterDTO request);
 
+	CommonResponse assignDealerInsuredVehicleInfo(InsuredVehicleMasterDTO request);
+
 }

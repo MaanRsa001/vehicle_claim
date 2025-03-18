@@ -1,7 +1,6 @@
 package com.maan.veh.claim.serviceimpl;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -19,13 +18,11 @@ import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.SparePartsSaveDetails;
-import com.maan.veh.claim.entity.VcSparePartsDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
-import com.maan.veh.claim.repository.VcSparePartsDetailsRepository;
 import com.maan.veh.claim.request.GarageWorkOrderRequest;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.ErrorList;
@@ -36,8 +33,6 @@ import com.maan.veh.claim.service.GarageWorkOrderService;
 
 @Service
 public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
-	
-	private static SimpleDateFormat DD_MM_YYYY = new SimpleDateFormat("dd/MM/yyyy");
 
     @Autowired
     private GarageWorkOrderRepository garageWorkOrderRepository;
@@ -50,9 +45,6 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
     
     @Autowired
 	private DamageSectionDetailsRepository damageRepository;
-    
-    @Autowired
-	private VcSparePartsDetailsRepository sparePartsDetailsRepo;
     
     @Autowired
     private SparePartsSaveDetailsRepository SparePartsSaveDetailsRepo;
@@ -144,16 +136,8 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             workOrder.setWorkOrderNo(req.getWorkOrderNo());
             workOrder.setWorkOrderType(req.getWorkOrderType());
             workOrder.setWorkOrderTypeDesc(req.getWorkOrderTypeDesc());
+            workOrder.setWorkOrderDate(req.getWorkOrderDate());
 
-            // Parse and set the work order date with error handling
-            //try {
-                workOrder.setWorkOrderDate(req.getWorkOrderDate());
-//            } catch (ParseException e) {
-//                response.setErrors(Collections.singletonList("Invalid work order date format."));
-//                response.setMessage("Failed");
-//                response.setIsError(true);
-//                return response;
-//            }
 
             // Step 5: Set settlement details
             workOrder.setSettlementType(req.getSettlementType());
@@ -188,15 +172,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             }
 
             // Step 8: Set delivery and other dates
-            //try {
-                workOrder.setDeliveryDate(req.getDeliveryDate());
-//            } catch (ParseException e) {
-//                response.setErrors(Collections.singletonList("Invalid delivery date format."));
-//                response.setMessage("Failed");
-//                response.setIsError(true);
-//                return response;
-//            }
-
+            workOrder.setDeliveryDate(req.getDeliveryDate());
             workOrder.setJointOrderYn(req.getJointOrderYn());
             workOrder.setSubrogationYn(req.getSubrogationYn());
 
@@ -231,32 +207,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
                 insuredVeh.setQuotationNo(workOrder.getQuotationNo());
                 insuredVeh.setEntryDate(new Date());
                 insuredVehRepo.save(insuredVeh);
-			} else if(StringUtils.isNotBlank(req.getFnolSgsId())) {
-				// Instantiate a new InsuredVehicleInfo object
-//				InsuredVehicleInfo newInsuredVeh = new InsuredVehicleInfo();
-//
-//				// Map fields from GarageWorkOrderSaveReq to InsuredVehicleInfo
-//				newInsuredVeh.setCompanyId(req.getCompanyId() != null ? Integer.valueOf(req.getCompanyId()) : null);
-//				newInsuredVeh.setFnolSgsId(req.getFnolSgsId());
-//				newInsuredVeh.setPolicyNo(req.getPolicyNo());
-//				newInsuredVeh.setClaimNo(req.getClaimNo());
-//				newInsuredVeh.setVehicleMake(req.getVehicleMake());
-//				newInsuredVeh.setVehicleModel(req.getVehicleModel());
-//				newInsuredVeh.setMakeYear(req.getMakeYear() != null ? Integer.valueOf(req.getMakeYear()) : null);
-//				newInsuredVeh.setChassisNo(req.getChassisNo());
-//				newInsuredVeh.setInsuredName(req.getInsuredName());
-//				newInsuredVeh.setType(req.getType());
-//				newInsuredVeh.setVehicleRegNo(req.getVehicleRegNo());
-//				newInsuredVeh.setEntryDate(req.getEntryDate());
-//				newInsuredVeh.setStatus(req.getStatus());
-//				newInsuredVeh.setGarageId(req.getGarageId());
-//				newInsuredVeh.setQuotationNo(req.getQuotationNo());
-//				insuredVehRepo.save(newInsuredVeh);
-////                response.setErrors(Collections.singletonList("No insured vehicle found for claim number: " + req.getClaimNo()));
-////                response.setMessage("Failed");
-////                response.setIsError(true);
-////                return response;
-			}
+			} 
             //saving data in spare parts details table for direct garage save
             if("GPC".equalsIgnoreCase(req.getQuoteStatus())) {
             	directGarageSave(optionalInsuredVeh.get(),workOrder);
@@ -288,7 +239,6 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
     public void directGarageSave(InsuredVehicleInfo insuredVehicleInfo, GarageWorkOrder workOrder) {
     	try {
     		LoginMaster loginMaster = loginRepo.findByLoginId(insuredVehicleInfo.getGarageId());
-        	//SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNo(workOrder.getClaimNo());
     		SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNoAndGarageCode(workOrder.getClaimNo(),loginMaster.getCoreAppCode());
         	if(spareSave == null) {
         		spareSave = new SparePartsSaveDetails();
@@ -585,6 +535,14 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             
             List<DamageSectionDetails> damageList = damageRepository.findByClaimNoAndQuotationNo(workOrder.getClaimNo(), workOrder.getQuotationNo());
 
+            if("WA".equalsIgnoreCase(req.getQuoteStatus())&&damageList!=null&&damageList.size()>0) {
+            	List<DamageSectionDetails> updatedDamage=new ArrayList<>();
+            	for(DamageSectionDetails damage:damageList) {
+            		damage.setGarageDealer("Garage");
+            		updatedDamage.add(damage);
+            	}
+            	damageRepository.saveAll(updatedDamage);          	
+            }
             boolean foundReplace = damageList.stream()
                 .anyMatch(damage -> "REPLACE".equalsIgnoreCase(damage.getRepairReplace()));
             

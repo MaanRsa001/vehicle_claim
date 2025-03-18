@@ -42,24 +42,6 @@ public class DropDownController {
 
 	}
 
-
-	@GetMapping("/getdamagedropdown/{companyId}")
-	public ResponseEntity<CommonRes> getDamageDropdown(@PathVariable String companyId) {
-		CommonRes data = new CommonRes();
-
-		List<DropDownRes> res = dropDownService.getDamageDropdown(companyId);
-		data.setCommonResponse(res);
-		data.setIsError(false);
-		data.setErrorMessage(null);
-		data.setMessage("Success");
-
-		if (res != null) {
-			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-		}
-	}
-
 	@GetMapping("/getworkordertype/{companyId}")
 	public ResponseEntity<CommonRes> getWorkOrderType(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
@@ -94,41 +76,7 @@ public class DropDownController {
 		}
 	}
 	
-	@GetMapping("/getmobilecode/{companyId}")
-	public ResponseEntity<CommonRes> getMobileCode(@PathVariable String companyId) {
-		CommonRes data = new CommonRes();
-
-		List<DropDownRes> res = dropDownService.getMobileCode(companyId);
-		data.setCommonResponse(res);
-		data.setIsError(false);
-		data.setErrorMessage(null);
-		data.setMessage("Success");
-
-		if (res != null) {
-			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	@GetMapping("/getlosstype/{companyId}")
-	public ResponseEntity<CommonRes> getLossType(@PathVariable String companyId) {
-		CommonRes data = new CommonRes();
-
-		List<DropDownRes> res = dropDownService.getLossType(companyId);
-		data.setCommonResponse(res);
-		data.setIsError(false);
-		data.setErrorMessage(null);
-		data.setMessage("Success");
-
-		if (res != null) {
-			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	@GetMapping("/lossLocation/{companyId}")
+	@GetMapping("/losslocation/{companyId}")
 	public ResponseEntity<CommonRes> getLossLocation(@PathVariable String companyId) {
 		CommonRes data = new CommonRes();
 
@@ -202,23 +150,6 @@ public class DropDownController {
 		CommonRes data = new CommonRes();
 
 		List<DropDownRes> res = dropDownService.getbodyPart(companyId," ");
-		data.setCommonResponse(res);
-		data.setIsError(false);
-		data.setErrorMessage(null);
-		data.setMessage("Success");
-
-		if (res != null) {
-			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	@GetMapping(value = "/vatpercentage/{companyId}")
-	public ResponseEntity<CommonRes> getVatPercentage(@PathVariable String companyId) {
-		CommonRes data = new CommonRes();
-
-		List<DropDownRes> res = dropDownService.getVatPercentage(companyId);
 		data.setCommonResponse(res);
 		data.setIsError(false);
 		data.setErrorMessage(null);
@@ -490,5 +421,39 @@ public class DropDownController {
    			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
    		}
    	}
+    
+    @GetMapping(value = "/policeStation/{companyId}")
+    public ResponseEntity<CommonRes> getPoliceStation(@PathVariable String companyId) {
+    	CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getPoliceStation(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+    }
+    
+    @GetMapping(value = "/natureofloss/{companyId}")
+    public ResponseEntity<CommonRes> getNatureOfLoss(@PathVariable String companyId) {
+    	CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getNatureOfLoss(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+    }
 
 }

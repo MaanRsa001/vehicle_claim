@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "claim_intimation_details")
+@Table(name = "eagle_claim_intimation_details")
 @IdClass(ClaimIntimationDetailsId.class)
 public class ClaimIntimationDetails {
 

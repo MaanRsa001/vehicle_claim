@@ -2,6 +2,10 @@ package com.maan.veh.claim.auth;
 
 public class SystemUnavailableException extends Exception 
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public static String error = "";
 
     public SystemUnavailableException() {}

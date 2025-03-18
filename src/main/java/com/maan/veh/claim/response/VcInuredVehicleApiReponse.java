@@ -1,4 +1,4 @@
-package com.maan.veh.claim.external;
+package com.maan.veh.claim.response;
 
 import java.util.Date;
 

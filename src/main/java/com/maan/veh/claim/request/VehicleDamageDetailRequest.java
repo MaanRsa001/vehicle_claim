@@ -78,4 +78,8 @@ public class VehicleDamageDetailRequest {
     @JsonProperty("totalAmtRepLab")
     private String totalAmtRepLab;
     
+    
+    @JsonProperty("deductiblePer")
+    private String deductiblePer;
+    
 }

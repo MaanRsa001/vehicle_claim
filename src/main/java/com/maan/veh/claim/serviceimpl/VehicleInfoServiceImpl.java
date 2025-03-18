@@ -141,9 +141,6 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
         
         try {
         	
-            // Fetch the list of vehicle info based on company ID
-            //List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByCompanyIdAndStatusIn(Integer.valueOf(request.getCompanyId()),status);
-        	//List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByCompanyIdAndGarageId(Integer.valueOf(request.getCompanyId()),request.getGarageId());
         	List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByCompanyIdAndGarageIdOrderByEntryDateDesc(Integer.valueOf(request.getCompanyId()),request.getGarageId());
         	
             if(vehicleInfoList.size()>0) {
@@ -252,7 +249,6 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 
             // Check if there are any work orders for this garage
             if (workOrders.isEmpty()) {
-                //response.setErrors(Collections.singletonList("No work orders found for the given garage ID"));
                 response.setMessage("Failed");
                 response.setIsError(true);
                 return response;
@@ -282,7 +278,6 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
             	    .collect(Collectors.toList()); // Collect the results into a list
             
             // Fetch the list of vehicle info based on claim numbers and status
-            //List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoInAndGarageId(claimWithReplacement,request.getGarageId());
             List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoInAndGarageIdAndSurveyorId(claimWithReplacement,request.getGarageId(),request.getSurveyorId());
             
             // Check if any vehicles were found for the provided claim numbers and status
@@ -357,7 +352,6 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
            
 
             // Fetch the list of vehicle info based on claim numbers and status
-            //List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoIn(claimNumbers);
             List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoInAndDealerId(claimNumbers,request.getSparepartsDealerId());
             
             // Check if any vehicles were found for the provided claim numbers and status
@@ -403,72 +397,6 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 
         return response;
 	}
-
-//	@Override
-//	public CommonResponse surveyorViewV1(VehicleInfoRequest request) {
-//		CommonResponse response = new CommonResponse();
-//	    try {
-//	        
-//	    	List<VehicleInfoResponse> vehList = new ArrayList<>();
-//	        
-//	        // Fetch damage section details based on Status
-//	        List<DamageSectionDetails> details = damageRepository.findByStatusAndGarageLoginId("Dealer",request.getGarageId());
-//	        
-//	        List<String> claimNoList = details.stream()
-//                    .map(DamageSectionDetails::getClaimNo) 
-//                    .collect(Collectors.toList());
-//	        
-//	        Map<String, String> claimToQuotationMap = details.stream()
-//	                .collect(Collectors.toMap(
-//	                        DamageSectionDetails::getClaimNo,  // Key: claimNo
-//	                        DamageSectionDetails::getQuotationNo // Value: quotationNo
-//	                ));
-//	        
-//	        List<InsuredVehicleInfo> vehicleInfoList = insuredVehicleInfoRepository.findByClaimNoIn(claimNoList);
-//	        
-//	        
-//	        if (!vehicleInfoList.isEmpty()) {
-//                for (InsuredVehicleInfo vehicle : vehicleInfoList) {
-//                    // Create a new VehicleInfoResponse object and populate it
-//                    VehicleInfoResponse veh = new VehicleInfoResponse();
-//                    
-//                    veh.setCompanyId(vehicle.getCompanyId() != null ? String.valueOf(vehicle.getCompanyId()) : null);
-//                    veh.setPolicyNo(vehicle.getPolicyNo());
-//                    veh.setClaimNo(vehicle.getClaimNo());
-//                    veh.setVehicleMake(vehicle.getVehicleMake());
-//                    veh.setVehicleModel(vehicle.getVehicleModel());
-//                    veh.setMakeYear(vehicle.getMakeYear() != null ? String.valueOf(vehicle.getMakeYear()) : null);
-//                    veh.setChassisNo(vehicle.getChassisNo());
-//                    veh.setInsuredName(vehicle.getInsuredName());
-//                    veh.setType(vehicle.getType());
-//                    veh.setVehicleRegNo(vehicle.getVehicleRegNo()); 
-//                    veh.setEntryDate(vehicle.getEntryDate());
-//                    //veh.setStatus(vehicle.getStatus());
-//                    veh.setQuoteStatus(vehicle.getStatus());
-//                    veh.setQuotationNo(claimToQuotationMap.get(vehicle.getClaimNo()));
-//                    
-//                    // Add the populated response to the list
-//                    vehList.add(veh);
-//                }
-//                response.setErrors(Collections.emptyList());
-//                response.setMessage("Success");
-//                response.setResponse(vehList);
-//            } else {
-//                response.setErrors(Collections.singletonList("No vehicles found for the provided claim numbers and status"));
-//                response.setMessage("Failed");
-//                response.setIsError(true);
-//                response.setResponse(Collections.emptyList());
-//            }
-//	        
-//	    } catch (Exception e) {
-//	        // Handle exceptions
-//	    	String exceptionDetails = e.getClass().getSimpleName() + ": " + e.getMessage();
-//	        response.setResponse(exceptionDetails);
-//	        response.setMessage("Failed");
-//	        response.setResponse(null);
-//	    }
-//	    return response;
-//	}
 	
 	@Override
 	public CommonResponse surveyorViewV1(VehicleInfoRequest request) {
@@ -602,9 +530,6 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	        	}
 	        	 vehList.add(veh);
 	        }
-//	        vehList = vehList.stream()
-//	        	    .filter(res -> "Replace".equalsIgnoreCase(res.getRepairReplace())) // Filter condition
-//	        	    .collect(Collectors.toList()); 
 	        
                 response.setErrors(Collections.emptyList());
                 response.setMessage("Success");

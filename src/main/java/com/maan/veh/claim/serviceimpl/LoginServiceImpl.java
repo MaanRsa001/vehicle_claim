@@ -59,7 +59,6 @@ import com.maan.veh.claim.entity.LoginUserInfo;
 import com.maan.veh.claim.entity.MenuMaster;
 import com.maan.veh.claim.entity.NotifTransactionDetails;
 import com.maan.veh.claim.entity.SessionMaster;
-import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.repository.ApiTransactionLogRepository;
 import com.maan.veh.claim.repository.BranchMasterRepository;
 import com.maan.veh.claim.repository.InsuranceCompanyMasterRepository;
@@ -75,6 +74,7 @@ import com.maan.veh.claim.request.LoginRequest;
 import com.maan.veh.claim.response.CommonResponse;
 import com.maan.veh.claim.response.DropDownRes;
 import com.maan.veh.claim.response.ErrorList;
+import com.maan.veh.claim.response.ErrorResponse;
 import com.maan.veh.claim.response.SuccessRes;
 import com.maan.veh.claim.service.LoginService;
 
