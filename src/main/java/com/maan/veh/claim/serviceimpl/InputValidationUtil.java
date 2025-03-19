@@ -1691,9 +1691,19 @@ List<ErrorList> errors = new ArrayList<>();
 	    }
 	    if (StringUtils.isBlank(req.getReplaceRepair())) {
 	        errors.add(new ErrorList("100", "ReplaceRepair", "Replace/Repair flag cannot be blank"));
+	        
 	    }else if(req.getReplaceRepair().equalsIgnoreCase("REPLACE")) {
 	    	if (StringUtils.isBlank(req.getSparePartType())) {
 		        errors.add(new ErrorList("100", "SparePartType", "Spare part type cannot be blank"));
+		    }
+	    	if (StringUtils.isBlank(req.getDiscountPercentage())) {
+		        errors.add(new ErrorList("100", "DiscountPercentage", "DiscountPercentage type cannot be blank"));
+		    }
+	    	if (StringUtils.isBlank(req.getDiscountAmount())) {
+		        errors.add(new ErrorList("100", "DiscountAmount", "DiscountAmount type cannot be blank"));
+		    }
+	    	if (StringUtils.isBlank(req.getDepreciation())) {
+		        errors.add(new ErrorList("100", "Depreciation", "Depreciation type cannot be blank"));
 		    }
 	    	 if (StringUtils.isBlank(req.getDamageType())) {
 	 	        errors.add(new ErrorList("100", "DamageType", "Damage type cannot be blank"));
@@ -1701,6 +1711,8 @@ List<ErrorList> errors = new ArrayList<>();
 	    	 if (StringUtils.isBlank(req.getDepreciationType())) {
 	 	        errors.add(new ErrorList("100", "DepreciationType", "Depreciation type cannot be blank"));
 	 	    }
+	    	 
+	    	 
 	    }
 	    if (StringUtils.isBlank(req.getNoOfUnits())) {
 	        errors.add(new ErrorList("100", "NoOfUnits", "Number of units cannot be blank"));
@@ -1708,7 +1720,6 @@ List<ErrorList> errors = new ArrayList<>();
 	    
 	    
 	    // Validate decimal fields
-//	    validateDecimalField(req.getOriginalDiscount(), "OriginalDiscount", errors);
 //	    validateDecimalField(req.getDiscountPercentage(), "DiscountPercentage", errors);
 //	    validateDecimalField(req.getDiscountAmount(), "DiscountAmount", errors);
 	    validateDecimalField(req.getReplacementCostDeductible(), "ReplacementCostDeductible", errors);

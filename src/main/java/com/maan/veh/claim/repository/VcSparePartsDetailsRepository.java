@@ -18,5 +18,7 @@ public interface VcSparePartsDetailsRepository extends JpaRepository<VcSparePart
 
 	List<VcSparePartsDetails> findByClaimNumberAndQuotationNoAndGarageIdAndDamageSno(String claimNo, String quotationNo,
 			String garageId, String damageSno);
+
+	VcSparePartsDetails findByClaimNumberAndQuotationNoAndDamageSno(String claimNo, String quotationNo, String valueOf);
 }
 

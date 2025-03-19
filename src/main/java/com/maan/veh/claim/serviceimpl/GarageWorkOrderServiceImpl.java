@@ -723,7 +723,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 			        	 spareSave.setUnknownAccidentDeduction(spareParts.getUnknownAccidentDeduction());
 			        	 spareSave.setAmountToBeRecovered(spareParts.getAmountToBeRecovered());
 			        	 spareSave.setTotalAfterDeductions(spareParts.getTotalAfterDeductions());
-			        	 spareSave.setVatRatePercentage(spareParts.getVatRate());
+			        	 spareSave.setVatRatePercentage(spareParts.getVatRatePercentage());
 			        	 spareSave.setVatRate(spareParts.getVatRate());
 			        	 spareSave.setVatAmount(spareParts.getVatAmount());
 			        	 spareSave.setTotalWithVat(spareParts.getTotalWithVat());
