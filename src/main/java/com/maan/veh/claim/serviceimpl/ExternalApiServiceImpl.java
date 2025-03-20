@@ -1325,7 +1325,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 				    damageRequest.setDeprectTyp(spare.getDepreciationType());
 				    damageRequest.setOriginalDisc(spare.getOriginalDiscount()!=null ?spare.getOriginalDiscount().toString():"");
 				    damageRequest.setPartAccident("");
-				    damageRequest.setReffStatus(spare.getReferralStatus()!=null ?spare.getReferralStatus().toString():"A");
+				    damageRequest.setReffStatus("");
 				    damageRequest.setRemarks(spare.getRemarks());
 				    damageRequest.setRepairLabour(spare.getRepairLabour()!=null ?spare.getRepairLabour().toString():"0");
 				    damageRequest.setRepairLabourDeduct(spare.getRepairLabourDeductible()!=null ?spare.getRepairLabourDeductible().toString():"0");
@@ -1344,7 +1344,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 				    damageRequest.setDeprectTyp("");
 				    damageRequest.setOriginalDisc("");
 				    damageRequest.setPartAccident("");
-				    damageRequest.setReffStatus("A");
+				    damageRequest.setReffStatus("");
 				    damageRequest.setRemarks("");
 				    damageRequest.setRepairLabour("0");
 				    damageRequest.setRepairLabourDeduct("0");
@@ -1366,17 +1366,19 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			    	damageRequest.setUnitPrice(detail.getGaragePrice()!=null?detail.getGaragePrice().toString():"");
 			    	BigDecimal unitPrice = detail.getGaragePrice() != null ? detail.getGaragePrice() : BigDecimal.ZERO;
 				    int noOfParts = detail.getNoOfParts() > 0 ? detail.getNoOfParts() : 0;
-				    BigDecimal replacementCharge = detail.getReplaceCost() != null ? detail.getReplaceCost() : BigDecimal.ZERO;
+//				    BigDecimal replacementCharge = detail.getReplaceCost() != null ? detail.getReplaceCost() : BigDecimal.ZERO;
 
 				    try {
-				        total = unitPrice.multiply(BigDecimal.valueOf(noOfParts)).add(replacementCharge);
+//				        total = unitPrice.multiply(BigDecimal.valueOf(noOfParts)).add(replacementCharge);
+				        total = unitPrice.multiply(BigDecimal.valueOf(noOfParts));
 				    } catch (Exception e) {
 				        // Log the error and default total to zero
 				        System.err.println("Error calculating total: " + e.getMessage());
 				        total = BigDecimal.ZERO;
 				    }
 				    damageRequest.setNoUnits(detail.getNoOfParts()!=null ?detail.getNoOfParts().toString():"0");
-//				    damageRequest.setTotal(String.valueOf(total));
+				    damageRequest.setReplacementCharge(total!=null ?total.toString():"0");
+				    damageRequest.setTotal(total!=null ?total.toString():"0");
 			    }else {
 				   
 			    	damageRequest.setUnitPrice("");
@@ -1386,12 +1388,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			    	total = replacementCharge.subtract(dedudct);
 			    	damageRequest.setNoUnits("");
 			    	damageRequest.setTotal(spare.getRepairLabour() != null ? spare.getRepairLabour().toString() : "0");
+			    	damageRequest.setReplacementCharge(detail.getReplaceCost()!=null ?detail.getReplaceCost().toString():"0");
 			    }
-			    
-			    
-			    damageRequest.setReplacementCharge(detail.getReplaceCost()!=null ?detail.getReplaceCost().toString():"0");
-			    
-
 			    vehicleDamageDetails.add(damageRequest);
 			}
 
