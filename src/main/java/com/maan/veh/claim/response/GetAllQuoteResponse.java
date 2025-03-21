@@ -30,6 +30,10 @@ public class GetAllQuoteResponse {
 
     @JsonProperty("ReplacementCostDeductible")
     private String replacementCostDeductible;
+    
+    @JsonProperty("ExpectedDeliveryDays")
+    private String expectedDeliveryDays;
+
 
     @JsonProperty("SparePartDepreciation")
     private String sparePartDepreciation;

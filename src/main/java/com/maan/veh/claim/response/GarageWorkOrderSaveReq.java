@@ -57,6 +57,9 @@ public class GarageWorkOrderSaveReq {
 	 	@JsonProperty("DeliveryDate")
 	    private Date deliveryDate;
 	 	
+	 	@JsonProperty("ExpectedDeliveryDays")
+	    private String expectedDeliveryDays;
+	 	
 	 	@JsonProperty("JointOrderYn")
 	    private String jointOrderYn;
 	 	

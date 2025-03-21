@@ -61,6 +61,9 @@ public class SparePartsSaveDetails {
 
     @Column(name = "delivery_date")
     private Date deliveryDate;
+    
+    @Column(name = "expected_delivery_days", length = 50)
+    private String expectedDeliveryDays;
 
     @Column(name = "delivered_to", length = 255)
     private String deliveredTo;

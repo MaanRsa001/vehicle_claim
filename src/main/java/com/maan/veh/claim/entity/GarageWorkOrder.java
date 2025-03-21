@@ -65,6 +65,9 @@ public class GarageWorkOrder {
     @Column(name = "repair_type")
     private String repairType;
     
+    @Column(name = "expected_delivery_days")
+    private String expectedDeliveryDays;
+    
     
     
    // @Temporal(TemporalType.TIMESTAMP)

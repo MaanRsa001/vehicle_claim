@@ -36,6 +36,9 @@ public class GarageWorkOrderResponse {
     
     @JsonProperty("SettlementToDesc")
     private String settlementToDesc;
+    
+    @JsonProperty("ExpectedDeliveryDays")
+    private String expectedDeliveryDays;
 
     @JsonProperty("GarageName")
     private String garageName;

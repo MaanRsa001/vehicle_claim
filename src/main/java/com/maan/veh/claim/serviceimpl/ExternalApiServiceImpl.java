@@ -1619,7 +1619,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			         // Format dates inline
 			         response.setWorkOrderDate(spareSaved.getWorkOrderDate() != null ? dateFormat.format(spareSaved.getWorkOrderDate()) : "");
 			         response.setDeliveryDate(spareSaved.getDeliveryDate() != null ? dateFormat.format(spareSaved.getDeliveryDate()) : "");
-			            
+			         response.setExpectedDeliveryDays(spareSaved.getExpectedDeliveryDays())	;	            
 			         response.setReplacementCost(
 								spareSaved.getReplacementCost() != null ? spareSaved.getReplacementCost().toString()
 										: "0.00");

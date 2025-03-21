@@ -263,9 +263,9 @@ public class InputValidationUtil {
 	        list.add(new ErrorList("100", "Location", "Location cannot be blank"));
 	    }
 
-	    if (StringUtils.isBlank(req.getRepairType())) {
-	        list.add(new ErrorList("100", "RepairType", "Repair type cannot be blank"));
-	    }
+//	    if (StringUtils.isBlank(req.getRepairType())) {
+//	        list.add(new ErrorList("100", "RepairType", "Repair type cannot be blank"));
+//	    }
 
 	    if (StringUtils.isNotBlank(req.getSparepartsDealerId())) {
 	        if (StringUtils.isBlank(req.getQuotationNo())) {
@@ -298,9 +298,9 @@ public class InputValidationUtil {
 	    }
 
 	    // Validate Delivery Date
-	    if (deliveryDate == null) {
-	        list.add(new ErrorList("100", "DeliveryDate", "Delivery date is required and must be in the format (dd/MM/yyyy)."));
-	    }
+//	    if (deliveryDate == null) {
+//	        list.add(new ErrorList("100", "DeliveryDate", "Delivery date is required and must be in the format (dd/MM/yyyy)."));
+//	    }
 
 	    // Validate logical order of dates
 	    if (workOrderDate != null && deliveryDate != null) {

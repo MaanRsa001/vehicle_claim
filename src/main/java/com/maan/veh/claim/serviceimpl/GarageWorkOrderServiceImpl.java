@@ -160,6 +160,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             workOrder.setSettlementTypeDesc(req.getSettlementTypeDesc());
             workOrder.setSettlementTo(req.getSettlementTo());
             workOrder.setSettlementToDesc(req.getSettlementToDesc());
+           
 
             // Step 6: Set optional fields
             if (StringUtils.isNotBlank(req.getGarageName())) {
@@ -190,6 +191,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             // Step 8: Set delivery and other dates
             //try {
                 workOrder.setDeliveryDate(req.getDeliveryDate());
+                workOrder.setExpectedDeliveryDays(req.getExpectedDeliveryDays());
 //            } catch (ParseException e) {
 //                response.setErrors(Collections.singletonList("Invalid delivery date format."));
 //                response.setMessage("Failed");
@@ -231,31 +233,6 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
                 insuredVeh.setQuotationNo(workOrder.getQuotationNo());
                 insuredVeh.setEntryDate(new Date());
                 insuredVehRepo.save(insuredVeh);
-			} else if(StringUtils.isNotBlank(req.getFnolSgsId())) {
-				// Instantiate a new InsuredVehicleInfo object
-//				InsuredVehicleInfo newInsuredVeh = new InsuredVehicleInfo();
-//
-//				// Map fields from GarageWorkOrderSaveReq to InsuredVehicleInfo
-//				newInsuredVeh.setCompanyId(req.getCompanyId() != null ? Integer.valueOf(req.getCompanyId()) : null);
-//				newInsuredVeh.setFnolSgsId(req.getFnolSgsId());
-//				newInsuredVeh.setPolicyNo(req.getPolicyNo());
-//				newInsuredVeh.setClaimNo(req.getClaimNo());
-//				newInsuredVeh.setVehicleMake(req.getVehicleMake());
-//				newInsuredVeh.setVehicleModel(req.getVehicleModel());
-//				newInsuredVeh.setMakeYear(req.getMakeYear() != null ? Integer.valueOf(req.getMakeYear()) : null);
-//				newInsuredVeh.setChassisNo(req.getChassisNo());
-//				newInsuredVeh.setInsuredName(req.getInsuredName());
-//				newInsuredVeh.setType(req.getType());
-//				newInsuredVeh.setVehicleRegNo(req.getVehicleRegNo());
-//				newInsuredVeh.setEntryDate(req.getEntryDate());
-//				newInsuredVeh.setStatus(req.getStatus());
-//				newInsuredVeh.setGarageId(req.getGarageId());
-//				newInsuredVeh.setQuotationNo(req.getQuotationNo());
-//				insuredVehRepo.save(newInsuredVeh);
-////                response.setErrors(Collections.singletonList("No insured vehicle found for claim number: " + req.getClaimNo()));
-////                response.setMessage("Failed");
-////                response.setIsError(true);
-////                return response;
 			}
             //saving data in spare parts details table for direct garage save
             if("GPC".equalsIgnoreCase(req.getQuoteStatus())) {
@@ -305,6 +282,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 				spareSave.setDeliveredTo(workOrder.getGarageName());
 				spareSave.setQuotationNo(workOrder.getQuotationNo());
 				spareSave.setDeliveryDate(workOrder.getDeliveryDate());
+				spareSave.setExpectedDeliveryDays(workOrder.getExpectedDeliveryDays());
 				spareSave.setJointOrder("N");
 				spareSave.setSubrogation("N");
 				spareSave.setTotalLoss(workOrder.getTotalLoss());
@@ -406,6 +384,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
                 garage.setRepairType(data.getRepairType());
                 garage.setQuotationNo(data.getQuotationNo());
                 garage.setDeliveryDate(data.getDeliveryDate());
+                garage.setExpectedDeliveryDays(data.getExpectedDeliveryDays());
                 garage.setJointOrderYn(data.getJointOrderYn());
                 garage.setSubrogationYn(data.getSubrogationYn());
                 garage.setTotalLoss(Optional.ofNullable(data.getTotalLoss()).map(BigDecimal::toString).orElse(null)); // Handle nullable BigDecimal
