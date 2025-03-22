@@ -77,6 +77,7 @@ import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
+import com.maan.veh.claim.repository.LoginUserInfoRepository;
 import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
 import com.maan.veh.claim.repository.VcSparePartsDetailsRepository;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
@@ -122,6 +123,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
     @Autowired
     private ApiTransactionLogRepository apiTransactionLogRepo;
+   
     
     @Autowired
     private GarageWorkOrderRepository garageWorkOrderRepo;
@@ -1450,6 +1452,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	        // Retrieve saved spare parts details
 	        List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByClaimNoIn(claimNumbers);
+	  
 
 	        // Check if there are saved spare parts
 	        if (!spareSavedList.isEmpty()) {
@@ -1461,9 +1464,11 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                response.setWorkOrderNo(spareSaved.getWorkOrderNo());
 	                response.setWorkOrderType(spareSaved.getWorkOrderType());
 	                response.setWorkOrderDate(spareSaved.getWorkOrderDate());
+	                response.setGarageName(spareSaved.getGarageName());
 	                response.setSettlementType(spareSaved.getAccountSettlementType());
 	                response.setSettlementTo(spareSaved.getAccountSettlementName());
 	                response.setGarageId(String.valueOf(spareSaved.getGarageCode()));
+
 	                response.setQuotationNo(spareSaved.getQuotationNo());
 	                response.setDeliveryDate(spareSaved.getDeliveryDate());
 	                response.setJointOrderYn(spareSaved.getJointOrder());

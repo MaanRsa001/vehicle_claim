@@ -17,11 +17,13 @@ import com.maan.veh.claim.entity.DamageSectionDetails;
 import com.maan.veh.claim.entity.GarageWorkOrder;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.entity.LoginMaster;
+import com.maan.veh.claim.entity.LoginUserInfo;
 import com.maan.veh.claim.entity.SparePartsSaveDetails;
 import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
+import com.maan.veh.claim.repository.LoginUserInfoRepository;
 import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
 import com.maan.veh.claim.request.GarageWorkOrderRequest;
 import com.maan.veh.claim.response.CommonResponse;
@@ -42,6 +44,9 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
     
     @Autowired
     private InputValidationUtil validation;
+    
+    @Autowired
+    private LoginUserInfoRepository loginUserInfoRepo;
     
     @Autowired
 	private DamageSectionDetailsRepository damageRepository;
@@ -239,6 +244,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
     public void directGarageSave(InsuredVehicleInfo insuredVehicleInfo, GarageWorkOrder workOrder) {
     	try {
     		LoginMaster loginMaster = loginRepo.findByLoginId(insuredVehicleInfo.getGarageId());
+    		LoginUserInfo loginUser=loginUserInfoRepo.findByLoginId(loginMaster.getLoginId());
     		SparePartsSaveDetails spareSave = SparePartsSaveDetailsRepo.findByClaimNoAndGarageCode(workOrder.getClaimNo(),loginMaster.getCoreAppCode());
         	if(spareSave == null) {
         		spareSave = new SparePartsSaveDetails();
@@ -252,6 +258,7 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 				spareSave.setAccountSettlementName(insuredVehicleInfo.getInsuredName());
 				spareSave.setGarageQuotationNo(workOrder.getQuotationNo());
 				spareSave.setGarageCode(loginMaster.getCoreAppCode());
+				spareSave.setGarageName(loginUser.getUserName());
 				spareSave.setDeliveredTo(workOrder.getGarageName());
 				spareSave.setQuotationNo(workOrder.getQuotationNo());
 				spareSave.setDeliveryDate(workOrder.getDeliveryDate());
