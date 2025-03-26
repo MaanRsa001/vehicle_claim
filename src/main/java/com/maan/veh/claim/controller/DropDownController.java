@@ -41,6 +41,24 @@ public class DropDownController {
 		}
 
 	}
+	
+	@GetMapping("/getColourCode/{companyId}")
+	public ResponseEntity<CommonRes> getColourCodeDropDown(@PathVariable String companyId) {
+		CommonRes data = new CommonRes();
+
+		List<DropDownRes> res = dropDownService.getColourCodeDropDown(companyId);
+		data.setCommonResponse(res);
+		data.setIsError(false);
+		data.setErrorMessage(null);
+		data.setMessage("Success");
+
+		if (res != null) {
+			return new ResponseEntity<CommonRes>(data, HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+
+	}
 
 
 	@GetMapping("/getdamagedropdown/{companyId}")

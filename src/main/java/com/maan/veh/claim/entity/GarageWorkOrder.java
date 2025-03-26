@@ -68,6 +68,8 @@ public class GarageWorkOrder {
     @Column(name = "expected_delivery_days")
     private String expectedDeliveryDays;
     
+//    @Column(name = "est_repair_day")
+//    private String estRepairDay;
     
     
    // @Temporal(TemporalType.TIMESTAMP)

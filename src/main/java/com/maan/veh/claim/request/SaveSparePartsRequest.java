@@ -123,6 +123,9 @@ public class SaveSparePartsRequest {
 	    
 	@JsonProperty("clcpId")
 	private String clcpId;
+	
+	@JsonProperty("estRepairDay")
+	private String estRepairDay;
 
 	@JsonProperty("vehicleDamageDetails")
 	private List<VehicleDamageDetailRequest> vehicleDamageDetails;

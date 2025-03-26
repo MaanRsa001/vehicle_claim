@@ -7,6 +7,8 @@ import com.maan.veh.claim.response.DropDownRes;
 public interface DropDownService {
 
 	List<DropDownRes> getDamageDirection(String companyId);
+	
+	List<DropDownRes> getColourCodeDropDown(String companyId);
 
 	List<DropDownRes> getDamageDropdown(String companyId);
 

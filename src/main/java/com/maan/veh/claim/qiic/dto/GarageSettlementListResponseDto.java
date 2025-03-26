@@ -133,4 +133,6 @@ public class GarageSettlementListResponseDto {
     @JsonProperty("mobileCode")
     private String mobileCode;
 
+    @JsonProperty("expDeliveryDate")
+    private String expDeliveryDate;
 }

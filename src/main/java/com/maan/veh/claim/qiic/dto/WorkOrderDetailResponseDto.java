@@ -122,6 +122,9 @@ public class WorkOrderDetailResponseDto {
     private String mobileCode;
     
     @JsonProperty("mobileNo")
-    private String mobileNo;
+    private String mobileNo; 
+    
+    @JsonProperty("expDeliveryDate")
+    private String expDeliveryDate;
 
 }

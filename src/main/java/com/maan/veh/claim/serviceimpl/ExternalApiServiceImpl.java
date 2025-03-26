@@ -8,6 +8,8 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -1147,6 +1149,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	    CommonResponse response = new CommonResponse();
 	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setSno(apiTransactionLogRepo.findMaxSno() + 1);
 	    log.setRequestTime(LocalDateTime.now());
 	    log.setEntryDate(new Date());
 	    log.setEndpoint(externalApiUrlSaveSpareparts);
@@ -1245,7 +1248,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    } finally {
 	        log.setResponseTime(LocalDateTime.now());
 	        if(StringUtils.isNotBlank(log.getRequest())){
-	        	//apiTransactionLogRepo.save(log);
+	        	apiTransactionLogRepo.save(log);
 	        	logger.info(externalApiUrlSaveSpareparts +" ==> "+ log);
 	        }
 	    }
@@ -1253,7 +1256,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    return response;
 	}
 	
-	
+
 	private SaveSparePartsRequest mapToSaveSparePartsRequestV1(SparePartsSaveDetails partsSaveDetails,
 			List<DamageSectionDetails> damageDetails) {
 		SaveSparePartsRequest request = new SaveSparePartsRequest();
@@ -1287,6 +1290,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			request.setLpoId(partsSaveDetails.getLpoId());
 			request.setVehId(partsSaveDetails.getVehId());
 			request.setClcpId(partsSaveDetails.getClcpId());
+			request.setEstRepairDay(partsSaveDetails.getExpectedDeliveryDays());
 
 			List<VehicleDamageDetailRequest> vehicleDamageDetails = new ArrayList<>();
 
@@ -1499,7 +1503,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			         response.setWorkOrderType(spareSaved.getWorkOrderType());
 			         response.setSettlementType(spareSaved.getAccountSettlementType());
 			         response.setSettlementTo(spareSaved.getAccountSettlementName());
-			         response.setGarageId(spareSaved.getGarageCode().toString());
+			         response.setGarageId(spareSaved.getGarageCode().toString());			         	         
 			         response.setQuotationNo(spareSaved.getQuotationNo());
 			         response.setJointOrderYn(spareSaved.getJointOrder());
 			         response.setSubrogationYn(spareSaved.getSubrogation());
@@ -2336,6 +2340,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        Map<String, WorkOrderDetailResponseDto> sparePartsMap = apiData.stream()
 	                .collect(Collectors.toMap(WorkOrderDetailResponseDto::getFileNo, s -> s, (a, b) -> a));
 
+	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            
 	        for (SparePartsSaveDetails spareSaved : sparePartsList) {
 
 	            if (spareSaved != null) {
@@ -2363,8 +2370,22 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                
 	                //Format dates inline
 	                quoteResponse.setWorkOrderDate(spareSaved.getWorkOrderDate() != null ? dateFormat.format(spareSaved.getWorkOrderDate()) : "");
-	                quoteResponse.setDeliveryDate(spareSaved.getDeliveryDate() != null ? dateFormat.format(spareSaved.getDeliveryDate()) : "");
-	                
+
+	                // Get the date string from sparePartsMap
+	                String expDeliveryDateStr = sparePartsMap.get(spareSaved.getClaimNo()).getExpDeliveryDate();
+
+	                try {
+						if (expDeliveryDateStr != null && !expDeliveryDateStr.isEmpty()) {
+							OffsetDateTime offsetDateTime = OffsetDateTime.parse(expDeliveryDateStr, inputFormatter);
+						    String formattedDate = offsetDateTime.format(outputFormatter);
+						    quoteResponse.setDeliveryDate(formattedDate);
+						} else {
+						    quoteResponse.setDeliveryDate("");
+						}
+					} catch (Exception e) {
+						System.out.println("There is a error in formating the delivery date :"+spareSaved.getClaimNo()+" "+expDeliveryDateStr);
+					}
+
 	                res.add(quoteResponse);
 	            }
 	        }
@@ -2603,6 +2624,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        Map<String, GarageSettlementListResponseDto> sparePartsMap = apiData.stream()
 	                .collect(Collectors.toMap(GarageSettlementListResponseDto::getFileNo, s -> s, (a, b) -> a));
 
+	        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	        for (SparePartsSaveDetails spareSaved : sparePartsList) {
 
 	            if (spareSaved != null) {
@@ -2630,7 +2653,22 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                
 	                //Format dates inline
 	                quoteResponse.setWorkOrderDate(spareSaved.getWorkOrderDate() != null ? dateFormat.format(spareSaved.getWorkOrderDate()) : "");
-	                quoteResponse.setDeliveryDate(spareSaved.getDeliveryDate() != null ? dateFormat.format(spareSaved.getDeliveryDate()) : "");
+//	                quoteResponse.setDeliveryDate(sparePartsMap.get(spareSaved.getClaimNo()).getDeliveryDate() != null ? dateFormat.format(sparePartsMap.get(spareSaved.getClaimNo()).getDeliveryDate()) : "");
+	                
+	                String expDeliveryDateStr = sparePartsMap.get(spareSaved.getClaimNo()).getExpDeliveryDate();
+
+	                try {
+						if (expDeliveryDateStr != null && !expDeliveryDateStr.isEmpty()) {
+							OffsetDateTime offsetDateTime = OffsetDateTime.parse(expDeliveryDateStr, inputFormatter);
+						    String formattedDate = offsetDateTime.format(outputFormatter);
+						    quoteResponse.setDeliveryDate(formattedDate);
+						} else {
+						    quoteResponse.setDeliveryDate("");
+						}
+					} catch (Exception e) {
+						System.out.println("There is a error in formating the delivery date :"+spareSaved.getClaimNo()+" "+expDeliveryDateStr);
+					}
+
 	                
 	                if(!"ESB".equalsIgnoreCase(spareSaved.getSavedStatus())) {
 	                	if("Completed".equalsIgnoreCase(sparePartsMap.get(spareSaved.getClaimNo()).getPaymentStatus())) {
@@ -2644,7 +2682,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                }
 	                
 	            }
-	        }
+	    }
 
 	        response.setErrors(Collections.emptyList());
 	        response.setMessage("Success");
