@@ -1459,6 +1459,9 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	            List<GetAllQuoteResponse> responseList = new ArrayList<>();
 
 	            for (SparePartsSaveDetails spareSaved : spareSavedList) {
+	            	
+	            	InsuredVehicleInfo info = repository.findByClaimNoAndQuotationNo(spareSaved.getClaimNo(), spareSaved.getQuotationNo());
+	            	
 	                GetAllQuoteResponse response = new GetAllQuoteResponse();
 	                response.setClaimNo(spareSaved.getClaimNo());
 	                response.setWorkOrderNo(spareSaved.getWorkOrderNo());
@@ -1468,7 +1471,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                response.setSettlementType(spareSaved.getAccountSettlementType());
 	                response.setSettlementTo(spareSaved.getAccountSettlementName());
 	                response.setGarageId(String.valueOf(spareSaved.getGarageCode()));
-
+	                response.setGarageLoginId(info.getGarageId());
+	                
 	                response.setQuotationNo(spareSaved.getQuotationNo());
 	                response.setDeliveryDate(spareSaved.getDeliveryDate());
 	                response.setJointOrderYn(spareSaved.getJointOrder());

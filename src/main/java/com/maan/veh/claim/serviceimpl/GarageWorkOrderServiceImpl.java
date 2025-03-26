@@ -692,6 +692,16 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
         		spareSave = new SparePartsSaveDetails();
         	}
         	
+        	  List<SparePartsSaveDetails> existingClaims = SparePartsSaveDetailsRepo.findAll();
+              
+              if (!existingClaims.isEmpty()) {
+                  comResponse.setErrors(Collections.singletonList("Claim number " + existingClaims.get(0).getClaimNo() + " is already submitted. No further submissions allowed."));
+                  comResponse.setMessage("Failed");
+                  comResponse.setResponse(Collections.emptyList());
+                  return comResponse;
+              }
+
+        	
 			GarageWorkOrder workOrder = garageWorkOrderRepository.findByClaimNoAndQuotationNo(req.getClaimNo(),req.getQuotationNo());
 			
 			if(workOrder != null) {

@@ -25,6 +25,9 @@ public class GetAllQuoteResponse {
     @JsonProperty("GarageId")
     private String garageId;
     
+    @JsonProperty("GarageLoginId")
+    private String GarageLoginId;
+    
     @JsonProperty("ReplacementCost")
     private String replacementCost;
 
