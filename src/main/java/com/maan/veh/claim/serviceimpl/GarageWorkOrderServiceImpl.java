@@ -692,10 +692,15 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
         		spareSave = new SparePartsSaveDetails();
         	}
         	
-        	  List<SparePartsSaveDetails> existingClaims = SparePartsSaveDetailsRepo.findAll();
+        	ArrayList<String> arr1 = new ArrayList<>(List.of(req.getClaimNo()));
+        	  List<SparePartsSaveDetails> existingClaims = SparePartsSaveDetailsRepo.findByClaimNoInAndSavedStatus(arr1,"QSIS");
               
               if (!existingClaims.isEmpty()) {
-                  comResponse.setErrors(Collections.singletonList("Claim number " + existingClaims.get(0).getClaimNo() + " is already submitted. No further submissions allowed."));
+            	  List<ErrorList> list = new ArrayList<>();
+
+          		  list.add(new ErrorList("100", "Quotation", "Quotation already saved for this claim number : "+req.getClaimNo()));
+          		  
+                  comResponse.setErrors(list);
                   comResponse.setMessage("Failed");
                   comResponse.setResponse(Collections.emptyList());
                   return comResponse;
@@ -721,6 +726,11 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
 				spareSave.setTotalLoss(workOrder.getTotalLoss());
 				spareSave.setTotalLossType(workOrder.getLossType());
 				spareSave.setRemarks(workOrder.getRemarks());
+				
+				//to know the status is pushed to spareparts menu
+				//QSIS =>  quote saved in spareparts
+				spareSave.setSavedStatus("QSIS");
+				
 				spareSave.setSparePartsDealer(Optional.ofNullable(workOrder.getSparepartsDealerId()).map(String ::valueOf).orElse(""));		         
 			         
 				List<SparePartsSaveDetails> sparePartList = SparePartsSaveDetailsRepo.findByClaimNoAndQuotationNo(workOrder.getClaimNo(),workOrder.getQuotationNo());

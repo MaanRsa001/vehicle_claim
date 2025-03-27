@@ -203,6 +203,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
         log.setEntryDate(new Date());
         log.setEndpoint(externalApiUrlCreatefnol);
         String reportSeries = "";
+        ClaimIntimationDetails newData = new ClaimIntimationDetails();
         // Validate requestPayload
         List<ErrorList> validationErrors = validation.validateClaimIntemationDetails(requestPayload);
         if (!validationErrors.isEmpty()) {
@@ -213,7 +214,6 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             return response;
         }
         try {
-			ClaimIntimationDetails newData = new ClaimIntimationDetails();
 			//Optional<ClaimIntimationDetails> optional = claimIntimationDetailsRepository.findByPolicyNo(requestPayload.getPolicyNo());
 			Optional<ClaimIntimationDetails> optional = claimIntimationDetailsRepository.findByPolicyNoAndPoliceReportNo(requestPayload.getPolicyNo(),requestPayload.getPoliceReportNo());
 			if(optional.isPresent()){
@@ -257,7 +257,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			newData.setPoliceReportNo(reportSeries);
 			newData.setLossDescription(requestPayload.getLossDescription());
 			newData.setAtFault(requestPayload.getAtFault());
-			claimIntimationDetailsRepository.save(newData);
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			System.out.println("Error while saving data");
@@ -308,24 +308,16 @@ public class ExternalApiServiceImpl implements ExternalApiService {
             
           //saving fnol number
             try{
-            	ClaimIntimationDetails oldData = new ClaimIntimationDetails();
-    			
-            	Optional<ClaimIntimationDetails> optional = claimIntimationDetailsRepository.findByPolicyNoAndPoliceReportNo(requestPayload.getPolicyNo(),reportSeries);
-    			if(optional.isPresent()){
-    				oldData = optional.get();
-    				oldData.setFnolNo(externalApiResponse.getData().getFnolNo());
-    				oldData.setClaimStatusCode(externalApiResponse.getData().getClaimStatusCode());
-    				oldData.setClaimType(externalApiResponse.getData().getClaimType());
-    				oldData.setFnolSgsId(externalApiResponse.getData().getFnolSgsId());
-    				oldData.setClaimPartyId(externalApiResponse.getData().getClaimPartyId());
-    				claimIntimationDetailsRepository.save(oldData);
-    			}
-    			
+            	newData.setFnolNo(externalApiResponse.getData().getFnolNo());
+            	newData.setClaimStatusCode(externalApiResponse.getData().getClaimStatusCode());
+            	newData.setClaimType(externalApiResponse.getData().getClaimType());
+            	newData.setFnolSgsId(externalApiResponse.getData().getFnolSgsId());
+            	newData.setClaimPartyId(externalApiResponse.getData().getClaimPartyId());
             }catch (Exception e) {
     			// TODO Auto-generated catch block
     			System.out.println("Error while saving data");
     		}
-
+            
             if (externalApiResponse.isHasError()) {
                 // Create custom error response
                 List<ErrorResponse> errorList = new ArrayList<>();
@@ -337,6 +329,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
                 response.setResponse(Collections.emptyMap());
                 response.setIsError(true);
             } else {
+            	claimIntimationDetailsRepository.save(newData);
                 response.setMessage("Data saved successfully");
                 response.setIsError(false);
                 response.setResponse(externalApiResponse);
@@ -1451,7 +1444,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	                .collect(Collectors.toList());
 
 	        // Retrieve saved spare parts details
-	        List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByClaimNoIn(claimNumbers);
+//	        List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByClaimNoIn(claimNumbers);
+	        List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByClaimNoInAndSavedStatus(claimNumbers,"QSIS");
 	  
 
 	        // Check if there are saved spare parts

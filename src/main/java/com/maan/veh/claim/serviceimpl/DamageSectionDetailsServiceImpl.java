@@ -420,7 +420,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            	if("Garage".equalsIgnoreCase(data.getGarageDealer())) {
 	            		res.setUnitPrice(data.getGaragePrice() != null ? df.format(data.getGaragePrice()) : "");
 	            	}else if("Dealer".equalsIgnoreCase(data.getGarageDealer())) {
-	            		res.setUnitPrice(data.getGaragePrice() != null ? df.format(data.getDealerPrice()) : "");
+	            		res.setUnitPrice(data.getDealerPrice() != null ? df.format(data.getDealerPrice()) : "");
 	            	}else {
 	            		res.setUnitPrice(data.getGaragePrice() != null ? df.format(data.getGaragePrice()) : "");
 	            	}          	

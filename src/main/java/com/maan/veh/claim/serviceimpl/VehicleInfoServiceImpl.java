@@ -2,6 +2,7 @@ package com.maan.veh.claim.serviceimpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,9 +72,17 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
             Set<String> claimNos = vehicleInfoList.stream()
                     .map(InsuredVehicleInfo::getClaimNo)
                     .collect(Collectors.toSet());
+            
+            vehicleInfoList.sort(Comparator.comparing(InsuredVehicleInfo::getEntryDate).reversed());
+
+            List<String> claimNoList = vehicleInfoList.stream()
+                    .map(InsuredVehicleInfo::getClaimNo)
+                    .distinct()
+                    .collect(Collectors.toList());
+
 
             Map<String, String> workOrderMap = new HashMap<>();
-            List<String> claimNoList = new ArrayList<>(claimNos);
+//            List<String> claimNoList = new ArrayList<>(claimNos);
             int batchSize = 500; // Oracle limit
             for (int i = 0; i < claimNoList.size(); i += batchSize) {
                 List<String> batch = claimNoList.subList(i, Math.min(i + batchSize, claimNoList.size()));
