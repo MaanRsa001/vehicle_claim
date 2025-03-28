@@ -29,4 +29,6 @@ public interface SparePartsSaveDetailsRepository extends JpaRepository<SparePart
 
 	List<SparePartsSaveDetails> findByClaimNoInAndSavedStatus(List<String> claimNumbers, String string);
 
+	List<SparePartsSaveDetails> findByClaimNoInAndSavedStatusIn(List<String> claimNumbers, List<String> status);
+
 }

@@ -692,13 +692,23 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
         		spareSave = new SparePartsSaveDetails();
         	}
         	
-        	ArrayList<String> arr1 = new ArrayList<>(List.of(req.getClaimNo()));
+        	  ArrayList<String> arr1 = new ArrayList<>(List.of(req.getClaimNo()));
         	  List<SparePartsSaveDetails> existingClaims = SparePartsSaveDetailsRepo.findByClaimNoInAndSavedStatus(arr1,"QSIS");
+        	  List<SparePartsSaveDetails> submitedClaims = SparePartsSaveDetailsRepo.findByClaimNoInAndSavedStatus(arr1,"ESB");
               
               if (!existingClaims.isEmpty()) {
             	  List<ErrorList> list = new ArrayList<>();
 
           		  list.add(new ErrorList("100", "Quotation", "Quotation already saved for this claim number : "+req.getClaimNo()));
+          		  
+                  comResponse.setErrors(list);
+                  comResponse.setMessage("Failed");
+                  comResponse.setResponse(Collections.emptyList());
+                  return comResponse;
+              }else if(!submitedClaims.isEmpty()){
+            	  List<ErrorList> list = new ArrayList<>();
+
+          		  list.add(new ErrorList("100", "Quotation", "Quotation already pushed to core for this claim number : "+req.getClaimNo()));
           		  
                   comResponse.setErrors(list);
                   comResponse.setMessage("Failed");

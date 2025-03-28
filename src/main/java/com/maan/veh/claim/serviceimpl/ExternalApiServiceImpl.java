@@ -1442,10 +1442,12 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	        List<String> claimNumbers = insuredList.stream()
 	                .map(InsuredVehicleInfo::getClaimNo)
 	                .collect(Collectors.toList());
-
+	        List<String> status = new ArrayList<String>();
+	        status.add("QSIS");
+	        status.add("ESB");
 	        // Retrieve saved spare parts details
 //	        List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByClaimNoIn(claimNumbers);
-	        List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByClaimNoInAndSavedStatus(claimNumbers,"QSIS");
+	        List<SparePartsSaveDetails> spareSavedList = SparePartsSaveDetailsRepo.findByClaimNoInAndSavedStatusIn(claimNumbers,status);
 	  
 
 	        // Check if there are saved spare parts
