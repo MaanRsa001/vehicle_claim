@@ -3194,6 +3194,110 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 
 	    return response;
 	}
+	
+	@Override
+	public CommonResponse getUploadImpFileList(DownloadDocumentRequest req) {
+		CommonResponse response = new CommonResponse();
+	    ApiTransactionLog log = new ApiTransactionLog();
+	    log.setSno(apiTransactionLogRepo.findMaxSno()+1);
+	    log.setRequestTime(LocalDateTime.now());
+	    log.setEntryDate(new Date());
+	    try {
+	        // Fetch company ID from request payload
+	        String companyId = String.valueOf(req.getCompanyId());
+
+	        // Fetch API URL from the database
+	        String apiType = "PRINT_PACKAGE"; // Match API_TYPE column value
+	        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository
+	                .findByCompanyIdAndApiTypeAndStatus(companyId, apiType, "Y");
+
+	        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+	            response.setMessage("API URL not found for company: " + companyId);
+	            response.setIsError(true);
+	            return response;
+	        }
+
+	        String externalApiUrlCreatefnol = apiConfig.get().getApiUrl();
+	        log.setEndpoint(externalApiUrlCreatefnol);
+            
+            InsuredVehicleInfo insuredVeh = new InsuredVehicleInfo();
+	        
+	        Optional<InsuredVehicleInfo> optionalInsuredVeh = repository.findByClaimNoAndGarageId(req.getClaimNo(),req.getGarageId());
+            if (optionalInsuredVeh.isPresent()) {
+                insuredVeh = optionalInsuredVeh.get();
+			}
+	        
+	        // Prepare request body as a simple map
+	        Map<String, String> requestBodyMap = new HashMap<>();
+	        requestBodyMap.put("sgsId", insuredVeh.getFnolSgsId());
+	        
+	        // Authenticate and retrieve JWT token
+	        String jwtToken = authenticateUserCall();
+
+	        // Create headers and add JWT token
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + jwtToken);
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+
+	        // Convert DTO to JSON for request body and add headers
+	        String requestBody = objectMapper.writeValueAsString(requestBodyMap);
+	        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+	        log.setRequest(requestBody);
+	        logger.info(requestBody);
+	        
+	       // Configure SSL Trust Managers (if necessary)
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+	        
+	        // Send request to external API
+	        ResponseEntity<String> apiResponse = restTemplate.postForEntity(log.getEndpoint(), entity, String.class);
+	        log.setResponse(apiResponse.getBody());
+	        log.setStatus("SUCCESS");
+	        
+	        // Parse response into ExternalApiResponse object
+	        UploadedDocumentListResponseDto externalApiResponse = objectMapper.readValue(apiResponse.getBody(), UploadedDocumentListResponseDto.class);
+
+	        // Process response based on external API success status
+	        if (!"true".equalsIgnoreCase(externalApiResponse.getHasError())) {
+	            //response.setMessage(externalApiResponse.getMessage());
+	        	response.setMessage("Success");
+	            response.setResponse(externalApiResponse);
+	            response.setIsError(false);
+	        }
+
+	    } catch (Exception e) {
+	        log.setStatus("FAILURE");
+	        log.setErrorMessage(e.getMessage());
+	        response.setMessage("Failed to save data");
+	        response.setIsError(true);
+	        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+
+	    } finally {
+	        log.setResponseTime(LocalDateTime.now());
+	        if(StringUtils.isNotBlank(log.getRequest())){
+	        	apiTransactionLogRepo.save(log);
+	        	logger.info(log.getEndpoint()+" ==> "+ log);
+	        }
+	    }
+
+	    return response;
+	}
 
 
 	@Override

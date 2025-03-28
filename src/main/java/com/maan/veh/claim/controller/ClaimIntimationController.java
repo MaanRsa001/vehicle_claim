@@ -144,6 +144,12 @@ public class ClaimIntimationController {
             return ResponseEntity.ok(res);
     }
     
+    @PostMapping("/garage/getImpUploadFileList")
+    public ResponseEntity<CommonResponse> getUploadImpFileList(@RequestBody DownloadDocumentRequest requestPayload) {
+        	CommonResponse res = externalApiService.getUploadImpFileList(requestPayload);
+            return ResponseEntity.ok(res);
+    }
+    
     @PostMapping("/garage/DownloadDoc")
     public ResponseEntity<CommonResponse> downloadDoc(@RequestBody DownloadDocumentRequest requestPayload) {
         	CommonResponse res = externalApiService.downloadDoc(requestPayload);
