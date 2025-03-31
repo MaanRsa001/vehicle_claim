@@ -44,6 +44,9 @@ public class CityMaster {
 
 	@Column(name = "CITY_NAME", length = 100)
 	private String cityName;
+	
+	@Column(name = "CITY_NAME_LOCAL", length = 100)
+	private String cityNameLocal;
 
 	@Column(name = "EFFECTIVE_DATE_END", nullable = false)
 	private Date effectiveDateEnd;

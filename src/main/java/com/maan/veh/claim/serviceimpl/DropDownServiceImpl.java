@@ -320,6 +320,7 @@ public class DropDownServiceImpl implements DropDownService {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getCoreAppCode());
                 res.setCodeDesc(data.getDocumentName());
+                res.setCodeDescLocal(data.getDocumentNameLocal());
                 resList.add(res);
             }
         } catch (Exception e) {
@@ -339,6 +340,7 @@ public class DropDownServiceImpl implements DropDownService {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getBranchCode().toString());
                 res.setCodeDesc(data.getBranchName());
+                res.setCodeDescLocal(data.getBranchNameLocal());
                 resList.add(res);
             }
         } catch (Exception e) {
@@ -377,6 +379,7 @@ public class DropDownServiceImpl implements DropDownService {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getCountryId().toString());
                 res.setCodeDesc(data.getCountryName());
+                res.setCodeDescLocal(data.getCountryNameLocal());
                 resList.add(res);
             }
         } catch (Exception e) {
@@ -396,6 +399,7 @@ public class DropDownServiceImpl implements DropDownService {
                 DropDownRes res = new DropDownRes();
                 res.setCode(data.getCityId().toString());
                 res.setCodeDesc(data.getCityName());
+                res.setCodeDescLocal(data.getCityNameLocal());
                 resList.add(res);
             }
         } catch (Exception e) {

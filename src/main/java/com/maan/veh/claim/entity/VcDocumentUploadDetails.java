@@ -46,6 +46,9 @@ public class VcDocumentUploadDetails {
 
     @Column(name = "DOC_NAME", length = 200)
     private String docName;
+    
+    @Column(name = "DOC_NAME_LOCAL", length = 200)
+    private String docNameLocal;
 
     @Column(name = "FILE_PATH_NAME", length = 200)
     private String filePathName;

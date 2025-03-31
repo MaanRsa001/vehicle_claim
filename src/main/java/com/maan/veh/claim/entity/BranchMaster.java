@@ -71,6 +71,9 @@ private static final long serialVersionUID = 1L;
     //--- ENTITY DATA FIELDS 
     @Column(name="BRANCH_NAME", length=100)
     private String     branchName ;
+    
+    @Column(name="BRANCH_NAME_LOCAL")
+    private String branchNameLocal ;
 
     @Column(name="REGION_CODE", length=20)
     private String     regionCode ;

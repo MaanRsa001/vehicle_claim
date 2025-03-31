@@ -48,6 +48,9 @@ public class CountryMaster {
 
     @Column(name = "COUNTRY_NAME", length = 50)
     private String countryName;
+    
+    @Column(name = "COUNTRY_NAME_LOCAL")
+    private String countryNameLocal;
 
     @Column(name = "NATIONALITY", length = 200)
     private String nationality;

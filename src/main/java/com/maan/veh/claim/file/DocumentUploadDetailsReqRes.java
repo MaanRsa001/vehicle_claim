@@ -29,6 +29,9 @@ public class DocumentUploadDetailsReqRes {
 	@JsonProperty("DocDesc")
 	private String docDesc;
 	
+	@JsonProperty("DocDescLocal")
+	private String docDescLocal;
+	
 	@JsonProperty("CompanyId")
 	private String companyId;
 	

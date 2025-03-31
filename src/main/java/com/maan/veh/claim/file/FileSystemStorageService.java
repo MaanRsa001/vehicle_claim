@@ -27,8 +27,12 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.maan.veh.claim.entity.LoginMaster;
+import com.maan.veh.claim.entity.VcDocumentMaster;
 import com.maan.veh.claim.entity.VcDocumentUploadDetails;
 import com.maan.veh.claim.error.Error;
+import com.maan.veh.claim.repository.LoginMasterRepository;
+import com.maan.veh.claim.repository.VcDocumentMasterRepository;
 import com.maan.veh.claim.repository.VcDocumentUploadDetailsRepository;
 import com.maan.veh.claim.response.CommonRes;
 import com.maan.veh.claim.response.CommonResponse;
@@ -43,6 +47,9 @@ public class FileSystemStorageService implements StorageService {
 	
 	@Autowired
 	private VcDocumentUploadDetailsRepository documentUploadDetailsRepo;
+	
+	@Autowired
+	private VcDocumentMasterRepository documentMasterRepo;
 	
 	@Autowired
     private InputValidationUtil validation;
@@ -87,6 +94,8 @@ public class FileSystemStorageService implements StorageService {
 	        }
 	        
 	        List<VcDocumentUploadDetails> all = documentUploadDetailsRepo.findAllByOrderByDocumentRefDesc();
+	        Integer companyId = Integer.parseInt(req.getCompanyId());
+	        VcDocumentMaster documentMaster=documentMasterRepo.findByCompanyIdAndCoreAppCode(companyId,req.getDocTypeId());
 	        Long id = 0L;
 	        if(all != null && all.size()>0) {
 	        	id = all.get(0).getDocumentRef() + 1;
@@ -99,6 +108,7 @@ public class FileSystemStorageService implements StorageService {
 	        data.setCompanyId(Integer.parseInt(req.getCompanyId()));
 	        data.setDocTypeId(req.getDocTypeId() != null ? req.getDocTypeId() : null);
 	        data.setDocName(req.getDocDesc());
+	        data.setDocNameLocal(documentMaster.getDocumentNameLocal());
 	        data.setFilePathName(destinationFile.toString());
 	        data.setUploadedTime(new Date());
 	        data.setDescription(req.getDocDesc());

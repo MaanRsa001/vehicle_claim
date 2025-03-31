@@ -55,6 +55,7 @@ import com.maan.veh.claim.dto.GetAllCoreAppCodeResponseDto.Dataset;
 import com.maan.veh.claim.entity.ApiTransactionLog;
 import com.maan.veh.claim.entity.BranchMaster;
 import com.maan.veh.claim.entity.InsuranceCompanyMaster;
+import com.maan.veh.claim.entity.ListItemValue;
 import com.maan.veh.claim.entity.LoginMaster;
 import com.maan.veh.claim.entity.LoginMasterId;
 import com.maan.veh.claim.entity.LoginUserInfo;
@@ -65,6 +66,7 @@ import com.maan.veh.claim.external.ErrorResponse;
 import com.maan.veh.claim.repository.ApiTransactionLogRepository;
 import com.maan.veh.claim.repository.BranchMasterRepository;
 import com.maan.veh.claim.repository.InsuranceCompanyMasterRepository;
+import com.maan.veh.claim.repository.ListItemValueRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
 import com.maan.veh.claim.repository.LoginUserInfoRepository;
 import com.maan.veh.claim.repository.MenuMasterRepository;
@@ -93,6 +95,9 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 		
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
+	
+	@Autowired
+	private ListItemValueRepository listItemRepo;
 	
 	@Autowired
 	private SessionMasterRepository sessionRepo;
@@ -155,7 +160,8 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	            comResponse.setIsError(true);
 	            return comResponse;
 	        }
-
+	        List<ListItemValue> listItem =listItemRepo.findByItemValueAndItemTypeAndStatusAndCompanyIdOrderByAmendIdDesc(login.getUserType(),"USER_TYPE","Y",login.getCompanyId());
+	        
 	        String token = jwtTokenUtil.doGenerateToken(req.getLoginId());
 	        log.info("-----token------" + token);
 	        SessionMaster session = new SessionMaster();
@@ -245,6 +251,7 @@ public class LoginServiceImpl implements LoginService,UserDetailsService{
 	        response.put("Token", session.getTempTokenid());
 	        response.put("UserName",userInfo.getUserName());
 	        response.put("UserType", login.getUserType());
+	        response.put("UserTypeLocal", (listItem != null && listItem.size() > 0) ? listItem.get(0).getParam1() : "");
 	        response.put("BranchCode", bm.getBranchCode());
 	        response.put("BranchName", bm.getBranchName());
 	        response.put("PartyId", login.getCoreAppCode());

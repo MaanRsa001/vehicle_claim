@@ -21,5 +21,7 @@ public class DropDownRes {
 	private String code;
 	@JsonProperty("CodeDesc")
 	private String codeDesc;
+	@JsonProperty("CodeDescLocal")
+	private String codeDescLocal;
 	
 }

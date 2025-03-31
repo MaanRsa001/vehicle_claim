@@ -24,6 +24,9 @@ public class VcDocumentMaster {
 
     @Column(name = "DOCUMENT_NAME", nullable = false, length = 100)
     private String documentName;
+    
+    @Column(name = "DOCUMENT_NAME_LOCAL")
+    private String documentNameLocal;
 
     @Column(name = "MANDATORY_STATUS", length = 2)
     private String mandatoryStatus;

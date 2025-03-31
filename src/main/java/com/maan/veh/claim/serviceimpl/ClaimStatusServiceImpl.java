@@ -2,9 +2,11 @@ package com.maan.veh.claim.serviceimpl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -45,62 +47,59 @@ public class ClaimStatusServiceImpl implements ClaimStatusService{
 	    try {
 	        // Retrieve list of VcFlowMaster with usertype "Garage"
 	        List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndStatusIdAndCompanyId(usertype,currentStatus,"100030");
+	        
+	        flowList.sort(Comparator.comparing(VcFlowMaster::getOrderId));
 
-	        // Convert the list to a map with subStatus as the key and subStatusDescription as the value
-	        Map<String, String> statusMap = flowList.stream()
-	                .collect(Collectors.toMap(
-	                        VcFlowMaster::getSubStatus,
-	                        VcFlowMaster::getSubStatusDescription,
-	                        (existing, replacement) -> existing // Handle duplicate keys by keeping the existing value
-	                ));
+	        Set<String> uniqueStatuses = new HashSet<>();
 
-	        // Iterate over the map entries to create DropDownRes objects
-	        for (Map.Entry<String, String> entry : statusMap.entrySet()) {
-	            DropDownRes res = new DropDownRes();
-	            res.setCode(entry.getKey());
-	            res.setCodeDesc(entry.getValue());
-	            resList.add(res);
+	        for (VcFlowMaster flow : flowList) {
+	            if (uniqueStatuses.add(flow.getSubStatus())) { // Add only if subStatus is new
+	                DropDownRes res = new DropDownRes();
+	                res.setCode(flow.getSubStatus());
+	                res.setCodeDesc(flow.getGridDescription());
+	                res.setCodeDescLocal(flow.getGridDescLocal());
+	                resList.add(res);
+	            }
 	        }
 	    } catch (Exception e) {
-	        e.printStackTrace();
-	        log.info("Exception is ---> " + e.getMessage());
-	        return null;
+	        log.error("Error in getGridStatus: {}", e.getMessage(), e);
 	    }
+
 	    return resList;
 	}
 
 	@Override
-	public List<DropDownRes> getGridStatus(String usertype,String companyId,String flowId) {
-		List<DropDownRes> resList = new ArrayList<>();
+	public List<DropDownRes> getGridStatus(String usertype, String companyId, String flowId) {
+	    List<DropDownRes> resList = new ArrayList<>();
+
 	    try {
-	        // Retrieve list of VcFlowMaster with usertype "Garage"
-	    	List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndCompanyIdAndFlowId(usertype, companyId,flowId);
+	        // Get data from the database
+	        List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndCompanyIdAndFlowId(usertype, companyId, flowId);
 
-	    	// Convert the list to a map with subStatus as the key and subStatusDescription as the value, sorted by orderId
-	    	Map<String, String> statusMap = flowList.stream()
-	    	        .sorted(Comparator.comparing(VcFlowMaster::getOrderId)) // Sorting by orderId
-	    	        .collect(Collectors.toMap(
-	    	                VcFlowMaster::getSubStatus,
-	    	                VcFlowMaster::getGridDescription,
-	    	                (existing, replacement) -> existing, // Handle duplicate keys by keeping the existing value
-	    	                LinkedHashMap::new // Maintain insertion order (sorted order)
-	    	        ));
+	        // Sort the list by orderId
+	        flowList.sort(Comparator.comparing(VcFlowMaster::getOrderId));
 
+	        // Keep track of unique statuses
+	        Set<String> uniqueStatuses = new HashSet<>();
 
-	        // Iterate over the map entries to create DropDownRes objects
-	        for (Map.Entry<String, String> entry : statusMap.entrySet()) {
-	            DropDownRes res = new DropDownRes();
-	            res.setCode(entry.getKey());
-	            res.setCodeDesc(entry.getValue());
-	            resList.add(res);
+	        // Convert VcFlowMaster objects to DropDownRes objects
+	        for (VcFlowMaster flow : flowList) {
+	            if (uniqueStatuses.add(flow.getSubStatus())) { // Add only if subStatus is new
+	                DropDownRes res = new DropDownRes();
+	                res.setCode(flow.getSubStatus());
+	                res.setCodeDesc(flow.getGridDescription());
+	                res.setCodeDescLocal(flow.getGridDescLocal());
+	                resList.add(res);
+	            }
 	        }
+
 	    } catch (Exception e) {
-	        e.printStackTrace();
-	        log.info("Exception is ---> " + e.getMessage());
-	        return null;
+	        log.error("Error in getGridStatus: {}", e.getMessage(), e);
 	    }
+
 	    return resList;
 	}
+
 
 
 }

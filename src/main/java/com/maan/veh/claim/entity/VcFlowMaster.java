@@ -32,15 +32,21 @@ public class VcFlowMaster {
 
     @Column(name = "STATUS_DESCRIPTION", length = 100, nullable = false)
     private String statusDescription;
+    
+    @Column(name = "STATUS_DESC_LOCAL")
+    private String statusDescLocal;
 
     @Column(name = "USERTYPE", length = 20, nullable = false)
-    private String usertype;
+    private String usertype;	
 
     @Column(name = "SUB_STATUS", length = 20, nullable = false)
     private String subStatus;
 
     @Column(name = "SUB_STATUS_DESCRIPTION", length = 100, nullable = false)
     private String subStatusDescription;
+    
+    @Column(name = "SUB_STATUS_DESC_LOCAL")
+    private String subStatusDescLocal;
 
     @Column(name = "ORDER_ID", length = 50)
     private String orderId;
@@ -50,4 +56,7 @@ public class VcFlowMaster {
     
     @Column(name = "GRID_DESCRIPTION")
     private String gridDescription;
+    
+    @Column(name = "GRID_DESC_local")
+    private String gridDescLocal;
 }
