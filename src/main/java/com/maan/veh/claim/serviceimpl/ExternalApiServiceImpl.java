@@ -1234,6 +1234,18 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 				partsSaveDetails.setSavedStatus("ESB");
 				partsSaveDetails.setClgwSgsId(externalApiResponse.getClgwSgsId());
 				SparePartsSaveDetailsRepo.save(partsSaveDetails);
+				// Step 14: Update Insured Vehicle Status based on Quote Status
+	            try {
+					Optional<InsuredVehicleInfo> optionalInsuredVeh = repository.findByClaimNoAndGarageId(request.getClaimNo(),request.getGarageLoginId());
+					if (optionalInsuredVeh.isPresent()) {
+					    InsuredVehicleInfo insuredVeh = optionalInsuredVeh.get();
+					    insuredVeh.setStatus("ESB");
+					    insuredVeh.setEntryDate(new Date());
+					    repository.save(insuredVeh);
+					}
+				} catch (Exception e) {
+					System.out.println("Error in status update block");
+				}
 			}
 
 		} catch (Exception e) {
@@ -3239,6 +3251,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			Map<String, String> requestBodyMap = new HashMap<>();
 			requestBodyMap.put("clfSgsId", insuredVeh.getFnolSgsId());
 			requestBodyMap.put("productId", insuredVeh.getProdId());
+//			requestBodyMap.put("clfSgsId", "253654");
+//			requestBodyMap.put("productId", "12");
 			requestBodyMap.put("moduleId", "02");
 
 			// Authenticate and retrieve JWT token
@@ -3338,7 +3352,8 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			DownloadDocumentRequestDto dto = new DownloadDocumentRequestDto();
 			dto.setSgsId(req.getSgsId());
 			dto.setDocId(req.getDocId());
-			dto.setDocPrintType("fileUpload");
+//			dto.setDocPrintType("fileUpload");
+			dto.setDocPrintType(req.getDocPrintType());
 			dto.setFileName(req.getFileName());
 
 			// Authenticate and retrieve JWT token
@@ -3424,5 +3439,83 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 			return "application/octet-stream"; // Default binary file type
 		}
 	}
+	
+
+//@Override
+//public CommonResponse deleteDocument(DownloadDocumentRequest req) {
+//    CommonResponse response = new CommonResponse();
+//    ApiTransactionLog log = new ApiTransactionLog();
+//    log.setSno(apiTransactionLogRepo.findMaxSno() + 1);
+//    log.setRequestTime(LocalDateTime.now());
+//    log.setEntryDate(new Date());
+//
+//    try {
+//        // Fetch company ID from request payload
+//        String companyId = String.valueOf(req.getCompanyId());
+//
+//        // Fetch API URL from the database
+//        String apiType = "DELETE_DOCUMENT"; // Match API_TYPE column value
+//        Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository.findByCompanyIdAndApiTypeAndStatus(companyId,
+//                apiType, "Y");
+//
+//        if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+//            response.setMessage("API URL not found for company: " + companyId);
+//            response.setIsError(true);
+//            return response;
+//        }
+//
+//        String externalApiUrl = apiConfig.get().getApiUrl();
+//        log.setEndpoint(externalApiUrl);
+//
+//        // Prepare request body
+//        Map<String, String> requestBodyMap = new HashMap<>();
+//        requestBodyMap.put("sgsId", req.getSgsId());
+//        requestBodyMap.put("docId", req.getDocId());
+//
+//        // Authenticate and retrieve JWT token
+//        String jwtToken = authenticateUserCall();
+//
+//        // Create headers and add JWT token
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Authorization", "Bearer " + jwtToken);
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//        // Convert DTO to JSON for request body
+//        String requestBody = objectMapper.writeValueAsString(requestBodyMap);
+//        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+//        log.setRequest(requestBody);
+//        logger.info("Request Payload: " + requestBody);
+//
+//        // Call external API
+//        ResponseEntity<String> apiResponse = restTemplate.exchange(log.getEndpoint(), HttpMethod.DELETE, entity, String.class);
+//        log.setResponse(apiResponse.getBody());
+//        log.setStatus("SUCCESS");
+//
+//        if (apiResponse.getStatusCode() == HttpStatus.OK) {
+//            response.setMessage("Document deleted successfully");
+//            response.setIsError(false);
+//        } else {
+//            response.setMessage("Failed to delete document");
+//            response.setIsError(true);
+//            response.setErrors(Collections.singletonList(new ErrorResponse("102", "Delete Failed", "Unexpected API response")));
+//            log.setStatus("FAILURE");
+//        }
+//
+//    } catch (Exception e) {
+//        log.setStatus("FAILURE");
+//        log.setErrorMessage(e.getMessage());
+//        response.setMessage("Failed to delete document");
+//        response.setIsError(true);
+//        response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+//    } finally {
+//        log.setResponseTime(LocalDateTime.now());
+//        if (StringUtils.isNotBlank(log.getRequest())) {
+//            apiTransactionLogRepo.save(log);
+//            logger.info("Transaction Log: " + log.getEndpoint() + " ==> " + log);
+//        }
+//    }
+//
+//    return response;
+//}
 
 }

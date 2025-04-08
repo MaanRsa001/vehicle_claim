@@ -43,5 +43,8 @@ public class UploadedDocumentListResponseDto {
 
         @JsonProperty("docSgsId")
         private String docSgsId;
+        
+        @JsonProperty("templateId")
+        private String templateId;
     }
 }

@@ -2,6 +2,7 @@ package com.maan.veh.claim.service;
 
 import java.util.List;
 
+import com.maan.veh.claim.qiic.request.ClaimCountRequest;
 import com.maan.veh.claim.response.DropDownRes;
 
 public interface ClaimStatusService {
@@ -13,5 +14,7 @@ public interface ClaimStatusService {
 	List<DropDownRes> getDealerStatus(String currentStatus);
 
 	List<DropDownRes> getGridStatus(String usertype,String companyId,String flowId);
+
+	List<DropDownRes> getClaimCount(ClaimCountRequest req);
 
 }

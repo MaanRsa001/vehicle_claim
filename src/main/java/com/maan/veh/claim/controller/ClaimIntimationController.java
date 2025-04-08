@@ -2,6 +2,7 @@ package com.maan.veh.claim.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -155,4 +156,11 @@ public class ClaimIntimationController {
         	CommonResponse res = externalApiService.downloadDoc(requestPayload);
             return ResponseEntity.ok(res);
     }
+//    
+//    @DeleteMapping("/garage/deleteDocument")
+//    public ResponseEntity<CommonResponse> deleteDocument(@RequestBody DownloadDocumentRequest requestPayload) {
+//        CommonResponse res = externalApiService.deleteDocument(requestPayload);
+//        return ResponseEntity.ok(res);
+//    }
+
 }

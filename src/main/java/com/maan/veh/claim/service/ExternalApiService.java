@@ -57,4 +57,6 @@ public interface ExternalApiService {
 
 	CommonResponse getUploadImpFileList(DownloadDocumentRequest requestPayload);
 
+//	CommonResponse deleteDocument(DownloadDocumentRequest requestPayload);
+
 }
