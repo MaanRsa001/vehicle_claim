@@ -1,5 +1,6 @@
 package com.maan.veh.claim.service;
 
+import com.maan.veh.claim.dto.DownloadDocumentRequest;
 import com.maan.veh.claim.dto.SaveSparePartsDTO;
 import com.maan.veh.claim.request.ClaimListRequest;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
@@ -35,5 +36,9 @@ public interface ExternalApiService {
 	CommonResponse getSavedGarageSpareParts(SaveSparePartsDTO requestPayload);
 
 	CommonResponse getPolicyDetails(GetClaimRequest request);
+
+//	CommonResponse callPrintPackageApi(DownloadDocumentRequest req);
+//
+//	CommonResponse downloadDoc(DownloadDocumentRequest requestPayload);
 
 }

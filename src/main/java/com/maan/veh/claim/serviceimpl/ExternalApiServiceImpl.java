@@ -15,6 +15,7 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,11 +29,14 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -51,6 +55,8 @@ import com.maan.veh.claim.dto.ClaimTransactionRequestDTO;
 import com.maan.veh.claim.dto.ClaimTransactionRequestDTOMetaData;
 import com.maan.veh.claim.dto.ClaimentCoverageRequestDTO;
 import com.maan.veh.claim.dto.ClaimentCoverageResponseDTO;
+import com.maan.veh.claim.dto.DownloadDocumentRequest;
+import com.maan.veh.claim.dto.DownloadDocumentRequestDto;
 import com.maan.veh.claim.dto.FnolRequestDTO;
 import com.maan.veh.claim.dto.FnolRequestDTOMetaData;
 import com.maan.veh.claim.dto.GarageClaimListDto;
@@ -59,6 +65,7 @@ import com.maan.veh.claim.dto.GetPolicyDetailsRequestDto;
 import com.maan.veh.claim.dto.PolicyResponseDTO;
 import com.maan.veh.claim.dto.SaveClaimRequestDTO;
 import com.maan.veh.claim.dto.SaveSparePartsDTO;
+import com.maan.veh.claim.dto.UploadedDocumentListResponseDto;
 import com.maan.veh.claim.entity.ApiIntegMaster;
 import com.maan.veh.claim.entity.ApiTransactionLog;
 import com.maan.veh.claim.entity.ClaimIntimationDetails;
@@ -77,7 +84,6 @@ import com.maan.veh.claim.repository.DamageSectionDetailsRepository;
 import com.maan.veh.claim.repository.GarageWorkOrderRepository;
 import com.maan.veh.claim.repository.InsuredVehicleInfoRepository;
 import com.maan.veh.claim.repository.LoginMasterRepository;
-import com.maan.veh.claim.repository.LoginUserInfoRepository;
 import com.maan.veh.claim.repository.SparePartsSaveDetailsRepository;
 import com.maan.veh.claim.repository.VcSparePartsDetailsRepository;
 import com.maan.veh.claim.request.ClaimIntimationDocumentDetails;
@@ -179,6 +185,11 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     @Value("${common.path}")
 	private Path rootLocation;
     
+//    @Value("${external.api.print-package.url}")
+//    private String printPackageUrl;
+//    
+//    private static final String EXTERNAL_API_URL = "https://external-api-host/PRINT_PACKAGE"; 
+    
     @Autowired
     private InputValidationUtil validation;
     
@@ -193,6 +204,7 @@ public class ExternalApiServiceImpl implements ExternalApiService {
     
     @Autowired
     private InsuredVehicleInfoRepository repository;
+    
 
     @Override
     public CommonResponse createFnol(SaveClaimRequest requestPayload) {
@@ -1980,6 +1992,196 @@ public class ExternalApiServiceImpl implements ExternalApiService {
 	    return policyResponseUI;
 	}
 
+
+//	@Override
+//	public CommonResponse callPrintPackageApi(DownloadDocumentRequest req) {
+//	
+//		CommonResponse res = new CommonResponse();
+//	        Map<String, Object> requestBodyMap = new HashMap<>();
+//
+//	        Optional<InsuredVehicleInfo> optionalInsuredVeh =
+//	        		insuredVehicleInfoRepo.findByClaimNoAndGarageId(req.getClaimNo(), req.getGarageId());
+//
+//	        if (optionalInsuredVeh.isEmpty()) {
+//	            res.setIsError(true);
+//	            res.setMessage("Vehicle info not found");
+//	            return res;
+//	        }
+//
+//	        InsuredVehicleInfo eagleVeh = optionalInsuredVeh.get();
+//	        requestBodyMap.put("clfSgsId", eagleVeh.getFnolSgsId());
+////	        requestBodyMap.put("productId", eagleVeh.getProdId());
+//
+//	        String requestJson = null;
+//	        String responseJson = null;
+//	        LocalDateTime startTime = LocalDateTime.now();
+//	        LocalDateTime endTime = null;
+//
+//	        try {
+//	            requestJson = new ObjectMapper().writeValueAsString(requestBodyMap);
+//
+//	            HttpHeaders headers = new HttpHeaders();
+//	            headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//	            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBodyMap, headers);
+//
+//	            ResponseEntity<String> response = restTemplate.exchange(
+//	            		printPackageUrl,
+//	                    HttpMethod.POST,
+//	                    entity,
+//	                    String.class
+//	            );
+//
+//	            responseJson = response.getBody();
+//	            endTime = LocalDateTime.now();
+//	            
+//	         // Parse response into DTO
+//	            UploadedDocumentListResponseDto parsedResponse = objectMapper.readValue(responseJson, UploadedDocumentListResponseDto.class);
+//
+//	            res.setIsError(false);
+//	            res.setMessage("API call successful");
+//	            res.setResponse(parsedResponse);
+//
+//	        } catch (Exception e) {
+//	            res.setIsError(true);
+//	            res.setMessage("API call failed: " + e.getMessage());
+//	            res.setResponse(null);
+//	            responseJson = e.getMessage();
+//	        }
+//
+//	        // Save transaction log
+//	        ApiTransactionLog log = ApiTransactionLog.builder()
+//	                .endpoint(printPackageUrl)
+//	                .sno(apiTransactionLogRepo.findMaxSno() + 1)
+//	                .request(requestJson)
+//	                .response(responseJson)
+//	                .status(res.getIsError() ? "FAILURE" : "SUCCESS")
+//	                .requestTime(startTime)
+//	                .responseTime(endTime)
+//	                .entryDate(new Date())
+//	                .build();
+//
+//	        apiTransactionLogRepo.save(log);
+//
+//	        return res;
+//	    }
+//
+//
+//	@Override
+//	public CommonResponse downloadDoc(DownloadDocumentRequest req) {
+//		CommonResponse response=new CommonResponse();
+//		ApiTransactionLog log=new ApiTransactionLog();
+//		log.setSno(apiTransactionLogRepo.findMaxSno()+1);
+//		log.setRequestTime(LocalDateTime.now());
+//		log.setEntryDate(new Date());
+//		
+//		try {
+//			// Fetch company ID from request payload
+//			String companyId = String.valueOf(req.getCompanyId());
+//
+//			// Fetch API URL from the database
+//			String apiType = "DOWNLOAD_DOC_PRINT";
+//			Optional<ApiIntegMaster> apiConfig = apiIntegMasterRepository.findByCompanyIdAndApiTypeAndStatus(companyId,
+//					apiType, "Y");
+//
+//			if (apiConfig.isEmpty() || apiConfig.get().getApiUrl() == null) {
+//				response.setMessage("API URL not found for company: " + companyId);
+//				response.setIsError(true);
+//				return response;
+//			}
+//
+//			String externalApiUrl = apiConfig.get().getApiUrl();
+//			log.setEndpoint(externalApiUrl);
+//
+//			// Prepare DTO
+//			DownloadDocumentRequestDto dto = new DownloadDocumentRequestDto();
+//			dto.setSgsId(req.getSgsId());
+//			dto.setDocId(req.getDocId());
+////			dto.setDocPrintType("fileUpload");
+//			dto.setDocPrintType(req.getDocPrintType());
+//			dto.setFileName(req.getFileName());
+//
+//			String jwtToken = authenticateUserCall();
+//
+//			HttpHeaders headers = new HttpHeaders();
+//			headers.set("Authorization", "Bearer " + jwtToken);
+//			headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//			// Convert DTO to JSON for request body
+//			String requestBody = objectMapper.writeValueAsString(dto);
+//			HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+//			log.setRequest(requestBody);
+//			logger.info("Request Payload: " + requestBody);
+//
+//			// Call external API expecting a Base64 string as response
+//			ResponseEntity<String> apiResponse = restTemplate.exchange(log.getEndpoint(), HttpMethod.POST, entity,
+//					String.class);
+//
+//			if (apiResponse.getStatusCode() == HttpStatus.OK && apiResponse.getBody() != null) {
+//				String base64EncodedFile = apiResponse.getBody();
+//
+//				String contentType = determineContentType(req.getFileName());
+//				String base64WithPrefix = "data:" + contentType + ";base64," + base64EncodedFile;
+//
+//				// ✅ Return response with prefixed Base64
+//				response.setMessage("File retrieved successfully");
+//				response.setResponse(base64WithPrefix);
+//				response.setIsError(false);
+//				log.setResponse("Success");
+//				log.setStatus("SUCCESS");
+//			} else {
+//				response.setMessage("Failed to download document");
+//				response.setIsError(true);
+//				response.setErrors(
+//						Collections.singletonList(new ErrorResponse("101", "Download Failed", "No content received")));
+//				log.setStatus("FAILURE");
+//			}
+//
+//		} catch (Exception e) {
+//			log.setStatus("FAILURE");
+//			log.setErrorMessage(e.getMessage());
+//			response.setMessage("Failed to retrieve file");
+//			response.setIsError(true);
+//			response.setErrors(Collections.singletonList(new ErrorResponse("100", "API Error", e.getMessage())));
+//		} finally {
+//			log.setResponseTime(LocalDateTime.now());
+//			if (StringUtils.isNotBlank(log.getRequest())) {
+//				apiTransactionLogRepo.save(log);
+//				logger.info("Transaction Log: " + log.getEndpoint() + " ==> " + log);
+//			}
+//		}
+//
+//		return response;
+//		
+//	}
+//
+//	private String determineContentType(String fileName) {
+//		String extension = FilenameUtils.getExtension(fileName).toLowerCase();
+//
+//		switch (extension) {
+//		case "pdf":
+//			return "application/pdf";
+//		case "jpg":
+//		case "jpeg":
+//			return "image/jpeg";
+//		case "png":
+//			return "image/png";
+//		case "gif":
+//			return "image/gif";
+//		case "doc":
+//			return "application/msword";
+//		case "docx":
+//			return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+//		case "xls":
+//			return "application/vnd.ms-excel";
+//		case "xlsx":
+//			return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+//		case "txt":
+//			return "text/plain";
+//		default:
+//			return "application/octet-stream"; // Default binary file type
+//		}
+//	}
 
 
 

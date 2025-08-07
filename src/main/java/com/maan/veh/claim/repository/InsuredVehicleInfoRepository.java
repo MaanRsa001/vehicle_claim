@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 import com.maan.veh.claim.entity.InsuredVehicleInfo;
 import com.maan.veh.claim.entity.InsuredVehicleInfoId;
 
+
+
 public interface InsuredVehicleInfoRepository extends JpaRepository<InsuredVehicleInfo, InsuredVehicleInfoId> {
 
 	List<InsuredVehicleInfo> findByCompanyId(Integer companyId);
@@ -47,6 +49,21 @@ public interface InsuredVehicleInfoRepository extends JpaRepository<InsuredVehic
 	List<InsuredVehicleInfo> findByCompanyIdAndSurveyorId(Integer companyId, String surveyorLoginId);
 
 	InsuredVehicleInfo findByClaimNoAndQuotationNo(String claimNo, String quotationNo);
+
+
+	List<InsuredVehicleInfo> findByClaimNo(String claimNo);
+
+	List<InsuredVehicleInfo> findByVehicleRegNo(String vehicleRegNo);
+
+	List<InsuredVehicleInfo> findByGarageIdAndClaimNo(String garageId, String claimNo);
+
+	List<InsuredVehicleInfo> findByGarageIdAndClaimNoAndVehicleRegNo(String garageId, String claimNo,
+			String vehicleRegNo);
+
+	List<InsuredVehicleInfo> findByGarageId(String garageId);
+
+	
+
 
 
    

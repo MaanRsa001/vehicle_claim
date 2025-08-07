@@ -1,12 +1,14 @@
 package com.maan.veh.claim.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.maan.veh.claim.dto.DownloadDocumentRequest;
 import com.maan.veh.claim.dto.SaveSparePartsDTO;
 import com.maan.veh.claim.request.ClaimListRequest;
 import com.maan.veh.claim.request.ClaimTransactionRequest;
@@ -102,4 +104,16 @@ public class ClaimIntimationController {
         CommonResponse res = externalApiService.getPolicyDetails(request);
         return ResponseEntity.ok(res);
     }
+    
+//    @PostMapping("/getImpUploadFileList")
+//    public ResponseEntity<CommonResponse> printPackage(@RequestBody DownloadDocumentRequest req) {
+//    	CommonResponse res = externalApiService.callPrintPackageApi(req);
+//    	 return new ResponseEntity<>(res, res.getIsError() ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+//    }
+    
+//    @PostMapping("/garage/DownloadDoc")
+//    public ResponseEntity<CommonResponse> downloadDoc(@RequestBody DownloadDocumentRequest requestPayload) {
+//        	CommonResponse res = externalApiService.downloadDoc(requestPayload);
+//            return ResponseEntity.ok(res);
+//    }
 }

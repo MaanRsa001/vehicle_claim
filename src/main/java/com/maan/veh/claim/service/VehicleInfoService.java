@@ -1,5 +1,6 @@
 package com.maan.veh.claim.service;
 
+import com.maan.veh.claim.dto.FilterGarageReq;
 import com.maan.veh.claim.request.ExternalVehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleGarageViewRequest;
 import com.maan.veh.claim.request.VehicleInfoRequest;
@@ -21,4 +22,16 @@ public interface VehicleInfoService {
 	CommonResponse dealerStatusSave(VehicleInfoRequest request);
 
 	CommonResponse getExternalGarageListByGarageId(ExternalVehicleGarageViewRequest request);
+
+	CommonResponse surveyorFilter(FilterGarageReq request);
+
+	CommonResponse getallClaimNo();
+
+	CommonResponse surveyorgetAll(VehicleInfoRequest request);
+
+
+//	CommonResponse getFilterGarage(FilterGarageReq request);
+
+//	CommonResponse surveyorFilter(VehicleInfoRequest request);
+
 }

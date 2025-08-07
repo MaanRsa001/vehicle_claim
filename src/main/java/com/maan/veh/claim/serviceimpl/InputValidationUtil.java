@@ -234,6 +234,7 @@ public class InputValidationUtil {
 	public List<ErrorList> validateWorkOrder(GarageWorkOrderSaveReq req) {
 	    List<ErrorList> list = new ArrayList<>();
 
+	    if(!req.getQuoteStatus().equalsIgnoreCase("CRBG")) {
 	    // Existing validations
 	    if (StringUtils.isBlank(req.getClaimNo())) {
 	        list.add(new ErrorList("100", "Claim number", "Claim number cannot be blank"));
@@ -283,9 +284,9 @@ public class InputValidationUtil {
 	        list.add(new ErrorList("100", "Status", "status cannot be blank"));
 	    }
 	    
-	    if (StringUtils.isBlank(req.getRemarks())) {
-	        list.add(new ErrorList("100", "Remarks", "remarks cannot be blank"));
-	    }
+//	    if (StringUtils.isBlank(req.getRemarks())) {
+//	        list.add(new ErrorList("100", "Remarks", "remarks cannot be blank"));
+//	    }
 
 	    Date workOrderDate = req.getWorkOrderDate();
 	    Date deliveryDate = req.getDeliveryDate();
@@ -379,7 +380,7 @@ public class InputValidationUtil {
 //	    } catch (Exception ex) {
 //	        //log.error("Exception during status check: {}", ex.getMessage(), ex);
 //	    }
-
+	    }
 
 	    return list;
 	}
@@ -1860,9 +1861,9 @@ List<ErrorList> errors = new ArrayList<>();
 		    list.add(new ErrorList("100", "QuoteStatus", "Quote status cannot be blank"));
 		}
 
-		if (StringUtils.isBlank(req.getRemarks())) {
-		    list.add(new ErrorList("100", "Remarks", "Remarks cannot be blank"));
-		}
+//		if (StringUtils.isBlank(req.getRemarks())) {
+//		    list.add(new ErrorList("100", "Remarks", "Remarks cannot be blank"));
+//		}
 
 		if (StringUtils.isBlank(req.getUserType())) {
 		    list.add(new ErrorList("100", "UserType", "User type cannot be blank"));

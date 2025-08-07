@@ -23,4 +23,7 @@ public class VehicleInfoRequest {
     
     @JsonProperty("QuoteStatus")
     private String quoteStatus;
+    
+    @JsonProperty("VehicleRegNo")
+    private String vehicleRegNo;
 }

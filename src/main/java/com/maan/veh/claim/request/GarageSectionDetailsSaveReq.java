@@ -1,5 +1,7 @@
 package com.maan.veh.claim.request;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
@@ -63,5 +65,13 @@ public class GarageSectionDetailsSaveReq {
     
     @JsonProperty("DealerPrice")
     private String dealerPrice;
+    
+    @JsonProperty("Remarks")
+    private String remarks;
+    
+    @JsonProperty("EntryDate")
+    private Date entryDate;
+    
+    
 
 }

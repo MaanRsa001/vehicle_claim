@@ -263,6 +263,7 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 					details.setDamageDirection(req.getDamageDirection());
 					details.setDamagePart(req.getDamagePart());
 					details.setRepairReplace(req.getRepairReplace());
+					details.setRemarks(req.getRemarks());
 					
 					if ("Replace".equalsIgnoreCase(req.getRepairReplace())) {
 						details.setNoOfParts(Integer.valueOf(req.getNoOfUnits()));
@@ -432,6 +433,8 @@ public class DamageSectionDetailsServiceImpl implements DamageSectionDetailsServ
 	            res.setDeductablePer(data.getLabourCostDeductPercentage() != null ? df.format(data.getLabourCostDeductPercentage()) : "0.00");
 	            res.setDeductableAmount(data.getLabourCostDeduct() != null ? df.format(data.getLabourCostDeduct()) : "0.00");
 	            res.setAsPerInvoice(data.getAsPerInvoice());
+	            res.setEntryDate(data.getEntryDate());
+	            res.setRemarks(data.getRemarks());
 	            groupedDamageDetails.add(res); 
 	        }
 	        

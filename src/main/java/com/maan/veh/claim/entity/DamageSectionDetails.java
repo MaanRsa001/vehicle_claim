@@ -121,5 +121,8 @@ public class DamageSectionDetails {
     
     @Column(name = "as_per_invoice")
     private String asPerInvoice;
+    
+    @Column(name="remarks")
+    private String remarks;
 
 }

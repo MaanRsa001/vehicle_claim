@@ -91,4 +91,7 @@ public class VehicleInfoResponse {
 
     @JsonProperty("PlateType")
     private String plateType;
+    
+    @JsonProperty("SurveyorId")
+    private String surveyorId;
 }

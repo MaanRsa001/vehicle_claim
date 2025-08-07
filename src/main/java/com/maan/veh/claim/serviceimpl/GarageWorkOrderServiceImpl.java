@@ -339,6 +339,19 @@ public class GarageWorkOrderServiceImpl implements GarageWorkOrderService {
             if (optionalWorkOrder.isPresent()) {
                 // Work order found, map its fields to the response DTO
                 GarageWorkOrder data = optionalWorkOrder.get();
+                
+                // ===> EARLY EXIT for Claim Rejected by Garage
+                if ("Claim Rejected by Garage".equalsIgnoreCase(data.getStatus())) {
+                    GarageWorkOrderResponse garage = new GarageWorkOrderResponse();
+                    garage.setClaimNo(data.getClaimNo());
+                    garage.setStatus(data.getStatus());
+
+                    response.setErrors(Collections.emptyList());
+                    response.setMessage("Claim rejected by garage");
+                    response.setResponse(garage);
+                    return response;
+                }
+                
                 GarageWorkOrderResponse garage = new GarageWorkOrderResponse();
                 
                 // Set fields in GarageWorkOrderResponse

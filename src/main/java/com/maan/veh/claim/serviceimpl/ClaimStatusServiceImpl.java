@@ -45,6 +45,12 @@ public class ClaimStatusServiceImpl implements ClaimStatusService{
 	    try {
 	        // Retrieve list of VcFlowMaster with usertype "Garage"
 	        List<VcFlowMaster> flowList = flowMasterRepo.findByUsertypeAndStatusIdAndCompanyId(usertype,currentStatus,companyId);
+	        
+	        if("PFG".equalsIgnoreCase(currentStatus)) {
+	        	flowList=flowList.stream()
+	        			.filter(f-> !"Pending from garage".equalsIgnoreCase(f.getSubStatusDescription()))
+	        			.collect(Collectors.toList());
+	        }
 
 	        // Convert the list to a map with subStatus as the key and subStatusDescription as the value
 	        Map<String, String> statusMap = flowList.stream()

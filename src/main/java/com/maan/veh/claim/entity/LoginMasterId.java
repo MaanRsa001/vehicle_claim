@@ -24,6 +24,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Builder
+@EqualsAndHashCode
 public class LoginMasterId implements Serializable {
 
     private static final long serialVersionUID = 1L;
