@@ -3,6 +3,7 @@ package com.maan.veh.claim.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -106,9 +107,9 @@ public class VehicleInfoController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@GetMapping("/getall/claimno")
-	public ResponseEntity<CommonResponse> getallClaimNo(){
-		CommonResponse response = vehicleInfoService.getallClaimNo();
+	@GetMapping("/getall/claimno/{SurveyorId}")
+	public ResponseEntity<CommonResponse> getallClaimNo(@PathVariable String SurveyorId){
+		CommonResponse response = vehicleInfoService.getallClaimNo(SurveyorId);
 		return ResponseEntity.ok(response);
 	}
 	

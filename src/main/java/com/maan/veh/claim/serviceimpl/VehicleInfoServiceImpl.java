@@ -3,6 +3,7 @@ package com.maan.veh.claim.serviceimpl;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -261,16 +262,22 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
         try {
         	  List<InsuredVehicleInfo> vehicleInfoLists = new ArrayList<>();
 
-              // 👉 CASE 1: If vehicleRegNo is present, apply filter logic
-              if (request.getGarageId() != null && request.getClaimNo() != null && request.getVehicleRegNo() != null) {
-                  vehicleInfoLists = insuredVehicleInfoRepository.findByGarageIdAndClaimNoAndVehicleRegNo(
-                          request.getGarageId(), request.getClaimNo(), request.getVehicleRegNo());
+        	  if("GPC".equalsIgnoreCase(request.getQuoteStatus()) && request.getSurveyorId() !=null) {
+        		  vehicleInfoLists=insuredVehicleInfoRepository.findByStatusAndSurveyorId("GPC",request.getSurveyorId());
+              
+        } else if (request.getGarageId() != null && request.getClaimNo() != null && request.getVehicleRegNo() != null && request.getSurveyorId()!=null) {
+                  vehicleInfoLists = insuredVehicleInfoRepository.findByGarageIdAndClaimNoAndVehicleRegNoAndSurveyorId(
+                          request.getGarageId(), request.getClaimNo(), request.getVehicleRegNo(),request.getSurveyorId());
 
-              } else if (request.getGarageId() != null && request.getClaimNo() != null) {
-                  vehicleInfoLists = insuredVehicleInfoRepository.findByGarageIdAndClaimNo(
-                          request.getGarageId(), request.getClaimNo());
+              } else if (request.getGarageId() != null && request.getClaimNo() != null && request.getSurveyorId()!=null) {
+                  vehicleInfoLists = insuredVehicleInfoRepository.findByGarageIdAndClaimNoAndSurveyorId(
+                          request.getGarageId(), request.getClaimNo(),request.getSurveyorId());
 
-              } else {
+              } else if(request.getClaimNo()!=null && request.getSurveyorId()!=null) {
+            	  vehicleInfoLists = insuredVehicleInfoRepository.findByClaimNoAndSurveyorId(request.getClaimNo(), request.getSurveyorId());
+              }
+              
+              else {
 
             // Fetch the work orders based on the garage ID
             List<GarageWorkOrder> workOrders = garageWorkOrderRepository.findByGarageId(request.getGarageId());
@@ -462,9 +469,16 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	    try {
 	        
 	    	List<SurveyorViewResponse> vehList = new ArrayList<>();
+	    	
+	    	List<DamageSectionDetails> details=new ArrayList<>();
 	        
 	        // Fetch damage section details based on Status
-	        List<DamageSectionDetails> details = damageRepository.findByStatusAndGarageLoginId("Dealer",request.getGarageId());
+	    	if(request.getGarageId()!=null) {
+	         details = damageRepository.findByStatusAndGarageLoginId("Dealer",request.getGarageId());
+	    	}
+	    	else if(request.getClaimNo()!=null) {
+	          details = damageRepository.findByStatusAndClaimNo("Dealer",request.getClaimNo());
+	    	}
 	        if(details != null) {
 	        	
 	        for(DamageSectionDetails damage : details) {
@@ -554,25 +568,26 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	        List<DamageSectionDetails> details = new ArrayList<>();
 
 	        // Base filter: GarageId is mandatory
-	        if (garageId == null || garageId.isBlank()) {
-	            response.setIsError(true);
-	            response.setMessage("GarageId is required");
-	            response.setErrors(List.of("GarageId is missing"));
-	            return response;
-	        }
+//	        if (garageId == null || garageId.isBlank()) {
+//	            response.setIsError(true);
+//	            response.setMessage("GarageId is required");
+//	            response.setErrors(List.of("GarageId is missing"));
+//	            return response;
+//	        }
 
-	        // Level 1: GarageId only
-	        if (isNullOrEmpty(surveyorId) && isNullOrEmpty(claimNo) && isNullOrEmpty(vehicleRegNo)) {
-	        	 details = damageRepository
-	        		    .findByGarageLoginIdAndSurveyorIdAndGarageDealerIsNotNull(request.getGarageId(), request.getSurveyorId());
-
-
-	        // Level 2: GarageId + SurveyorId + ClaimNo
-	        } else if (!isNullOrEmpty(surveyorId) && !isNullOrEmpty(claimNo) && isNullOrEmpty(vehicleRegNo)) {
+	           	 if(claimNo != null && surveyorId != null) {
+		        	 details = damageRepository.findByClaimNoAndSurveyorId(claimNo,surveyorId);
+		        }
+	  
+	         else if (!isNullOrEmpty(surveyorId) && !isNullOrEmpty(claimNo) && isNullOrEmpty(vehicleRegNo)) {
 	            details = damageRepository.findByGarageLoginIdAndSurveyorIdAndClaimNo(garageId, surveyorId, claimNo);
 
-	        // Level 3: GarageId + SurveyorId + ClaimNo + VehicleRegNo
 	        } 
+	        
+	         else if (isNullOrEmpty(surveyorId) && isNullOrEmpty(claimNo) && isNullOrEmpty(vehicleRegNo)) {
+	        	 details = damageRepository
+	        		    .findByGarageLoginIdAndSurveyorIdAndGarageDealerIsNotNull(request.getGarageId(), request.getSurveyorId());
+	        }
 //	        else if (!isNullOrEmpty(surveyorId) && !isNullOrEmpty(claimNo) && !isNullOrEmpty(vehicleRegNo)) {
 //	            details = damageRepository.findByGarageLoginIdAndSurveyorIdAndClaimNoAndVehicleRegNo(
 //	                garageId, surveyorId, claimNo, vehicleRegNo);
@@ -785,12 +800,14 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	    try {
 	        List<InsuredVehicleInfo> vehicleInfo = new ArrayList<>();
 
+	        List<String> allowedStatus=Arrays.asList("GPC", "DA", "CRFG", "WA", "CPTS", "DDE");
 	        // 🚘 CASE 1: When Garage ID is given → Get list of CLAIM NOs
-	        if (request.getGarageId() != null && !request.getGarageId().isEmpty()) {
-	            vehicleInfo = insuredVehicleInfoRepository.findByGarageId(request.getGarageId());
+	        if (request.getGarageId() != null && !request.getGarageId().isEmpty() && request.getSurveyorId() !=null) {
+	            vehicleInfo = insuredVehicleInfoRepository.findByGarageIdAndSurveyorId(request.getGarageId(),request.getSurveyorId());
 
 	            // Map to ClaimNo only
 	            List<String> claimNos = vehicleInfo.stream()
+	            	.filter(k->allowedStatus.contains(k.getStatus()))
 	                .map(InsuredVehicleInfo::getClaimNo)
 //	                .distinct()
 	                .collect(Collectors.toList());
@@ -802,8 +819,8 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 
 	        } 
 	        // 🔍 CASE 2: When ClaimNo is given → Get list of VEHICLE REG NOs
-	        else if (request.getClaimNo() != null && !request.getClaimNo().isEmpty()) {
-	            vehicleInfo = insuredVehicleInfoRepository.findByClaimNo(request.getClaimNo());
+	        else if (request.getClaimNo() != null && !request.getClaimNo().isEmpty() && request.getSurveyorId()!=null) {
+	            vehicleInfo = insuredVehicleInfoRepository.findByClaimNoAndSurveyorId(request.getClaimNo(),request.getSurveyorId());
 
 	            // Map to VehicleRegNo
 	            List<String> vehicleRegNos = vehicleInfo.stream()
@@ -831,10 +848,13 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 
 
 	@Override
-	public CommonResponse getallClaimNo() {
+	public CommonResponse getallClaimNo(String SurveyorId) {
 	    CommonResponse response = new CommonResponse();
 	    try {
-	        List<InsuredVehicleInfo> vehicleList = insuredVehicleInfoRepository.findAll();
+	        List<InsuredVehicleInfo> vehicleList = insuredVehicleInfoRepository.findBySurveyorId(SurveyorId);
+	        
+	        // Allowed statuses
+	        List<String> allowedStatuses = Arrays.asList("GPC", "DA", "CRFG", "WA", "CPTS", "DDE");
 
 	        if (vehicleList.isEmpty()) {
 	            response.setIsError(true);
@@ -842,6 +862,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 	            response.setResponse(Collections.emptyList());
 	        } else {
 	            List<GetAllClaimNoResponse> claimNos = vehicleList.stream()
+	            		   .filter(k -> allowedStatuses.contains(k.getStatus()))
 	                .map(k -> new GetAllClaimNoResponse(k.getClaimNo()))
 	                .collect(Collectors.toList());
 
@@ -908,6 +929,7 @@ public class VehicleInfoServiceImpl implements VehicleInfoService {
 
 	         return response;
 	}
+
 
 
 	

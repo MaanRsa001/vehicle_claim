@@ -14,5 +14,8 @@ public class FilterGarageReq {
 	@JsonProperty("ClaimNo")
 	private String claimNo;
 	
+	@JsonProperty("SurveyorId")
+	private String surveyorId;
+	
 	
 }

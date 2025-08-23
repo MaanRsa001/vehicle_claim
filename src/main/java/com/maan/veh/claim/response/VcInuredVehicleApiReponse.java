@@ -96,4 +96,10 @@ public class VcInuredVehicleApiReponse {
 		
 		@JsonProperty("clcpId")
 		 private String clcpId ;
+		
+		@JsonProperty("SurveyorId")
+		private String surveyorId;
+		
+		@JsonProperty("DealerId")
+		private String dealerId;
 }

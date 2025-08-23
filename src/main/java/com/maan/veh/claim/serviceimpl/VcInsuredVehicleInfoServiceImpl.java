@@ -143,9 +143,10 @@ public class VcInsuredVehicleInfoServiceImpl implements VcInsuredVehicleInfoServ
 	                insuredVehicleInfo.setFnolSgsId(insured.getFnolsgsid());
 	                insuredVehicleInfo.setVehId(insured.getVehId());
 	                insuredVehicleInfo.setClcpId(insured.getClcpId());
+	                insuredVehicleInfo.setProductId(insured.getProdid());
 	                // Default values
-	                insuredVehicleInfo.setSurveyorId("surveyor_test1");
-	                insuredVehicleInfo.setDealerId("dealer_test1");
+	                insuredVehicleInfo.setSurveyorId(insured.getSurveyorId());
+	                insuredVehicleInfo.setDealerId(insured.getDealerId());
 	                insuredVehicleInfo.setLpoId(insured.getLpoId());
 	                
 	                return insuredVehicleInfo;

@@ -25,7 +25,7 @@ public interface VehicleInfoService {
 
 	CommonResponse surveyorFilter(FilterGarageReq request);
 
-	CommonResponse getallClaimNo();
+	CommonResponse getallClaimNo(String surveyorId);
 
 	CommonResponse surveyorgetAll(VehicleInfoRequest request);
 

@@ -113,4 +113,7 @@ public class InsuredVehicleInfo {
     @Column(name = "veh_id", length = 50)
     private String vehId;
     
+    @Column(name="product_id")
+    private String productId;
+    
 }
